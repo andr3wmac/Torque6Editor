@@ -15,3 +15,5 @@ Building
 --------
 
 Torque 6 Editor uses [GENie](https://github.com/bkaradzic/genie) to generate projects to build the editor and the engine.  The binaries and scripts are found in the build directory. Windows users can use build/GENERATE_VS2010/12/13.BAT to generate Visual Studio projects. 
+
+Torque 6 Editor has a dependancy on wxWidgets. On windows it expects WXWIN environment variable to be defined with a path to the wxWidgets installation. You must build both Release and Debug libs for wxWidgets. For more information see: [url]https://wiki.wxwidgets.org/Install[/url]
