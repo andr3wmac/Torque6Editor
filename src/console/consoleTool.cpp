@@ -48,24 +48,34 @@ ConsoleTool::~ConsoleTool()
 
 void ConsoleTool::openTool()
 {
-   mConsolePanel = new ConsolePanel(mFrame, wxID_ANY);
+   // Check if panel already exists.
+   if ( mConsolePanel != NULL )
+   {
+      wxAuiPaneInfo& paneInfo = mManager->GetPane(mConsolePanel);
+      paneInfo.Show();
+      mManager->Update();
+      return;
+   }
 
-   // Add Pane
+   // If not, create it.
+   mConsolePanel = new ConsolePanel(mFrame, wxID_ANY);
    mManager->AddPane(mConsolePanel, wxAuiPaneInfo().Caption("Console")
-                                            .CaptionVisible( true )
-                                            .CloseButton( true )
-                                            .PinButton( true )
-                                            .MaximizeButton(true)
-                                            .Dock()
-                                            .Resizable()
-                                            .FloatingSize( wxDefaultSize )
-                                            .Bottom());
+                                                   .CaptionVisible( true )
+                                                   .CloseButton( true )
+                                                   .PinButton( true )
+                                                   .MaximizeButton(true)
+                                                   .Dock()
+                                                   .Resizable()
+                                                   .FloatingSize( wxDefaultSize )
+                                                   .Bottom());
    mManager->Update();
 }
 
 void ConsoleTool::closeTool()
 {
-
+   wxAuiPaneInfo& paneInfo = mManager->GetPane(mConsolePanel);
+   paneInfo.Hide();
+   mManager->Update();
 }
 
 void ConsoleTool::onProjectLoaded(wxString projectName, wxString projectPath)

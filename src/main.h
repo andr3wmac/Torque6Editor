@@ -38,8 +38,8 @@
 #include "profiler/profilerTool.h"
 #endif
 
-#ifndef _SCRIPTEDITOR_H_
-#include "scriptEditor/scriptEditor.h"
+#ifndef _SCRIPTS_TOOL_H_
+#include "scriptEditor/scriptsTool.h"
 #endif
 
 #ifndef _PROJECTMANAGER_H_
@@ -65,7 +65,7 @@ public:
    // Tools
    ConsoleTool       mConsoleTool;    
    ProfilerTool      mProfilerTool;   
-   ScriptEditor      mScriptEditor;
+   ScriptsTool       mScriptsTool;
 
    // Events
 	virtual bool OnInit();

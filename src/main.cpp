@@ -53,7 +53,7 @@ bool Torque6Editor::OnInit()
    // TODO: replace this with one function for all tools.
    mConsoleTool.init(&mProjectManager, mFrame, mManager);
    mProfilerTool.init(&mProjectManager, mFrame, mManager);
-   mScriptEditor.init(&mProjectManager, mFrame, mManager);
+   mScriptsTool.init(&mProjectManager, mFrame, mManager);
 
 	return true;
 }
@@ -83,21 +83,42 @@ void Torque6Editor::OnMenuEvent( wxCommandEvent& evt )
 
 void Torque6Editor::OnToolbarEvent( wxCommandEvent& evt )
 {
-   switch(evt.GetId())
+   if ( evt.IsChecked() )
    {
-      case TOOLBAR_CONSOLE:
-         mConsoleTool.openTool();
-         break;
+      switch(evt.GetId())
+      {
+         case TOOLBAR_CONSOLE:
+            mConsoleTool.openTool();
+            break;
 
-      case TOOLBAR_PROFILER:
-         mProfilerTool.openTool();
-         break;
+         case TOOLBAR_PROFILER:
+            mProfilerTool.openTool();
+            break;
 
-      case TOOLBAR_SCRIPTS:
-         mScriptEditor.openTool();
-         break;
+         case TOOLBAR_SCRIPTS:
+            mScriptsTool.openTool();
+            break;
 
-      default:
-         break;
+         default:
+            break;
+      }
+   } else {
+      switch(evt.GetId())
+      {
+         case TOOLBAR_CONSOLE:
+            mConsoleTool.closeTool();
+            break;
+
+         case TOOLBAR_PROFILER:
+            mProfilerTool.closeTool();
+            break;
+
+         case TOOLBAR_SCRIPTS:
+            mScriptsTool.closeTool();
+            break;
+
+         default:
+            break;
+      }
    }
 }

@@ -7,6 +7,7 @@ function Torque6Editor()
 
         includedirs {
             SRC_DIR,
+            EDITOR_DIR,
             path.join(LIB_DIR, "assimp/include"),
             path.join(LIB_DIR, "bgfx/include"),
             path.join(LIB_DIR, "bgfx/common"),

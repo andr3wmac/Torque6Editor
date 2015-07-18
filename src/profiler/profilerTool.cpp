@@ -36,6 +36,7 @@
 #include "profilerTool.h"
 
 ProfilerTool::ProfilerTool()
+   : mProfilerPanel( NULL )
 {
    mFrameCount = 50;
 }
@@ -47,6 +48,16 @@ ProfilerTool::~ProfilerTool()
 
 void ProfilerTool::openTool()
 {
+   // Check if panel already exists.
+   if ( mProfilerPanel != NULL )
+   {
+      wxAuiPaneInfo& paneInfo = mManager->GetPane(mProfilerPanel);
+      paneInfo.Show();
+      mManager->Update();
+      return;
+   }
+
+   // Create it.
    mProfilerPanel = new ProfilerPanel(mFrame, wxID_ANY);
 
    // Events
@@ -90,7 +101,9 @@ void ProfilerTool::openTool()
 
 void ProfilerTool::closeTool()
 {
-
+   wxAuiPaneInfo& paneInfo = mManager->GetPane(mProfilerPanel);
+   paneInfo.Hide();
+   mManager->Update();
 }
 
 void ProfilerTool::processProfilerCachedData(ProfilerCachedData* data, ProfilerTreeModelNode* node)

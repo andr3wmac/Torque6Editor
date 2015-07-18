@@ -20,8 +20,8 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _SCRIPTEDITOR_H_
-#define _SCRIPTEDITOR_H_
+#ifndef _SCRIPTS_TOOL_H_
+#define _SCRIPTS_TOOL_H_
 
 #ifndef _PROJECTMANAGER_H_
 #include "../project/projectManager.h"
@@ -48,15 +48,15 @@ public:
    }
 };
 
-class ScriptEditor : public wxEvtHandler, public ProjectTool
+class ScriptsTool : public wxEvtHandler, public ProjectTool
 {
    protected:
       ScriptsPanel*     mScriptsPanel;
       wxImageList*      mIconList;
 
    public:
-      ScriptEditor();
-      ~ScriptEditor();
+      ScriptsTool();
+      ~ScriptsTool();
 
       void loadProject(wxString projectName, wxString projectPath);
       void findAllScripts(wxTreeItemId treeParent, wxString folder);
@@ -71,4 +71,4 @@ class ScriptEditor : public wxEvtHandler, public ProjectTool
       virtual void onProjectClosed();
 };
 
-#endif // _SCRIPTEDITOR_H_
+#endif // _SCRIPTS_TOOL_H_
