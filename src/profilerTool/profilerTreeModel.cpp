@@ -41,7 +41,7 @@
 
 ProfilerTreeModel::ProfilerTreeModel()
 {
-    m_root = new ProfilerTreeModelNode( NULL, "00-Console", 0, -1, -1 );
+    m_root = new ProfilerTreeModelNode( NULL, "Profiler Data", 0, -1, -1 );
 }
 
 ProfilerTreeModelNode* ProfilerTreeModel::AddEntry( const wxString &name, int count, float time, float percent, ProfilerTreeModelNode* parentNode )
@@ -183,7 +183,7 @@ wxDataViewItem ProfilerTreeModel::GetParent( const wxDataViewItem &item ) const
 
     ProfilerTreeModelNode *node = (ProfilerTreeModelNode*) item.GetID();
 
-    if (node == m_root)
+    if (node->GetParent() == NULL)
         return wxDataViewItem(0);
 
     return wxDataViewItem( (void*) node->GetParent() );
@@ -201,24 +201,38 @@ bool ProfilerTreeModel::IsContainer( const wxDataViewItem &item ) const
 unsigned int ProfilerTreeModel::GetChildren( const wxDataViewItem &parent,
                                             wxDataViewItemArray &array ) const
 {
-    ProfilerTreeModelNode *node = (ProfilerTreeModelNode*) parent.GetID();
-    if (!node)
-    {
-        array.Add( wxDataViewItem( (void*) m_root ) );
-        return 1;
-    }
+   ProfilerTreeModelNode *node = (ProfilerTreeModelNode*) parent.GetID();
+   if (!node)
+   {
+      array.Add( wxDataViewItem( (void*) m_root ) );
+      return 1;
 
-    if (node->GetChildCount() == 0)
-    {
-        return 0;
-    }
+      /*if (m_root->GetChildCount() == 0)
+      {
+         return 0;
+      }
 
-    unsigned int count = node->GetChildren().GetCount();
-    for (unsigned int pos = 0; pos < count; pos++)
-    {
-        ProfilerTreeModelNode *child = node->GetChildren().Item( pos );
-        array.Add( wxDataViewItem( (void*) child ) );
-    }
+      unsigned int count = m_root->GetChildren().GetCount();
+      for (unsigned int pos = 0; pos < count; pos++)
+      {
+         ProfilerTreeModelNode *child = m_root->GetChildren().Item( pos );
+         array.Add( wxDataViewItem( (void*) child ) );
+      }
 
-    return count;
+      return count;*/
+   }
+
+   if (node->GetChildCount() == 0)
+   {
+      return 0;
+   }
+
+   unsigned int count = node->GetChildren().GetCount();
+   for (unsigned int pos = 0; pos < count; pos++)
+   {
+      ProfilerTreeModelNode *child = node->GetChildren().Item( pos );
+      array.Add( wxDataViewItem( (void*) child ) );
+   }
+
+   return count;
 }

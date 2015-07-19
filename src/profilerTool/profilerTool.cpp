@@ -97,6 +97,10 @@ void ProfilerTool::openTool()
 
    // Column 3
    mProfilerPanel->ProfilerDataView->AppendProgressColumn( "Percent", 3, wxDATAVIEW_CELL_INERT, 100 );
+
+   mProfilerData.AddEntry("Test Node1", 1, 1, 1, NULL);
+   mProfilerData.AddEntry("Test Node2", 1, 1, 1, NULL);
+   mProfilerData.AddEntry("Test Node3", 1, 1, 1, NULL);
 }
 
 void ProfilerTool::closeTool()
