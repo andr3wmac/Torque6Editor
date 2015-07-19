@@ -20,64 +20,54 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _MAIN_H_
-#define _MAIN_H_
-
-// For compilers that don't support precompilation, include "wx/wx.h"
-#include "wx/wxprec.h"
- 
-#ifndef WX_PRECOMP
-#	include "wx/wx.h"
-#endif
-
-#ifndef _CONSOLE_TOOL_H_
-#include "consoleTool/consoleTool.h"
-#endif
-
-#ifndef _PROFILER_TOOL_H_
-#include "profilerTool/profilerTool.h"
-#endif
-
 #ifndef _SCENE_TOOL_H_
-#include "sceneTool/sceneTool.h"
-#endif
-
-#ifndef _SCRIPTS_TOOL_H_
-#include "scriptsTool/scriptsTool.h"
-#endif
+#define _SCENE_TOOL_H_
 
 #ifndef _PROJECTMANAGER_H_
-#include "project/projectManager.h"
+#include "../project/projectManager.h"
 #endif
 
 #ifndef __TORQUE6EDITORUI_H__
-#include "Torque6EditorUI.h"
+#include "../Torque6EditorUI.h"
 #endif
 
-class Torque6Editor : public wxApp
+#ifndef _WX_TREECTRL_H_BASE_
+#include <wx/treectrl.h>
+#endif
+
+class EntityTreeItemData : public wxTreeItemData
 {
 public:
-   ~Torque6Editor();
-
-   // Window Management
-   MainFrame*        mFrame;
-   wxAuiManager*     mManager;
-
-   // Torque 6 Project Manager
-   ProjectManager    mProjectManager;
-
-   // Tools
-   ConsoleTool       mConsoleTool;    
-   ProfilerTool      mProfilerTool;   
-   SceneTool         mSceneTool;
-   ScriptsTool       mScriptsTool;
-
-   // Events
-	virtual bool OnInit();
-   virtual void OnMenuEvent( wxCommandEvent& evt );
-   virtual void OnToolbarEvent( wxCommandEvent& evt );
+   SimObject* objPtr;
+   
+   EntityTreeItemData(SimObject* _objPtr)
+      :  objPtr(_objPtr)
+   {
+   }
 };
- 
-DECLARE_APP(Torque6Editor)
- 
-#endif // _MAIN_H_
+
+class SceneTool : public wxEvtHandler, public ProjectTool
+{
+   protected:
+      ScenePanel*    mScenePanel;
+      wxTreeItemId   mEntityListRoot;
+      wxImageList*   mIconList;
+
+   public:
+      SceneTool();
+      ~SceneTool();
+
+      void refreshEntityList();
+      void loadObjectProperties(SimObject* obj);
+
+      void OnTreeEvent( wxTreeEvent& evt );
+
+      virtual void init(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
+      virtual void openTool();
+      virtual void closeTool();
+
+      virtual void onProjectLoaded(wxString projectName, wxString projectPath);
+      virtual void onProjectClosed();
+};
+
+#endif // _SCENE_TOOL_H_

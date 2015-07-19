@@ -47,7 +47,7 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	
 	m_tool2 = mainToolbar->AddTool( TOOLBAR_CONSOLE, wxT("Console"), wxBitmap( wxT("images/consoleTool.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_CHECK, wxEmptyString, wxEmptyString, NULL ); 
 	
-	m_tool3 = mainToolbar->AddTool( TOOLBAR_SCENE, wxT("Scene"), wxBitmap( wxT("images/sceneTool.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
+	m_tool3 = mainToolbar->AddTool( TOOLBAR_SCENE, wxT("Scene"), wxBitmap( wxT("images/sceneTool.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_CHECK, wxEmptyString, wxEmptyString, NULL ); 
 	
 	m_tool4 = mainToolbar->AddTool( TOOLBAR_SCRIPTS, wxT("Scripts"), wxBitmap( wxT("images/scriptTool.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_CHECK, wxEmptyString, wxEmptyString, NULL ); 
 	
@@ -140,4 +140,51 @@ ProfilerPanel::~ProfilerPanel()
 {
 	m_mgr.UnInit();
 	
+}
+
+ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
+{
+	wxBoxSizer* bSizer3;
+	bSizer3 = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizer4;
+	bSizer4 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_button2 = new wxButton( this, wxID_ANY, wxT("Open"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer4->Add( m_button2, 1, wxALL|wxEXPAND, 5 );
+	
+	m_button4 = new wxButton( this, wxID_ANY, wxT("Save"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer4->Add( m_button4, 1, wxALL|wxEXPAND, 5 );
+	
+	
+	bSizer3->Add( bSizer4, 0, wxEXPAND, 5 );
+	
+	m_notebook2 = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_panel11 = new wxPanel( m_notebook2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer5;
+	bSizer5 = new wxBoxSizer( wxVERTICAL );
+	
+	entityList = new wxTreeCtrl( m_panel11, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
+	bSizer5->Add( entityList, 1, wxALL|wxEXPAND, 5 );
+	
+	propertyGrid = new wxPropertyGrid(m_panel11, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE);
+	bSizer5->Add( propertyGrid, 1, wxALL|wxEXPAND, 5 );
+	
+	
+	m_panel11->SetSizer( bSizer5 );
+	m_panel11->Layout();
+	bSizer5->Fit( m_panel11 );
+	m_notebook2->AddPage( m_panel11, wxT("Entities"), true );
+	m_panel12 = new wxPanel( m_notebook2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_notebook2->AddPage( m_panel12, wxT("Lighting"), false );
+	
+	bSizer3->Add( m_notebook2, 1, wxEXPAND | wxALL, 5 );
+	
+	
+	this->SetSizer( bSizer3 );
+	this->Layout();
+}
+
+ScenePanel::~ScenePanel()
+{
 }

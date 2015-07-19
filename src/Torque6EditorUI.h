@@ -29,6 +29,9 @@
 #include <wx/choice.h>
 #include <wx/sizer.h>
 #include <wx/dataview.h>
+#include <wx/propgrid/propgrid.h>
+#include <wx/propgrid/advprops.h>
+#include <wx/notebook.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -107,6 +110,29 @@ class ProfilerPanel : public wxPanel
 		ProfilerPanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL ); wxAuiManager m_mgr;
 		
 		~ProfilerPanel();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ScenePanel
+///////////////////////////////////////////////////////////////////////////////
+class ScenePanel : public wxPanel 
+{
+	private:
+	
+	protected:
+		wxButton* m_button2;
+		wxButton* m_button4;
+		wxNotebook* m_notebook2;
+		wxPanel* m_panel11;
+		wxPanel* m_panel12;
+	
+	public:
+		wxTreeCtrl* entityList;
+		wxPropertyGrid* propertyGrid;
+		
+		ScenePanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
+		~ScenePanel();
 	
 };
 

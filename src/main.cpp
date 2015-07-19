@@ -53,6 +53,7 @@ bool Torque6Editor::OnInit()
    // TODO: replace this with one function for all tools.
    mConsoleTool.init(&mProjectManager, mFrame, mManager);
    mProfilerTool.init(&mProjectManager, mFrame, mManager);
+   mSceneTool.init(&mProjectManager, mFrame, mManager);
    mScriptsTool.init(&mProjectManager, mFrame, mManager);
 
 	return true;
@@ -95,6 +96,10 @@ void Torque6Editor::OnToolbarEvent( wxCommandEvent& evt )
             mProfilerTool.openTool();
             break;
 
+         case TOOLBAR_SCENE:
+            mSceneTool.openTool();
+            break;
+
          case TOOLBAR_SCRIPTS:
             mScriptsTool.openTool();
             break;
@@ -111,6 +116,10 @@ void Torque6Editor::OnToolbarEvent( wxCommandEvent& evt )
 
          case TOOLBAR_PROFILER:
             mProfilerTool.closeTool();
+            break;
+
+         case TOOLBAR_SCENE:
+            mSceneTool.closeTool();
             break;
 
          case TOOLBAR_SCRIPTS:
