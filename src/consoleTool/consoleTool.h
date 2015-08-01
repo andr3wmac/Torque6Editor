@@ -48,6 +48,7 @@ class ConsoleTool : public wxEvtHandler, public ProjectTool
       ConsoleTool();
       ~ConsoleTool();
 
+      virtual void initTool();
       virtual void openTool();
       virtual void closeTool();
 

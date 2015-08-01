@@ -48,15 +48,17 @@ class ProjectTool
       MainFrame*        mFrame;
       wxAuiManager*     mManager;
 
-      virtual void init(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
+      void init(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
+
+      virtual void initTool() { }
       virtual void openTool() { mOpen = true; }
       virtual void closeTool() { mOpen = false; }
-
+      virtual void renderTool() { }
       virtual void onProjectLoaded(wxString projectName, wxString path) {}
       virtual void onProjectClosed() {}
 };
 
-class ProjectManager : public wxEvtHandler
+class ProjectManager : public wxEvtHandler, public Renderable
 {
    public:
       ProjectManager();
@@ -77,6 +79,10 @@ class ProjectManager : public wxEvtHandler
       bool openProject(wxString projectPath);
       void closeProject();
 
+      virtual void preRender();
+      virtual void render();
+      virtual void postRender();
+
       virtual void OnIdle(wxIdleEvent& evt);
       virtual void OnSize(wxSizeEvent& evt);
       virtual void OnMouseMove(wxMouseEvent& evt);
@@ -90,6 +96,8 @@ class ProjectManager : public wxEvtHandler
       static wxVector<ProjectTool*> smProjectTools;
       static void onProjectLoaded(wxString projectName, wxString projectPath);
       static void onProjectClosed();
+
+
 };
  
 #endif // _PROJECTMANAGER_H_

@@ -37,7 +37,8 @@
 #include "sceneTool.h"
 
 SceneTool::SceneTool()
-   : mScenePanel(NULL)
+   : mScenePanel(NULL),
+     mSelectedObject(NULL)
 {
    mIconList = new wxImageList( 16, 16 );
 }
@@ -47,24 +48,21 @@ SceneTool::~SceneTool()
 
 }
 
-void SceneTool::openTool()
+void SceneTool::initTool()
 {
-   // Check if panel already exists.
-   if ( mScenePanel != NULL )
-   {
-      wxAuiPaneInfo& paneInfo = mManager->GetPane(mScenePanel);
-      paneInfo.Show();
-      mManager->Update();
-      refreshEntityList();
-      return;
-   }
-
-   // If not, create it.
    mScenePanel = new ScenePanel(mFrame, wxID_ANY);
-   mScenePanel->entityList->AssignImageList(mIconList);
-   mEntityListRoot = mScenePanel->entityList->AddRoot("ROOT");
 
+   // Icons.
+   mIconList->Add(wxBitmap("images/entityIcon.png", wxBITMAP_TYPE_PNG));
+   mIconList->Add(wxBitmap("images/componentIcon.png", wxBITMAP_TYPE_PNG));
+   mScenePanel->entityList->AssignImageList(mIconList);
+
+   // Events
    mScenePanel->entityList->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(SceneTool::OnTreeEvent), NULL, this);
+   mScenePanel->entityList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneTool::OnTreeMenu), NULL, this);
+   mScenePanel->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnPropertyChanged), NULL, this);
+
+   mEntityListRoot = mScenePanel->entityList->AddRoot("ROOT");
 
    mManager->AddPane(mScenePanel, wxAuiPaneInfo().Caption("Scene")
                                                   .CaptionVisible( true )
@@ -74,9 +72,19 @@ void SceneTool::openTool()
                                                   .Dock()
                                                   .Resizable()
                                                   .FloatingSize( wxDefaultSize )
-                                                  .Left());
+                                                  .Left()
+                                                  .Hide());
    mManager->Update();
-   refreshEntityList();
+}
+
+void SceneTool::openTool()
+{
+   wxAuiPaneInfo& paneInfo = mManager->GetPane(mScenePanel);
+   paneInfo.Show();
+   mManager->Update();
+
+   if ( mProjectManager->mProjectLoaded )
+      refreshEntityList();
 }
 
 void SceneTool::closeTool()
@@ -86,22 +94,22 @@ void SceneTool::closeTool()
    mManager->Update();
 }
 
-void SceneTool::init(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
+void SceneTool::renderTool()
 {
-   ProjectTool::init(_projectManager, _frame, _manager);
-
-   mIconList->Add(wxBitmap("images/entityIcon.png", wxBITMAP_TYPE_PNG));
-   mIconList->Add(wxBitmap("images/componentIcon.png", wxBITMAP_TYPE_PNG));
+   if ( mSelectedObject != NULL )
+   {
+      Plugins::Link.Graphics.drawBox3D(mSelectedBoundingBox, ColorI(255, 255, 255, 255), 2.0f);
+   }
 }
 
 void SceneTool::onProjectLoaded(wxString projectName, wxString projectPath)
 {
-   if ( !mOpen ) return;
+   refreshEntityList();
 }
 
 void SceneTool::onProjectClosed()
 {
-   if ( !mOpen ) return;
+   //
 }
 
 void SceneTool::OnTreeEvent( wxTreeEvent& evt )
@@ -113,6 +121,8 @@ void SceneTool::OnTreeEvent( wxTreeEvent& evt )
       Scene::SceneEntity* entity = dynamic_cast<Scene::SceneEntity*>(data->objPtr);
       if ( entity )
       {
+         mSelectedObject = entity;
+         mSelectedBoundingBox = entity->mBoundingBox;
          loadObjectProperties(entity);
          return;
       }
@@ -121,10 +131,44 @@ void SceneTool::OnTreeEvent( wxTreeEvent& evt )
       Scene::BaseComponent* component = dynamic_cast<Scene::BaseComponent*>(data->objPtr);
       if ( component )
       {
+         mSelectedObject = component;
+         mSelectedBoundingBox = component->getBoundingBox();
          loadObjectProperties(component);
          return;
       }
    }
+}
+
+void SceneTool::OnTreeMenu( wxTreeEvent& evt ) 
+{ 
+   wxMenu* menu = new wxMenu; 
+   menu->Append(wxID_OPEN, wxT("Add Empty Entity")); 
+   menu->Append(wxID_OPEN, wxT("Add Entity from Template")); 
+   menu->AppendSeparator();
+   
+   wxMenu* compMenu = new wxMenu;
+   compMenu->Append(wxID_OPEN, wxT("AnimationComponent")); 
+   compMenu->Append(wxID_OPEN, wxT("LightComponent")); 
+   compMenu->Append(wxID_OPEN, wxT("MeshComponent")); 
+   compMenu->Append(wxID_OPEN, wxT("PhysicsComponent")); 
+   compMenu->Append(wxID_OPEN, wxT("TextComponent")); 
+   menu->AppendSubMenu(compMenu, wxT("Add Component"));
+
+   menu->AppendSeparator();
+
+   menu->Append(wxID_OPEN, wxT("Delete")); 
+   mFrame->PopupMenu(menu, wxDefaultPosition); 
+   delete menu; 
+} 
+
+void SceneTool::OnPropertyChanged( wxPropertyGridEvent& evt ) 
+{ 
+   wxString name = evt.GetPropertyName();
+   wxVariant val = evt.GetPropertyValue();
+   wxString strVal = val.GetString();
+
+   mSelectedObject->setField(name, strVal);
+   Plugins::Link.Scene.refresh();
 }
 
 void SceneTool::refreshEntityList()

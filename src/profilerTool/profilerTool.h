@@ -56,6 +56,7 @@ class ProfilerTool : public wxEvtHandler, public ProjectTool
 
       void processProfilerCachedData(ProfilerCachedData* data, ProfilerTreeModelNode* node);
 
+      virtual void initTool();
       virtual void openTool();
       virtual void closeTool();
 

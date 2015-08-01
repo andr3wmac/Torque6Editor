@@ -29,9 +29,14 @@
 #include <wx/choice.h>
 #include <wx/sizer.h>
 #include <wx/dataview.h>
+#include <wx/bmpbuttn.h>
+#include <wx/srchctrl.h>
 #include <wx/propgrid/propgrid.h>
 #include <wx/propgrid/advprops.h>
+#include <wx/stattext.h>
+#include <wx/clrpicker.h>
 #include <wx/notebook.h>
+#include <wx/scrolwin.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -121,11 +126,17 @@ class ScenePanel : public wxPanel
 	private:
 	
 	protected:
+		wxButton* m_button21;
 		wxButton* m_button2;
 		wxButton* m_button4;
 		wxNotebook* m_notebook2;
 		wxPanel* m_panel11;
+		wxBitmapButton* m_bpButton1;
+		wxBitmapButton* m_bpButton2;
+		wxSearchCtrl* m_searchCtrl1;
 		wxPanel* m_panel12;
+		wxStaticText* m_staticText1;
+		wxColourPickerCtrl* m_colourPicker1;
 	
 	public:
 		wxTreeCtrl* entityList;
@@ -133,6 +144,38 @@ class ScenePanel : public wxPanel
 		
 		ScenePanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
 		~ScenePanel();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class MaterialsPanel
+///////////////////////////////////////////////////////////////////////////////
+class MaterialsPanel : public wxPanel 
+{
+	private:
+	
+	protected:
+		wxPanel* m_panel;
+		wxBitmapButton* m_bpButton1;
+		wxScrolledWindow* m_scrolledWindow1;
+		wxButton* m_button1;
+		wxButton* m_button2;
+		wxButton* m_button3;
+		wxButton* m_button4;
+		wxButton* m_button5;
+		wxButton* m_button6;
+		wxButton* m_button7;
+		wxButton* m_button8;
+		wxButton* m_button9;
+		wxButton* m_button10;
+	
+	public:
+		wxTreeCtrl* m_materialTree;
+		wxAuiNotebook* m_materialNotebook;
+		
+		MaterialsPanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 498,301 ), long style = wxTAB_TRAVERSAL ); wxAuiManager m_mgr;
+		
+		~MaterialsPanel();
 	
 };
 

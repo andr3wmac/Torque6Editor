@@ -20,8 +20,8 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _SCRIPTS_TOOL_H_
-#define _SCRIPTS_TOOL_H_
+#ifndef _MATERIALS_TOOL_H_
+#define _MATERIALS_TOOL_H_
 
 #ifndef _PROJECTMANAGER_H_
 #include "../project/projectManager.h"
@@ -31,44 +31,46 @@
 #include "../Torque6EditorUI.h"
 #endif
 
+#ifndef _MATERIAL_WINDOW_H_
+#include "materialWindow.h"
+#endif
+
 #ifndef _WX_TREECTRL_H_BASE_
 #include <wx/treectrl.h>
 #endif
 
-class ScriptTreeItemData : public wxTreeItemData
+class MaterialsTreeItemData : public wxTreeItemData
 {
 public:
-   wxString scriptPath;
-   wxString scriptName;
+   StringTableEntry assetId;
    
-   ScriptTreeItemData(wxString _scriptPath, wxString _scriptName)
-      :  scriptPath(_scriptPath),
-         scriptName(_scriptName)
+   MaterialsTreeItemData(StringTableEntry _assetId)
+      :  assetId(_assetId)
    {
    }
 };
 
-class ScriptsTool : public wxEvtHandler, public ProjectTool
+class MaterialsTool : public wxEvtHandler, public ProjectTool
 {
    protected:
-      ScriptsPanel*     mScriptsPanel;
+      MaterialsPanel*   mMaterialsPanel;
+      wxTreeItemId      mMaterialTreeRoot;
       wxImageList*      mIconList;
 
    public:
-      ScriptsTool();
-      ~ScriptsTool();
+      MaterialsTool();
+      ~MaterialsTool();
 
-      void loadProject(wxString projectName, wxString projectPath);
-      void findAllScripts(wxTreeItemId treeParent, wxString folder);
+      void refreshMaterialList();
+
+      virtual void OnTreeEvent( wxTreeEvent& evt );
 
       virtual void initTool();
       virtual void openTool();
       virtual void closeTool();
 
-      virtual void OnTreeEvent( wxTreeEvent& evt );
-
       virtual void onProjectLoaded(wxString projectName, wxString projectPath);
       virtual void onProjectClosed();
 };
 
-#endif // _SCRIPTS_TOOL_H_
+#endif // _MATERIALS_TOOL_H_

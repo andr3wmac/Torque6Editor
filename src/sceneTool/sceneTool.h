@@ -35,6 +35,10 @@
 #include <wx/treectrl.h>
 #endif
 
+#ifndef _SCENEENTITY_H_
+#include <3d/entity/entity.h>
+#endif
+
 class EntityTreeItemData : public wxTreeItemData
 {
 public:
@@ -52,6 +56,8 @@ class SceneTool : public wxEvtHandler, public ProjectTool
       ScenePanel*    mScenePanel;
       wxTreeItemId   mEntityListRoot;
       wxImageList*   mIconList;
+      SimObject*     mSelectedObject;
+      Box3F          mSelectedBoundingBox;
 
    public:
       SceneTool();
@@ -61,10 +67,13 @@ class SceneTool : public wxEvtHandler, public ProjectTool
       void loadObjectProperties(SimObject* obj);
 
       void OnTreeEvent( wxTreeEvent& evt );
+      void OnTreeMenu( wxTreeEvent& evt );
+      void OnPropertyChanged( wxPropertyGridEvent& evt );
 
-      virtual void init(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
+      virtual void initTool();
       virtual void openTool();
       virtual void closeTool();
+      virtual void renderTool();
 
       virtual void onProjectLoaded(wxString projectName, wxString projectPath);
       virtual void onProjectClosed();

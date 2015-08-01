@@ -46,18 +46,9 @@ ConsoleTool::~ConsoleTool()
 
 }
 
-void ConsoleTool::openTool()
+void ConsoleTool::initTool()
 {
-   // Check if panel already exists.
-   if ( mConsolePanel != NULL )
-   {
-      wxAuiPaneInfo& paneInfo = mManager->GetPane(mConsolePanel);
-      paneInfo.Show();
-      mManager->Update();
-      return;
-   }
-
-   // If not, create it.
+   // Create panel.
    mConsolePanel = new ConsolePanel(mFrame, wxID_ANY);
    mManager->AddPane(mConsolePanel, wxAuiPaneInfo().Caption("Console")
                                                    .CaptionVisible( true )
@@ -67,7 +58,15 @@ void ConsoleTool::openTool()
                                                    .Dock()
                                                    .Resizable()
                                                    .FloatingSize( wxDefaultSize )
-                                                   .Bottom());
+                                                   .Bottom()
+                                                   .Hide());
+   mManager->Update();
+}
+
+void ConsoleTool::openTool()
+{
+   wxAuiPaneInfo& paneInfo = mManager->GetPane(mConsolePanel);
+   paneInfo.Show();
    mManager->Update();
 }
 

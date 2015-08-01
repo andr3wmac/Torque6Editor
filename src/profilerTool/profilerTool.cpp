@@ -46,18 +46,9 @@ ProfilerTool::~ProfilerTool()
 
 }
 
-void ProfilerTool::openTool()
+void ProfilerTool::initTool()
 {
-   // Check if panel already exists.
-   if ( mProfilerPanel != NULL )
-   {
-      wxAuiPaneInfo& paneInfo = mManager->GetPane(mProfilerPanel);
-      paneInfo.Show();
-      mManager->Update();
-      return;
-   }
-
-   // Create it.
+   // Create panel.
    mProfilerPanel = new ProfilerPanel(mFrame, wxID_ANY);
 
    // Events
@@ -72,7 +63,8 @@ void ProfilerTool::openTool()
                                             .Dock()
                                             .Resizable()
                                             .FloatingSize( wxDefaultSize )
-                                            .Bottom());
+                                            .Bottom()
+                                            .Hide());
    mManager->Update();
 
    mProfilerPanel->ProfilerDataView->AssociateModel( &mProfilerData );
@@ -97,10 +89,13 @@ void ProfilerTool::openTool()
 
    // Column 3
    mProfilerPanel->ProfilerDataView->AppendProgressColumn( "Percent", 3, wxDATAVIEW_CELL_INERT, 100 );
+}
 
-   mProfilerData.AddEntry("Test Node1", 1, 1, 1, NULL);
-   mProfilerData.AddEntry("Test Node2", 1, 1, 1, NULL);
-   mProfilerData.AddEntry("Test Node3", 1, 1, 1, NULL);
+void ProfilerTool::openTool()
+{
+   wxAuiPaneInfo& paneInfo = mManager->GetPane(mProfilerPanel);
+   paneInfo.Show();
+   mManager->Update();
 }
 
 void ProfilerTool::closeTool()

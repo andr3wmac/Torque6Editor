@@ -150,6 +150,9 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	wxBoxSizer* bSizer4;
 	bSizer4 = new wxBoxSizer( wxHORIZONTAL );
 	
+	m_button21 = new wxButton( this, wxID_ANY, wxT("New"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer4->Add( m_button21, 1, wxALL, 5 );
+	
 	m_button2 = new wxButton( this, wxID_ANY, wxT("Open"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer4->Add( m_button2, 1, wxALL|wxEXPAND, 5 );
 	
@@ -164,11 +167,34 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	wxBoxSizer* bSizer5;
 	bSizer5 = new wxBoxSizer( wxVERTICAL );
 	
+	wxBoxSizer* bSizer6;
+	bSizer6 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_bpButton1 = new wxBitmapButton( m_panel11, wxID_ANY, wxBitmap( wxT("images/entityIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	bSizer6->Add( m_bpButton1, 0, wxALL, 2 );
+	
+	m_bpButton2 = new wxBitmapButton( m_panel11, wxID_ANY, wxBitmap( wxT("images/componentIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_bpButton2->Enable( false );
+	
+	bSizer6->Add( m_bpButton2, 0, wxALL, 2 );
+	
+	m_searchCtrl1 = new wxSearchCtrl( m_panel11, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	#ifndef __WXMAC__
+	m_searchCtrl1->ShowSearchButton( true );
+	#endif
+	m_searchCtrl1->ShowCancelButton( true );
+	m_searchCtrl1->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), 70, 94, 90, false, wxEmptyString ) );
+	
+	bSizer6->Add( m_searchCtrl1, 1, wxALL, 1 );
+	
+	
+	bSizer5->Add( bSizer6, 0, wxEXPAND, 0 );
+	
 	entityList = new wxTreeCtrl( m_panel11, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
-	bSizer5->Add( entityList, 1, wxALL|wxEXPAND, 5 );
+	bSizer5->Add( entityList, 1, wxALL|wxEXPAND, 1 );
 	
 	propertyGrid = new wxPropertyGrid(m_panel11, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE);
-	bSizer5->Add( propertyGrid, 1, wxALL|wxEXPAND, 5 );
+	bSizer5->Add( propertyGrid, 1, wxALL|wxEXPAND, 2 );
 	
 	
 	m_panel11->SetSizer( bSizer5 );
@@ -176,6 +202,26 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	bSizer5->Fit( m_panel11 );
 	m_notebook2->AddPage( m_panel11, wxT("Entities"), true );
 	m_panel12 = new wxPanel( m_notebook2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer10;
+	bSizer10 = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizer11;
+	bSizer11 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticText1 = new wxStaticText( m_panel12, wxID_ANY, wxT("Directional Light"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
+	m_staticText1->Wrap( -1 );
+	bSizer11->Add( m_staticText1, 1, wxALL, 5 );
+	
+	m_colourPicker1 = new wxColourPickerCtrl( m_panel12, wxID_ANY, wxColour( 0, 128, 128 ), wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
+	bSizer11->Add( m_colourPicker1, 0, wxALL, 2 );
+	
+	
+	bSizer10->Add( bSizer11, 1, wxEXPAND, 5 );
+	
+	
+	m_panel12->SetSizer( bSizer10 );
+	m_panel12->Layout();
+	bSizer10->Fit( m_panel12 );
 	m_notebook2->AddPage( m_panel12, wxT("Lighting"), false );
 	
 	bSizer3->Add( m_notebook2, 1, wxEXPAND | wxALL, 5 );
@@ -187,4 +233,86 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 
 ScenePanel::~ScenePanel()
 {
+}
+
+MaterialsPanel::MaterialsPanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
+{
+	m_mgr.SetManagedWindow(this);
+	m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
+	
+	m_panel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_mgr.AddPane( m_panel, wxAuiPaneInfo() .Left() .PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ).MinSize( wxSize( 200,-1 ) ) );
+	
+	wxBoxSizer* bSizer1;
+	bSizer1 = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizer2;
+	bSizer2 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_bpButton1 = new wxBitmapButton( m_panel, wxID_ANY, wxBitmap( wxT("images/saveIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	bSizer2->Add( m_bpButton1, 0, wxALL, 2 );
+	
+	
+	bSizer1->Add( bSizer2, 0, wxEXPAND, 5 );
+	
+	m_materialTree = new wxTreeCtrl( m_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
+	bSizer1->Add( m_materialTree, 1, wxALL|wxEXPAND, 2 );
+	
+	m_scrolledWindow1 = new wxScrolledWindow( m_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL );
+	m_scrolledWindow1->SetScrollRate( 5, 5 );
+	wxBoxSizer* bSizer3;
+	bSizer3 = new wxBoxSizer( wxVERTICAL );
+	
+	m_button1 = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Deferred"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer3->Add( m_button1, 0, wxALL|wxEXPAND, 2 );
+	
+	m_button2 = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Float"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer3->Add( m_button2, 0, wxALL|wxEXPAND, 2 );
+	
+	m_button3 = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Vec2"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer3->Add( m_button3, 0, wxALL|wxEXPAND, 2 );
+	
+	m_button4 = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Vec3"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer3->Add( m_button4, 0, wxALL|wxEXPAND, 2 );
+	
+	m_button5 = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Vec4"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer3->Add( m_button5, 0, wxALL|wxEXPAND, 2 );
+	
+	m_button6 = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Texture"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer3->Add( m_button6, 0, wxALL|wxEXPAND, 2 );
+	
+	m_button7 = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Time"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer3->Add( m_button7, 0, wxALL|wxEXPAND, 2 );
+	
+	m_button8 = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Cos"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer3->Add( m_button8, 0, wxALL|wxEXPAND, 2 );
+	
+	m_button9 = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Sin"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer3->Add( m_button9, 0, wxALL|wxEXPAND, 2 );
+	
+	m_button10 = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Multiply"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer3->Add( m_button10, 0, wxALL|wxEXPAND, 2 );
+	
+	
+	m_scrolledWindow1->SetSizer( bSizer3 );
+	m_scrolledWindow1->Layout();
+	bSizer3->Fit( m_scrolledWindow1 );
+	bSizer1->Add( m_scrolledWindow1, 1, wxEXPAND | wxALL, 5 );
+	
+	
+	m_panel->SetSizer( bSizer1 );
+	m_panel->Layout();
+	bSizer1->Fit( m_panel );
+	m_materialNotebook = new wxAuiNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_DEFAULT_STYLE );
+	m_mgr.AddPane( m_materialNotebook, wxAuiPaneInfo() .Left() .PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ).CentrePane() );
+	
+	
+	
+	m_mgr.Update();
+}
+
+MaterialsPanel::~MaterialsPanel()
+{
+	m_mgr.UnInit();
+	
 }

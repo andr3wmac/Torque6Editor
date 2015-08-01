@@ -103,8 +103,7 @@ bool ProjectManager::openProject(wxString projectPath)
       mProjectPath = projectPath;
       wxDir projectDir(mProjectPath);
       mProjectName = projectDir.GetName();
-
-      Plugins::Link.Con.printf("HELLO WORLD!");
+      setRendering(true);
 
       onProjectLoaded(mProjectName, projectPath);
       return true;
@@ -115,6 +114,8 @@ bool ProjectManager::openProject(wxString projectPath)
 
 void ProjectManager::closeProject()
 {
+   setRendering(false);
+
    mProjectLoaded = false;
    mProjectPath = "";
    mProjectName = "";
@@ -213,6 +214,20 @@ void ProjectManager::OnKeyUp(wxKeyEvent& evt)
       Plugins::Link.Engine.keyUp(torqueKey);
 }
 
+void ProjectManager::preRender()
+{
+
+}
+void ProjectManager::render()
+{
+   for(unsigned int i = 0; i < smProjectTools.size(); ++i)
+      smProjectTools[i]->renderTool();
+}
+void ProjectManager::postRender()
+{
+
+}
+
 // Project Tool Management
 wxVector<ProjectTool*> ProjectManager::smProjectTools;
 
@@ -230,6 +245,7 @@ void ProjectTool::init(ProjectManager* _projectManager, MainFrame* _frame, wxAui
    mProjectManager   = _projectManager;
    mFrame            = _frame;
    mManager          = _manager;
+   initTool();
 }
 
 void ProjectManager::onProjectLoaded(wxString projectName, wxString projectPath)

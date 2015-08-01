@@ -34,6 +34,10 @@
 #include "consoleTool/consoleTool.h"
 #endif
 
+#ifndef _MATERIALS_TOOL_H_
+#include "materialsTool/materialsTool.h"
+#endif
+
 #ifndef _PROFILER_TOOL_H_
 #include "profilerTool/profilerTool.h"
 #endif
@@ -67,7 +71,8 @@ public:
    ProjectManager    mProjectManager;
 
    // Tools
-   ConsoleTool       mConsoleTool;    
+   ConsoleTool       mConsoleTool;   
+   MaterialsTool     mMaterialsTool;
    ProfilerTool      mProfilerTool;   
    SceneTool         mSceneTool;
    ScriptsTool       mScriptsTool;

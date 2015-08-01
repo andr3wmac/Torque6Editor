@@ -55,29 +55,14 @@ ScriptsTool::~ScriptsTool()
 
 }
 
-void ScriptsTool::init(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
+void ScriptsTool::initTool()
 {
-   ProjectTool::init(_projectManager, _frame, _manager);
-
-   mIconList->Add(wxBitmap("images/iconFolder.png",   wxBITMAP_TYPE_PNG));
-   mIconList->Add(wxBitmap("images/iconFile.png",     wxBITMAP_TYPE_PNG));
-}
-
-void ScriptsTool::openTool()
-{
-   // Check if panel already exists.
-   if ( mScriptsPanel != NULL )
-   {
-      wxAuiPaneInfo& paneInfo = mManager->GetPane(mScriptsPanel);
-      paneInfo.Show();
-      mManager->Update();
-      return;
-   }
-
-   // Create it.
+   // Create panel.
    mScriptsPanel = new ScriptsPanel(mFrame, wxID_ANY);
 
    // Icons
+   mIconList->Add(wxBitmap("images/iconFolder.png",   wxBITMAP_TYPE_PNG));
+   mIconList->Add(wxBitmap("images/iconFile.png",     wxBITMAP_TYPE_PNG));
    mScriptsPanel->m_scriptsTree->AssignImageList(mIconList);
 
    // Events
@@ -92,14 +77,19 @@ void ScriptsTool::openTool()
                                             .Dock()
                                             .Resizable()
                                             .FloatingSize( wxDefaultSize )
-                                            .Bottom());
+                                            .Bottom()
+                                            .Hide());
+   mManager->Update();
+}
+
+void ScriptsTool::openTool()
+{
+   wxAuiPaneInfo& paneInfo = mManager->GetPane(mScriptsPanel);
+   paneInfo.Show();
    mManager->Update();
 
-   if ( mProjectManager->mProjectLoaded )
-      loadProject(mProjectManager->mProjectName, mProjectManager->mProjectPath);
-
-   // For Easy Debugging:
-   // loadProject("Debug Project", "C:/Users/Andrew/Documents/Projects/Torque6/projects/00-Console/");
+   //if ( mProjectManager->mProjectLoaded )
+   //   loadProject(mProjectManager->mProjectName, mProjectManager->mProjectPath);
 }
 
 void ScriptsTool::closeTool()
