@@ -11,8 +11,6 @@ function Torque6Editor()
             path.join(LIB_DIR, "assimp/include"),
             path.join(LIB_DIR, "bgfx/include"),
             path.join(LIB_DIR, "bgfx/common"),
-            path.join(LIB_DIR, "bgfx/common/imgui"),
-            path.join(LIB_DIR, "bgfx/common/nanovg"),
             path.join(LIB_DIR, "openal/win32"),
         }
 
@@ -29,6 +27,9 @@ function Torque6Editor()
             "TORQUE_PLUGIN"
         }
 
+        configuration "vs2015"
+            windowstargetplatformversion "10.0.10240.0"
+
         configuration "Debug"
             targetname "Torque6Editor_DEBUG"
             defines     { "TORQUE_DEBUG", "TORQUE_ENABLE_PROFILER" }
@@ -44,13 +45,61 @@ function Torque6Editor()
             flags { "WinMain" }
             targetdir   "../bin/windows"
             links { "ole32",
-                    "wxmsw30ud_adv",
-                    "wxmsw30ud_aui",
-                    "wxmsw30ud_core",
-                    "wxmsw30ud_propgrid",
-                    "wxmsw30ud_stc",
-                    "wxbase30ud",
-                    "wxbase30ud_net",
+                    "winmm",
+                    "comctl32",
+                    "rpcrt4",
+                    "wsock32",
+                    "wininet", 
+                  }
+            includedirs { "$(wxwin)/include",
+                          "$(wxwin)/src/stc/scintilla/include",
+                          "$(wxwin)/src/stc/scintilla/lexlib",
+                          "$(wxwin)/src/stc/scintilla/src",
+                        }
+            
+        configuration { "windows", "x32", "Release" }
+            includedirs { "$(wxwin)/lib/vc_lib/mswu" }
+            libdirs { "$(wxwin)/lib/vc_lib" }
+
+        configuration { "windows", "x32", "Debug" }
+            includedirs { "$(wxwin)/lib/vc_lib/mswu" }
+            libdirs { "$(wxwin)/lib/vc_lib" }
+
+        configuration { "windows", "x64", "Release" }
+            includedirs { "$(wxwin)/lib/vc_lib/mswu" }
+            libdirs { "$(wxwin)/lib/vc_x64_lib" }
+            targetdir   "../bin/windows.x64"
+
+        configuration { "windows", "x64", "Debug" }
+            includedirs { "$(wxwin)/lib/vc_lib/mswud" }
+            libdirs { "$(wxwin)/lib/vc_x64_lib" }
+            targetdir   "../bin/windows.x64"
+
+        configuration { "windows", "Release" }
+            links { "wxmsw31u_adv",
+                    "wxmsw31u_aui",
+                    "wxmsw31u_core",
+                    "wxmsw31u_propgrid",
+                    "wxmsw31u_stc",
+                    "wxbase31u",
+                    "wxbase31u_net",
+                    "wxscintilla",
+                    "wxtiff",
+                    "wxjpeg",
+                    "wxpng",
+                    "wxzlib",
+                    "wxregexu",
+                    "wxexpat",
+                  }
+
+        configuration { "windows", "Debug" }
+            links { "wxmsw31ud_adv",
+                    "wxmsw31ud_aui",
+                    "wxmsw31ud_core",
+                    "wxmsw31ud_propgrid",
+                    "wxmsw31ud_stc",
+                    "wxbase31ud",
+                    "wxbase31ud_net",
                     "wxscintillad",
                     "wxtiffd",
                     "wxjpegd",
@@ -58,19 +107,7 @@ function Torque6Editor()
                     "wxzlibd",
                     "wxregexud",
                     "wxexpatd",
-                    "winmm",
-                    "comctl32",
-                    "rpcrt4",
-                    "wsock32",
-                    "wininet", 
                   }
-            includedirs { "$(wxwin)/lib/vc_lib/mswud",
-                          "$(wxwin)/include",
-                          "$(wxwin)/src/stc/scintilla/include",
-                          "$(wxwin)/src/stc/scintilla/lexlib",
-                          "$(wxwin)/src/stc/scintilla/src",
-                        }
-            libdirs { "$(wxwin)/lib/vc_lib" }
 
         configuration "linux"
             targetdir   "../bin/linux"
