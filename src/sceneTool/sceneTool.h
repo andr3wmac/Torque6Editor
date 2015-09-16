@@ -50,21 +50,53 @@ public:
    }
 };
 
+class FeatureTreeItemData : public wxTreeItemData
+{
+public:
+   SimObject* objPtr;
+
+   FeatureTreeItemData(SimObject* _objPtr)
+      : objPtr(_objPtr)
+   {
+   }
+};
+
 class SceneTool : public wxEvtHandler, public ProjectTool
 {
    protected:
       ScenePanel*    mScenePanel;
+      wxImageList*   mEntityIconList;
       wxTreeItemId   mEntityListRoot;
-      wxImageList*   mIconList;
+
+      wxImageList*   mFeatureIconList;
+      wxTreeItemId   mFeatureListRoot;
+      
       SimObject*     mSelectedObject;
       Box3F          mSelectedBoundingBox;
+
+      bool mSelectRed;
+      bool mSelectGreen;
+      bool mSelectBlue;
+      Point3F mSelectRedPoint;
+      Point3F mSelectGreenPoint;
+      Point3F mSelectBluePoint;
+
+      bool mDragging;
+      bool mDragRed;
+      bool mDragBlue;
+      bool mDragGreen;
+      Point3F mDownPoint;
+      F32 mDownAngle;
 
    public:
       SceneTool();
       ~SceneTool();
 
       void refreshEntityList();
-      void loadObjectProperties(SimObject* obj);
+      void refreshFeatureList();
+      void loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* obj);
+      void selectEntity(Scene::SceneEntity* entity);
+      void selectComponent(Scene::BaseComponent* component);
 
       void OnTreeEvent( wxTreeEvent& evt );
       void OnTreeMenu( wxTreeEvent& evt );
@@ -74,6 +106,10 @@ class SceneTool : public wxEvtHandler, public ProjectTool
       virtual void openTool();
       virtual void closeTool();
       virtual void renderTool();
+
+      virtual bool onMouseLeftDown(int x, int y);
+      virtual bool onMouseLeftUp(int x, int y);
+      virtual bool onMouseMove(int x, int y);
 
       virtual void onProjectLoaded(wxString projectName, wxString projectPath);
       virtual void onProjectClosed();

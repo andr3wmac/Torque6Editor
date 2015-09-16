@@ -46,9 +46,11 @@ ProjectManager::ProjectManager()
       mProjectPath(""),
       mTorque6Library(NULL),
       mTorque6Init(NULL),
-      mTorque6Shutdown(NULL)
+      mTorque6Shutdown(NULL),
+      mEditorOverlayView(NULL),
+      mEditorMode(0)
 {
-
+   mCameraPanVelocity = Point3F::Zero;
 }
 
 ProjectManager::~ProjectManager()
@@ -105,6 +107,16 @@ bool ProjectManager::openProject(wxString projectPath)
       mProjectName = projectDir.GetName();
       setRendering(true);
 
+      // Editor Overlay
+      mEditorOverlayView = Plugins::Link.Graphics.getView("EditorOverlay", 6100);
+
+      // Editor Camera
+      Scene::SceneCamera* activeCam = Plugins::Link.Scene.getActiveCamera();
+      mCamera.copy(activeCam);
+      mCamera.setBindMouse(true, false, true);
+      Plugins::Link.Scene.addCamera("EditorCamera", &mCamera);
+      Plugins::Link.Scene.pushActiveCamera("EditorCamera");
+
       onProjectLoaded(mProjectName, projectPath);
       return true;
    }
@@ -128,40 +140,74 @@ void ProjectManager::closeProject()
 
 void ProjectManager::OnIdle(wxIdleEvent& evt)
 {
-   if ( mProjectLoaded )
+   if (mProjectLoaded)
+   {
       Plugins::Link.Engine.mainLoop();
+      evt.RequestMore();
+   }
 }
 
 void ProjectManager::OnSize(wxSizeEvent& evt)
 {
-   if ( mProjectLoaded )
-      Plugins::Link.Engine.resizeWindow(evt.GetSize().GetX(), evt.GetSize().GetY());
+   if (!mProjectLoaded)
+      return;
+
+   Plugins::Link.Engine.resizeWindow(evt.GetSize().GetX(), evt.GetSize().GetY());
 }
 
 void ProjectManager::OnMouseMove(wxMouseEvent& evt)
 {
-   if ( mProjectLoaded )
-      Plugins::Link.Engine.mouseMove(evt.GetPosition().x, evt.GetPosition().y);
+   if (!mProjectLoaded)
+      return;
+
+   for (unsigned int i = 0; i < smProjectTools.size(); ++i)
+      smProjectTools[i]->onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
+
+   Plugins::Link.Engine.mouseMove(evt.GetPosition().x, evt.GetPosition().y);
 }
 void ProjectManager::OnMouseLeftDown(wxMouseEvent& evt)
 {
-   if ( mProjectLoaded )
-      Plugins::Link.Engine.mouseButton(true, true);
+   mWindow->SetFocus();
+
+   if (!mProjectLoaded)
+      return;
+
+   for (unsigned int i = 0; i < smProjectTools.size(); ++i)
+      smProjectTools[i]->onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
+
+   Plugins::Link.Engine.mouseButton(true, true);
 }
 void ProjectManager::OnMouseLeftUp(wxMouseEvent& evt)
 {
-   if ( mProjectLoaded )
-      Plugins::Link.Engine.mouseButton(true, false);
+   if (!mProjectLoaded)
+      return;
+
+   for (unsigned int i = 0; i < smProjectTools.size(); ++i)
+      smProjectTools[i]->onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
+
+   Plugins::Link.Engine.mouseButton(false, true);
 }
 void ProjectManager::OnMouseRightDown(wxMouseEvent& evt)
 {
-   if ( mProjectLoaded )
-      Plugins::Link.Engine.mouseButton(false, true);
+   mWindow->SetFocus();
+
+   if (!mProjectLoaded)
+      return;
+
+   for (unsigned int i = 0; i < smProjectTools.size(); ++i)
+      smProjectTools[i]->onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
+
+   Plugins::Link.Engine.mouseButton(true, false);
 }
 void ProjectManager::OnMouseRightUp(wxMouseEvent& evt)
 {
-   if ( mProjectLoaded )
-      Plugins::Link.Engine.mouseButton(false, false);
+   if (!mProjectLoaded)
+      return;
+
+   for (unsigned int i = 0; i < smProjectTools.size(); ++i)
+      smProjectTools[i]->onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
+
+   Plugins::Link.Engine.mouseButton(false, false);
 }
 
 KeyCodes getTorqueKeyCode(int key)
@@ -201,28 +247,73 @@ KeyCodes getTorqueKeyCode(int key)
 
 void ProjectManager::OnKeyDown(wxKeyEvent& evt)
 {
-   KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
+   if (!mProjectLoaded)
+      return;
 
-   if ( mProjectLoaded )
-      Plugins::Link.Engine.keyDown(torqueKey);
+   switch (evt.GetKeyCode())
+   {
+      case 87: // W
+         mCameraPanVelocity.z = -1.0;
+         break;
+
+      case 65: // A
+         mCameraPanVelocity.x = 1.0;
+         break;
+
+      case 83: // S
+         mCameraPanVelocity.z = 1.0;
+         break;
+
+      case 68: // D
+         mCameraPanVelocity.x = -1.0;
+         break;
+   }
+   mCamera.setPanVelocity(mCameraPanVelocity);
+
+   KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
+   Plugins::Link.Engine.keyDown(torqueKey);
 }
 void ProjectManager::OnKeyUp(wxKeyEvent& evt)
 {
-   KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
+   if (!mProjectLoaded)
+      return;
 
-   if ( mProjectLoaded )
-      Plugins::Link.Engine.keyUp(torqueKey);
+   switch (evt.GetKeyCode())
+   {
+      case 87: // W
+         mCameraPanVelocity.z = 0.0;
+         break;
+
+      case 65: // A
+         mCameraPanVelocity.x = 0.0;
+         break;
+
+      case 83: // S
+         mCameraPanVelocity.z = 0.0;
+         break;
+
+      case 68: // D
+         mCameraPanVelocity.x = 0.0;
+         break;
+   }
+   mCamera.setPanVelocity(mCameraPanVelocity);
+
+   KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
+   Plugins::Link.Engine.keyUp(torqueKey);
 }
 
 void ProjectManager::preRender()
 {
-
+   Plugins::Link.bgfx.setViewRect(mEditorOverlayView->id, 0, 0, *Plugins::Link.Rendering.canvasWidth, *Plugins::Link.Rendering.canvasHeight);
+   Plugins::Link.bgfx.setViewTransform(mEditorOverlayView->id, Plugins::Link.Rendering.viewMatrix, Plugins::Link.Rendering.projectionMatrix, BGFX_VIEW_STEREO, NULL);
 }
+
 void ProjectManager::render()
 {
    for(unsigned int i = 0; i < smProjectTools.size(); ++i)
       smProjectTools[i]->renderTool();
 }
+
 void ProjectManager::postRender()
 {
 
@@ -258,4 +349,28 @@ void ProjectManager::onProjectClosed()
 {
    for(unsigned int i = 0; i < smProjectTools.size(); ++i)
       smProjectTools[i]->onProjectClosed();
+}
+
+// ---------------------------------------------------------------
+
+IMPLEMENT_PLUGIN_CONOBJECT(EditorCamera);
+
+EditorCamera::EditorCamera()
+{
+
+}
+
+void EditorCamera::onMouseMoveEvent(const GuiEvent &event)
+{
+   //editorList[activeEditorIndex]->onMouseMoveEvent(event);
+}
+
+void EditorCamera::onMouseDownEvent(const GuiEvent &event)
+{
+   //editorList[activeEditorIndex]->onMouseDownEvent(event);
+}
+
+void EditorCamera::onMouseDraggedEvent(const GuiEvent &event)
+{
+   //editorList[activeEditorIndex]->onMouseDraggedEvent(event);
 }

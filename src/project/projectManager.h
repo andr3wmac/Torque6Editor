@@ -31,12 +31,32 @@
 #include "platform/platformLibrary.h"
 #endif
 
+#ifndef _SCENE_CAMERA_H_
+#include "3d/scene/camera.h"
+#endif
+
 typedef int (*initFunc)(int argc, const char **argv, HWND windowHWND);
 typedef void (*shutdownFunc)();
 
 class ProjectManager;
 class MainFrame;
 class wxAuiManager;
+
+// Editor Camera
+class EditorCamera : public Scene::SceneCamera
+{
+   private:
+      typedef Scene::SceneCamera Parent;
+
+   public:
+      EditorCamera();
+
+      void onMouseMoveEvent(const GuiEvent &event);
+      void onMouseDownEvent(const GuiEvent &event);
+      void onMouseDraggedEvent(const GuiEvent &event);
+
+      DECLARE_PLUGIN_CONOBJECT(EditorCamera);
+};
 
 class ProjectTool
 {
@@ -56,9 +76,16 @@ class ProjectTool
       virtual void renderTool() { }
       virtual void onProjectLoaded(wxString projectName, wxString path) {}
       virtual void onProjectClosed() {}
+
+      virtual bool onMouseLeftDown(int x, int y) { return false; }
+      virtual bool onMouseLeftUp(int x, int y) { return false; }
+      virtual bool onMouseRightDown(int x, int y) { return false; }
+      virtual bool onMouseRightUp(int x, int y) { return false; }
+      virtual bool onMouseMove(int x, int y) { return false; }
+      
 };
 
-class ProjectManager : public wxEvtHandler, public Renderable
+class ProjectManager : public wxEvtHandler, public Rendering::Renderable
 {
    public:
       ProjectManager();
@@ -75,6 +102,12 @@ class ProjectManager : public wxEvtHandler, public Renderable
       wxString          mProjectPath;
       wxAuiManager*     mManager;
       wxWindow*         mWindow;
+      EditorCamera      mCamera;
+      Point3F           mCameraPanVelocity;
+
+      S32               mEditorMode;
+
+      Graphics::ViewTableEntry* mEditorOverlayView;
 
       bool openProject(wxString projectPath);
       void closeProject();
@@ -96,8 +129,6 @@ class ProjectManager : public wxEvtHandler, public Renderable
       static wxVector<ProjectTool*> smProjectTools;
       static void onProjectLoaded(wxString projectName, wxString projectPath);
       static void onProjectClosed();
-
-
 };
  
 #endif // _PROJECTMANAGER_H_

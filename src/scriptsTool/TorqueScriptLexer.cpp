@@ -66,9 +66,9 @@ int SCI_METHOD LexerTorqueScript::WordListSet(int n, const char *wl) {
 
 bool LexerTorqueScript::TSWordlistContainsKey(WordList &list, int length, LexAccessor &styler, int i)
 {
-   for (int jj = 0; jj < list.len; jj++)
-      if (strlen(list.words[jj]) == length)
-         if (styler.Match(i, list.words[jj]))
+   for (int jj = 0; jj < list.Length(); jj++)
+      if (strlen(list.WordAt(jj)) == length)
+         if (styler.Match(i, list.WordAt(jj)))
             return true;
    return false;
 }

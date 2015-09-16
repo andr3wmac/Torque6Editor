@@ -33,20 +33,23 @@
 #include <wx/srchctrl.h>
 #include <wx/propgrid/propgrid.h>
 #include <wx/propgrid/advprops.h>
-#include <wx/stattext.h>
-#include <wx/clrpicker.h>
 #include <wx/notebook.h>
 #include <wx/scrolwin.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
-#define TOOLBAR_PROJECT 1000
-#define TOOLBAR_CONSOLE 1001
-#define TOOLBAR_SCENE 1002
-#define TOOLBAR_SCRIPTS 1003
-#define TOOLBAR_MATERIALS 1004
-#define TOOLBAR_PROFILER 1005
-#define PROFILER_START 1006
+#define MENU_PROJECT 1000
+#define MENU_CONSOLE 1001
+#define MENU_SCENE 1002
+#define MENU_SCRIPTS 1003
+#define MENU_MATERIALS 1004
+#define MENU_PROFILER 1005
+#define TOOLBAR_MOVE 1006
+#define TOOLBAR_ROTATE 1007
+#define TOOLBAR_SCALE 1008
+#define PROFILER_START 1009
+#define ENTITY_LIST 1010
+#define FEATURE_LIST 1011
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainFrame
@@ -57,12 +60,10 @@ class MainFrame : public wxFrame
 	
 	protected:
 		wxMenu* m_menu1;
+		wxMenu* m_menu2;
 		wxToolBarToolBase* m_tool1; 
 		wxToolBarToolBase* m_tool2; 
 		wxToolBarToolBase* m_tool3; 
-		wxToolBarToolBase* m_tool4; 
-		wxToolBarToolBase* m_tool5; 
-		wxToolBarToolBase* m_tool7; 
 	
 	public:
 		wxMenuBar* mainMenuBar;
@@ -135,12 +136,13 @@ class ScenePanel : public wxPanel
 		wxBitmapButton* m_bpButton2;
 		wxSearchCtrl* m_searchCtrl1;
 		wxPanel* m_panel12;
-		wxStaticText* m_staticText1;
-		wxColourPickerCtrl* m_colourPicker1;
+		wxBitmapButton* m_bpButton11;
 	
 	public:
 		wxTreeCtrl* entityList;
 		wxPropertyGrid* propertyGrid;
+		wxTreeCtrl* featureList;
+		wxPropertyGrid* featurePropGrid;
 		
 		ScenePanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
 		~ScenePanel();

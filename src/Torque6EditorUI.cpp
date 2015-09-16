@@ -38,22 +38,41 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	
 	mainMenuBar->Append( m_menu1, wxT("File") ); 
 	
+	m_menu2 = new wxMenu();
+	wxMenuItem* m_menuItem5;
+	m_menuItem5 = new wxMenuItem( m_menu2, MENU_PROJECT, wxString( wxT("Project") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu2->Append( m_menuItem5 );
+	
+	wxMenuItem* m_menuItem6;
+	m_menuItem6 = new wxMenuItem( m_menu2, MENU_CONSOLE, wxString( wxT("Console") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu2->Append( m_menuItem6 );
+	
+	wxMenuItem* m_menuItem7;
+	m_menuItem7 = new wxMenuItem( m_menu2, MENU_SCENE, wxString( wxT("Scene") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu2->Append( m_menuItem7 );
+	
+	wxMenuItem* m_menuItem8;
+	m_menuItem8 = new wxMenuItem( m_menu2, MENU_SCRIPTS, wxString( wxT("Scripts") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu2->Append( m_menuItem8 );
+	
+	wxMenuItem* m_menuItem9;
+	m_menuItem9 = new wxMenuItem( m_menu2, MENU_MATERIALS, wxString( wxT("Materials") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu2->Append( m_menuItem9 );
+	
+	wxMenuItem* m_menuItem10;
+	m_menuItem10 = new wxMenuItem( m_menu2, MENU_PROFILER, wxString( wxT("Profiler") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu2->Append( m_menuItem10 );
+	
+	mainMenuBar->Append( m_menu2, wxT("Tools") ); 
+	
 	this->SetMenuBar( mainMenuBar );
 	
-	mainToolbar = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT ); 
-	m_tool1 = mainToolbar->AddTool( TOOLBAR_PROJECT, wxT("Project"), wxBitmap( wxT("images/projectTool.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_CHECK, wxEmptyString, wxEmptyString, NULL ); 
+	mainToolbar = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_HORIZONTAL ); 
+	m_tool1 = mainToolbar->AddTool( TOOLBAR_MOVE, wxT("Move"), wxBitmap( wxT("images/translate.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxT("Move"), wxEmptyString, NULL ); 
 	
-	mainToolbar->AddSeparator(); 
+	m_tool2 = mainToolbar->AddTool( TOOLBAR_ROTATE, wxT("Rotate"), wxBitmap( wxT("images/rotate.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxT("Rotate"), wxEmptyString, NULL ); 
 	
-	m_tool2 = mainToolbar->AddTool( TOOLBAR_CONSOLE, wxT("Console"), wxBitmap( wxT("images/consoleTool.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_CHECK, wxEmptyString, wxEmptyString, NULL ); 
-	
-	m_tool3 = mainToolbar->AddTool( TOOLBAR_SCENE, wxT("Scene"), wxBitmap( wxT("images/sceneTool.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_CHECK, wxEmptyString, wxEmptyString, NULL ); 
-	
-	m_tool4 = mainToolbar->AddTool( TOOLBAR_SCRIPTS, wxT("Scripts"), wxBitmap( wxT("images/scriptTool.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_CHECK, wxEmptyString, wxEmptyString, NULL ); 
-	
-	m_tool5 = mainToolbar->AddTool( TOOLBAR_MATERIALS, wxT("Materials"), wxBitmap( wxT("images/materialsTool.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_CHECK, wxEmptyString, wxEmptyString, NULL ); 
-	
-	m_tool7 = mainToolbar->AddTool( TOOLBAR_PROFILER, wxT("Profiler"), wxBitmap( wxT("images/profilerTool.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_CHECK, wxEmptyString, wxEmptyString, NULL ); 
+	m_tool3 = mainToolbar->AddTool( TOOLBAR_SCALE, wxT("Scale"), wxBitmap( wxT("images/scale.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxT("Scale"), wxEmptyString, NULL ); 
 	
 	mainToolbar->Realize();
 	m_mgr.AddPane( mainToolbar, wxAuiPaneInfo() .Top() .CaptionVisible( false ).CloseButton( false ).Gripper().Dock().Resizable().FloatingSize( wxSize( 37,57 ) ).Layer( 1 ) );
@@ -190,7 +209,7 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	bSizer5->Add( bSizer6, 0, wxEXPAND, 0 );
 	
-	entityList = new wxTreeCtrl( m_panel11, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
+	entityList = new wxTreeCtrl( m_panel11, ENTITY_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
 	bSizer5->Add( entityList, 1, wxALL|wxEXPAND, 1 );
 	
 	propertyGrid = new wxPropertyGrid(m_panel11, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE);
@@ -200,29 +219,31 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	m_panel11->SetSizer( bSizer5 );
 	m_panel11->Layout();
 	bSizer5->Fit( m_panel11 );
-	m_notebook2->AddPage( m_panel11, wxT("Entities"), true );
+	m_notebook2->AddPage( m_panel11, wxT("Objects"), true );
 	m_panel12 = new wxPanel( m_notebook2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* bSizer10;
-	bSizer10 = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer* bSizer51;
+	bSizer51 = new wxBoxSizer( wxVERTICAL );
 	
-	wxBoxSizer* bSizer11;
-	bSizer11 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizer61;
+	bSizer61 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_staticText1 = new wxStaticText( m_panel12, wxID_ANY, wxT("Directional Light"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
-	m_staticText1->Wrap( -1 );
-	bSizer11->Add( m_staticText1, 1, wxALL, 5 );
-	
-	m_colourPicker1 = new wxColourPickerCtrl( m_panel12, wxID_ANY, wxColour( 0, 128, 128 ), wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
-	bSizer11->Add( m_colourPicker1, 0, wxALL, 2 );
+	m_bpButton11 = new wxBitmapButton( m_panel12, wxID_ANY, wxBitmap( wxT("images/featureIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	bSizer61->Add( m_bpButton11, 0, wxALL, 2 );
 	
 	
-	bSizer10->Add( bSizer11, 1, wxEXPAND, 5 );
+	bSizer51->Add( bSizer61, 0, wxEXPAND, 0 );
+	
+	featureList = new wxTreeCtrl( m_panel12, FEATURE_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
+	bSizer51->Add( featureList, 1, wxALL|wxEXPAND, 1 );
+	
+	featurePropGrid = new wxPropertyGrid(m_panel12, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE);
+	bSizer51->Add( featurePropGrid, 1, wxALL|wxEXPAND, 2 );
 	
 	
-	m_panel12->SetSizer( bSizer10 );
+	m_panel12->SetSizer( bSizer51 );
 	m_panel12->Layout();
-	bSizer10->Fit( m_panel12 );
-	m_notebook2->AddPage( m_panel12, wxT("Lighting"), false );
+	bSizer51->Fit( m_panel12 );
+	m_notebook2->AddPage( m_panel12, wxT("Features"), false );
 	
 	bSizer3->Add( m_notebook2, 1, wxEXPAND | wxALL, 5 );
 	

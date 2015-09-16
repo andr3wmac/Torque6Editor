@@ -43,10 +43,9 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
-#include "OptionSet.h"
 #include "SparseState.h"
 #include "Catalogue.h"
-
+#include "OptionSet.h"
 #include "defsext.h"
 #include "prefs.h"
 

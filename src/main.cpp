@@ -81,62 +81,51 @@ void Torque6Editor::OnMenuEvent( wxCommandEvent& evt )
       mProjectManager.closeProject();
       mManager->Update();
    }
+
+   switch (evt.GetId())
+   {
+      case MENU_CONSOLE:
+         mConsoleTool.openTool();
+         break;
+
+      case MENU_MATERIALS:
+         mMaterialsTool.openTool();
+         break;
+
+      case MENU_PROFILER:
+         mProfilerTool.openTool();
+         break;
+
+      case MENU_SCENE:
+         mSceneTool.openTool();
+         break;
+
+      case MENU_SCRIPTS:
+         mScriptsTool.openTool();
+         break;
+
+      default:
+         break;
+   }
 }
 
 void Torque6Editor::OnToolbarEvent( wxCommandEvent& evt )
 {
-   if ( evt.IsChecked() )
+   switch(evt.GetId())
    {
-      switch(evt.GetId())
-      {
-         case TOOLBAR_CONSOLE:
-            mConsoleTool.openTool();
-            break;
+      case TOOLBAR_MOVE:
+         mProjectManager.mEditorMode = 0;
+         break;
 
-         case TOOLBAR_MATERIALS:
-            mMaterialsTool.openTool();
-            break;
+      case TOOLBAR_ROTATE:
+         mProjectManager.mEditorMode = 1;
+         break;
 
-         case TOOLBAR_PROFILER:
-            mProfilerTool.openTool();
-            break;
+      case TOOLBAR_SCALE:
+         mProjectManager.mEditorMode = 2;
+         break;
 
-         case TOOLBAR_SCENE:
-            mSceneTool.openTool();
-            break;
-
-         case TOOLBAR_SCRIPTS:
-            mScriptsTool.openTool();
-            break;
-
-         default:
-            break;
-      }
-   } else {
-      switch(evt.GetId())
-      {
-         case TOOLBAR_CONSOLE:
-            mConsoleTool.closeTool();
-            break;
-
-         case TOOLBAR_MATERIALS:
-            mMaterialsTool.closeTool();
-            break;
-
-         case TOOLBAR_PROFILER:
-            mProfilerTool.closeTool();
-            break;
-
-         case TOOLBAR_SCENE:
-            mSceneTool.closeTool();
-            break;
-
-         case TOOLBAR_SCRIPTS:
-            mScriptsTool.closeTool();
-            break;
-
-         default:
-            break;
-      }
+      default:
+         break;
    }
 }
