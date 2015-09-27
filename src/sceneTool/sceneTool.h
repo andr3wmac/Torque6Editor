@@ -39,6 +39,10 @@
 #include <3d/entity/entity.h>
 #endif
 
+#ifndef _GIZMO_H_
+#include "gizmo.h"
+#endif
+
 class EntityTreeItemData : public wxTreeItemData
 {
 public:
@@ -61,7 +65,7 @@ public:
    }
 };
 
-class SceneTool : public wxEvtHandler, public ProjectTool
+class SceneTool : public wxEvtHandler, public EditorTool
 {
    protected:
       ScenePanel*    mScenePanel;
@@ -71,22 +75,10 @@ class SceneTool : public wxEvtHandler, public ProjectTool
       wxImageList*   mFeatureIconList;
       wxTreeItemId   mFeatureListRoot;
       
-      SimObject*     mSelectedObject;
-      Box3F          mSelectedBoundingBox;
+      SimObject*           mSelectedObject;
+      Scene::SceneEntity*  mSelectedEntity;
 
-      bool mSelectRed;
-      bool mSelectGreen;
-      bool mSelectBlue;
-      Point3F mSelectRedPoint;
-      Point3F mSelectGreenPoint;
-      Point3F mSelectBluePoint;
-
-      bool mDragging;
-      bool mDragRed;
-      bool mDragBlue;
-      bool mDragGreen;
-      Point3F mDownPoint;
-      F32 mDownAngle;
+      Gizmo mGizmo;
 
    public:
       SceneTool();

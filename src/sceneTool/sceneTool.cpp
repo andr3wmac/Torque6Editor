@@ -41,24 +41,11 @@
 
 SceneTool::SceneTool()
    : mScenePanel(NULL),
-     mSelectedObject(NULL)
+     mSelectedObject(NULL),
+     mSelectedEntity(NULL)
 {
    mEntityIconList = new wxImageList(16, 16);
    mFeatureIconList = new wxImageList( 16, 16 );
-
-   mSelectRed     = false;
-   mSelectGreen   = false;
-   mSelectBlue    = false;
-
-   mSelectRedPoint   = Point3F::Zero;
-   mSelectGreenPoint = Point3F::Zero;
-   mSelectBluePoint  = Point3F::Zero;
-   mDownPoint        = Point3F::Zero;
-   mDragging         = false;
-   mDragRed = false;
-   mDragGreen = false;
-   mDragBlue = false;
-   mDownAngle = 0.0f;
 }
 
 SceneTool::~SceneTool()
@@ -68,6 +55,7 @@ SceneTool::~SceneTool()
 
 void SceneTool::initTool()
 {
+   mGizmo.mProjectManager = mProjectManager;
    mScenePanel = new ScenePanel(mFrame, wxID_ANY);
 
    // Entity Icons.
@@ -125,29 +113,6 @@ void SceneTool::closeTool()
    mManager->Update();
 }
 
-Point2F closestPointToLine(Point2F A, Point2F B, Point2F P)
-{
-   Point2F AP = P - A;  //Vector from A to P   
-   Point2F AB = B - A;  //Vector from A to B  
-
-   float magnitudeAB = AB.lenSquared();  //Magnitude of AB vector (it's length squared)     
-   float ABAPproduct = mDot(AP, AB);               //The DOT product of a_to_p and a_to_b     
-   float distance = ABAPproduct / magnitudeAB;     //The normalized "distance" from a to your closest point  
-
-   if (distance < 0) //Check if P projection is over vectorAB     
-   {
-      return A;
-
-   }
-   else if (distance > 1) {
-      return B;
-   }
-   else
-   {
-      return A + AB * distance;
-   }
-}
-
 void SceneTool::renderTool()
 {
    if ( mSelectedObject != NULL )
@@ -155,56 +120,22 @@ void SceneTool::renderTool()
       Scene::SceneEntity* entity = dynamic_cast<Scene::SceneEntity*>(mSelectedObject);
       if (entity)
       {
-         F32 boundingBox[16];
-         bx::mtxSRT(boundingBox,
+         F32 transform[16];
+         bx::mtxSRT(transform,
             entity->mScale.x, entity->mScale.y, entity->mScale.z,
             entity->mRotation.x, entity->mRotation.y, entity->mRotation.z,
             entity->mPosition.x, entity->mPosition.y, entity->mPosition.z);
-         Plugins::Link.Graphics.drawBox3D(mProjectManager->mEditorOverlayView->id, mSelectedBoundingBox, ColorI(255, 255, 255, 255), boundingBox);
 
-         if ( mSelectRed )
-            Plugins::Link.Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, entity->mPosition, entity->mPosition + Point3F(50, 0, 0), ColorI(255, 20, 20, 255));
-         else
-            Plugins::Link.Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, entity->mPosition, entity->mPosition + Point3F(50, 0, 0), ColorI(200, 0, 0, 255));
-
-         if ( mSelectGreen )
-            Plugins::Link.Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, entity->mPosition, entity->mPosition + Point3F(0, 50, 0), ColorI(20, 255, 20, 255));
-         else
-            Plugins::Link.Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, entity->mPosition, entity->mPosition + Point3F(0, 50, 0), ColorI(0, 200, 0, 255));
-
-         if ( mSelectBlue )
-            Plugins::Link.Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, entity->mPosition, entity->mPosition + Point3F(0, 0, 50), ColorI(20, 20, 255, 255));
-         else
-            Plugins::Link.Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, entity->mPosition, entity->mPosition + Point3F(0, 0, 50), ColorI(0, 0, 200, 255));
+         // Bounding Box
+         Plugins::Link.Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, entity->mBoundingBox, ColorI(255, 255, 255, 255), NULL);
       }
+
+      mGizmo.render();
    }
-}
-
-Point3F getPointOnXPlane(Point3F p1, Point3F p2)
-{
-   F32 a = (0.0f - p1.x) / (p2.x - p1.x);
-   return Point3F(0.0f, p1.y + a*(p2.y - p1.y), p1.z + a*(p2.z - p1.z));
-}
-
-Point3F getPointOnYPlane(Point3F p1, Point3F p2)
-{
-   F32 a = (0.0f - p1.y) / (p2.y - p1.y);
-   return Point3F(p1.x + a*(p2.x - p1.x), 0.0f, p1.z + a*(p2.z - p1.z));
-}
-
-Point3F getPointOnZPlane(Point3F p1, Point3F p2)
-{
-   F32 a = (0.0f - p1.z) / (p2.z - p1.z);
-   return Point3F(p1.x + a*(p2.x - p1.x), p1.y + a*(p2.y - p1.y), 0.0f);
 }
 
 bool SceneTool::onMouseLeftDown(int x, int y)
 {
-   mDragRed = false;
-   mDragGreen = false;
-   mDragBlue = false;
-   mDragging = true;
-
    Point3F worldRay = Plugins::Link.Rendering.screenToWorld(Point2I(x, y));
    Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
 
@@ -214,31 +145,9 @@ bool SceneTool::onMouseLeftDown(int x, int y)
       if (hit)
          selectEntity(hit);
    }
-   else {
-
-      if (mSelectRed)
-      {
-         mDownPoint = mSelectRedPoint;
-         Point3F xPoint = getPointOnXPlane(editorPos, editorPos + (worldRay * 1000.0f));
-         mDownAngle = mAtan(xPoint.z, xPoint.y);
-         mDragRed = true;
-      }
-
-      if (mSelectGreen)
-      {
-         mDownPoint = mSelectGreenPoint;
-         Point3F yPoint = getPointOnYPlane(editorPos, editorPos + (worldRay * 1000.0f));
-         mDownAngle = mAtan(yPoint.z, yPoint.x);
-         mDragGreen = true;
-      }
-
-      if (mSelectBlue)
-      {
-         mDownPoint = mSelectBluePoint;
-         Point3F zPoint = getPointOnZPlane(editorPos, editorPos + (worldRay * 1000.0f));
-         mDownAngle = mAtan(zPoint.y, zPoint.x);
-         mDragBlue = true;
-      }
+   else 
+   {
+      mGizmo.onMouseLeftDown(x, y);
    }
 
    return false;
@@ -246,10 +155,7 @@ bool SceneTool::onMouseLeftDown(int x, int y)
 
 bool SceneTool::onMouseLeftUp(int x, int y)
 {
-   mDragging = false;
-   mDragRed = false;
-   mDragGreen = false;
-   mDragBlue = false;
+   mGizmo.onMouseLeftUp(x, y);
 
    if ( mSelectedObject != NULL )
       loadObjectProperties(mScenePanel->propertyGrid, mSelectedObject);
@@ -257,130 +163,9 @@ bool SceneTool::onMouseLeftUp(int x, int y)
    return false;
 }
 
-bool LinePlaneIntersection(Point3F& intersection, Point3F linePoint, Point3F lineVec, Point3F planeNormal, Point3F planePoint) {
-
-   F32 length;
-   F32 dotNumerator;
-   F32 dotDenominator;
-   Point3F vector;
-   intersection = Point3F::Zero;
-
-   //calculate the distance between the linePoint and the line-plane intersection point
-   dotNumerator = mDot((planePoint - linePoint), planeNormal);
-   dotDenominator = mDot(lineVec, planeNormal);
-
-   //line and plane are not parallel
-   if (dotDenominator != 0.0f) {
-      length = dotNumerator / dotDenominator;
-
-      //create a vector from the linePoint to the intersection point
-      vector = lineVec;
-      vector.normalize();
-      vector *= length;
-
-      //get the coordinates of the line-plane intersection point
-      intersection = linePoint + vector;
-      return true;
-   }
-
-   //output not valid
-   else {
-      return false;
-   }
-}
-
 bool SceneTool::onMouseMove(int x, int y)
 {
-   if (mSelectedObject == NULL)
-      return false;
-
-   Scene::SceneEntity* entity = dynamic_cast<Scene::SceneEntity*>(mSelectedObject);
-   if (!entity)
-      return false;
-
-   Point3F dummyPoint;
-   Point3F worldRay = Plugins::Link.Rendering.screenToWorld(Point2I(x, y));
-   Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
-   Plugins::Link.Rendering.closestPointsOnTwoLines(mSelectRedPoint, dummyPoint, entity->mPosition, Point3F(1000.0f, 0.0f, 0.0f), editorPos, worldRay * 1000.0f);
-   Plugins::Link.Rendering.closestPointsOnTwoLines(mSelectGreenPoint, dummyPoint, entity->mPosition, Point3F(0.0, 1000.0f, 0.0f), editorPos, worldRay * 1000.0f);
-   Plugins::Link.Rendering.closestPointsOnTwoLines(mSelectBluePoint, dummyPoint, entity->mPosition, Point3F(0.0f, 0.0f, 1000.0f), editorPos, worldRay * 1000.0f);
-
-   Point2I redPointScreen = Plugins::Link.Rendering.worldToScreen(mSelectRedPoint);
-   Point2I greenPointScreen = Plugins::Link.Rendering.worldToScreen(mSelectGreenPoint);
-   Point2I bluePointScreen = Plugins::Link.Rendering.worldToScreen(mSelectBluePoint);
-   F32 redDist = Point2F(x - redPointScreen.x, y - redPointScreen.y).len();
-   F32 greenDist = Point2F(x - greenPointScreen.x, y - greenPointScreen.y).len();
-   F32 blueDist = Point2F(x - bluePointScreen.x, y - bluePointScreen.y).len();
-   mSelectRed = (redDist < greenDist && redDist < blueDist);
-   mSelectGreen = (greenDist < redDist && greenDist < blueDist);
-   mSelectBlue = (blueDist < greenDist && blueDist < redDist);
-
-   if (mDragging)
-   {
-      Point3F dragVector = Point3F::Zero;
-      F32 dragAngle = 0.0f;
-
-      if (mDragRed)
-      {
-         dragVector = mSelectRedPoint - mDownPoint;
-         if (mProjectManager->mEditorMode == 1)
-         {
-            Point3F xPoint = getPointOnXPlane(editorPos, editorPos + (worldRay * 1000.0f));
-            dragAngle = mAtan(xPoint.z, xPoint.y) - mDownAngle;
-            entity->mRotation.x += dragAngle;
-            entity->refresh();
-         }
-      }
-
-      if (mDragGreen)
-      {
-         dragVector = mSelectGreenPoint - mDownPoint;
-
-         if (mProjectManager->mEditorMode == 1)
-         {
-            Point3F yPoint = getPointOnYPlane(editorPos, editorPos + (worldRay * 1000.0f));
-            dragAngle = mAtan(yPoint.z, yPoint.x) - mDownAngle;
-            entity->mRotation.y += dragAngle;
-            entity->refresh();
-         }
-      }
-
-      if (mDragBlue)
-      {
-         dragVector = mSelectBluePoint - mDownPoint;
-
-         if (mProjectManager->mEditorMode == 1)
-         {
-            Point3F zPoint = getPointOnZPlane(editorPos, editorPos + (worldRay * 1000.0f));
-            dragAngle = mAtan(zPoint.y, zPoint.x) - mDownAngle;
-            entity->mRotation.z += dragAngle;
-            entity->refresh();
-         }
-      }
-
-      // Move mode.
-      if (mProjectManager->mEditorMode == 0)
-      {
-         mDownPoint += dragVector;
-         entity->mPosition += dragVector;
-         entity->refresh();
-      }
-
-      // Rotate mode
-      if (mProjectManager->mEditorMode == 1)
-      {
-         mDownAngle += dragAngle;
-      }
-
-      // Scale mode.
-      if (mProjectManager->mEditorMode == 2)
-      {
-         mDownPoint += dragVector;
-         entity->mScale += dragVector;
-         entity->refresh();
-      }
-   }
-
+   mGizmo.onMouseMove(x, y);
    return false;
 }
 
@@ -477,13 +262,12 @@ void SceneTool::refreshEntityList()
       {
          Scene::SceneEntity* entity = dynamic_cast<Scene::SceneEntity*>(sceneGroup->at(n));
          if ( !entity ) continue;
-         wxTreeItemId entityItem = mScenePanel->entityList->AppendItem(mEntityListRoot, entity->mTemplateAssetID, 0, -1, new EntityTreeItemData(entity));
+         wxTreeItemId entityItem = mScenePanel->entityList->AppendItem(mEntityListRoot, entity->getName(), 0, -1, new EntityTreeItemData(entity));
 
          // Iterate components
-         Scene::EntityTemplate* entityTemplate = entity->mTemplate;
-         for(S32 n = 0; n < entityTemplate->size(); ++n)
+         for(S32 n = 0; n < entity->mComponents.size(); ++n)
          {
-            Scene::BaseComponent* component = static_cast<Scene::BaseComponent*>(entityTemplate->at(n));
+            Scene::BaseComponent* component = entity->mComponents[n];
 
             wxString compName(component->getClassName());
             const char* internalName = component->getInternalName();
@@ -566,13 +350,17 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
 void SceneTool::selectEntity(Scene::SceneEntity* entity)
 {
    mSelectedObject = entity;
-   mSelectedBoundingBox = entity->mBoundingBox;
+   mSelectedEntity = entity;
+
+   mGizmo.selectEntity(entity);
+
    loadObjectProperties(mScenePanel->propertyGrid, entity);
 }
 
 void SceneTool::selectComponent(Scene::BaseComponent* component)
 {
    mSelectedObject = component;
-   mSelectedBoundingBox = component->getBoundingBox();
+   mSelectedEntity = NULL;
+
    loadObjectProperties(mScenePanel->propertyGrid, component);
 }
