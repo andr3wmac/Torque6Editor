@@ -35,6 +35,13 @@
 #include <wx/propgrid/advprops.h>
 #include <wx/notebook.h>
 #include <wx/scrolwin.h>
+#include <wx/stattext.h>
+#include <wx/filepicker.h>
+#include <wx/checkbox.h>
+#include <wx/textctrl.h>
+#include <wx/wizard.h>
+#include <wx/dynarray.h>
+WX_DEFINE_ARRAY_PTR( wxWizardPageSimple*, WizardPages );
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -50,6 +57,9 @@
 #define PROFILER_START 1009
 #define ENTITY_LIST 1010
 #define FEATURE_LIST 1011
+#define ASSET_LIST 1012
+#define MENU_IMPORT_MESH 1013
+#define MENU_IMPORT_TEXTURE 1014
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainFrame
@@ -64,17 +74,24 @@ class MainFrame : public wxFrame
 		wxToolBarToolBase* m_tool1; 
 		wxToolBarToolBase* m_tool2; 
 		wxToolBarToolBase* m_tool3; 
+		wxMenu* m_menu21;
 	
 	public:
 		wxMenuBar* mainMenuBar;
 		wxMenuItem* m_menuItem1;
 		wxToolBar* mainToolbar;
+		wxMenu* translateMenu;
 		wxPanel* mainPanel;
 		
 		MainFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Torque 6 Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1024,768 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		wxAuiManager m_mgr;
 		
 		~MainFrame();
+		
+		void MainFrameOnContextMenu( wxMouseEvent &event )
+		{
+			this->PopupMenu( translateMenu, event.GetPosition() );
+		}
 	
 };
 
@@ -178,6 +195,82 @@ class MaterialsPanel : public wxPanel
 		MaterialsPanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 498,301 ), long style = wxTAB_TRAVERSAL ); wxAuiManager m_mgr;
 		
 		~MaterialsPanel();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ProjectPanel
+///////////////////////////////////////////////////////////////////////////////
+class ProjectPanel : public wxPanel 
+{
+	private:
+	
+	protected:
+		wxNotebook* m_notebook2;
+		wxPanel* m_panel11;
+		wxPanel* m_panel12;
+		wxBitmapButton* m_bpButton11;
+	
+	public:
+		wxTreeCtrl* assetList;
+		wxPropertyGrid* assetPropGrid;
+		wxMenu* moduleMenu;
+		
+		ProjectPanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
+		~ProjectPanel();
+		
+		void ProjectPanelOnContextMenu( wxMouseEvent &event )
+		{
+			this->PopupMenu( moduleMenu, event.GetPosition() );
+		}
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ImportMeshWizard
+///////////////////////////////////////////////////////////////////////////////
+class ImportMeshWizard : public wxWizard 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticText1;
+		wxCheckBox* m_checkBox2;
+		wxCheckBox* m_checkBox3;
+		wxStaticText* m_staticText111;
+		wxStaticText* m_staticText121;
+	
+	public:
+		wxFilePickerCtrl* meshFilePath;
+		wxTextCtrl* assetID;
+		wxDirPickerCtrl* importPath;
+		wxCheckBox* copyMeshCheck;
+		
+		ImportMeshWizard( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import Mesh"), const wxBitmap& bitmap = wxNullBitmap, const wxPoint& pos = wxDefaultPosition, long style = wxDEFAULT_DIALOG_STYLE );
+		WizardPages m_pages;
+		~ImportMeshWizard();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ImportTextureWizard
+///////////////////////////////////////////////////////////////////////////////
+class ImportTextureWizard : public wxWizard 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticText11;
+		wxTextCtrl* m_textCtrl1;
+		wxStaticText* m_staticText1;
+		wxFilePickerCtrl* m_filePicker1;
+		wxCheckBox* m_checkBox1;
+	
+	public:
+		
+		ImportTextureWizard( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import Texture"), const wxBitmap& bitmap = wxNullBitmap, const wxPoint& pos = wxDefaultPosition, long style = wxDEFAULT_DIALOG_STYLE );
+		WizardPages m_pages;
+		~ImportTextureWizard();
 	
 };
 

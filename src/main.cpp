@@ -45,12 +45,14 @@ bool Torque6Editor::OnInit()
 
    // Main Toolbar Events
    mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(Torque6Editor::OnToolbarEvent), NULL, this);
+   //mFrame->mainToolbar->SetDropdownMenu(TOOLBAR_MOVE, mFrame->translateMenu);
 
    // Torque 6 Project Manager
    mProjectManager.init(mManager, mFrame->mainPanel);
 
    // Tools
    // TODO: replace this with one function for all tools.
+   mProjectTool.init(&mProjectManager, mFrame, mManager);
    mConsoleTool.init(&mProjectManager, mFrame, mManager);
    mMaterialsTool.init(&mProjectManager, mFrame, mManager);
    mProfilerTool.init(&mProjectManager, mFrame, mManager);
@@ -84,6 +86,10 @@ void Torque6Editor::OnMenuEvent( wxCommandEvent& evt )
 
    switch (evt.GetId())
    {
+      case MENU_PROJECT:
+         mProjectTool.openTool();
+         break;
+
       case MENU_CONSOLE:
          mConsoleTool.openTool();
          break;

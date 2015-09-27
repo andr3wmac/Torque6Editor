@@ -78,6 +78,17 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	m_mgr.AddPane( mainToolbar, wxAuiPaneInfo() .Top() .CaptionVisible( false ).CloseButton( false ).Gripper().Dock().Resizable().FloatingSize( wxSize( 37,57 ) ).Layer( 1 ) );
 	
 	
+	translateMenu = new wxMenu();
+	wxMenuItem* m_menuItem11;
+	m_menuItem11 = new wxMenuItem( translateMenu, wxID_ANY, wxString( wxT("MyMenuItem") ) , wxEmptyString, wxITEM_NORMAL );
+	translateMenu->Append( m_menuItem11 );
+	
+	m_menu21 = new wxMenu();
+	wxMenuItem* m_menu21Item = new wxMenuItem( translateMenu, wxID_ANY, wxT("MyMenu"), wxEmptyString, wxITEM_NORMAL, m_menu21 );
+	translateMenu->Append( m_menu21Item );
+	
+	this->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( MainFrame::MainFrameOnContextMenu ), NULL, this ); 
+	
 	mainPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	m_mgr.AddPane( mainPanel, wxAuiPaneInfo() .Left() .CaptionVisible( false ).CloseButton( false ).PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ).CentrePane() );
 	
@@ -90,6 +101,7 @@ MainFrame::~MainFrame()
 {
 	m_mgr.UnInit();
 	
+	delete translateMenu; 
 }
 
 ScriptsPanel::ScriptsPanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
@@ -336,4 +348,186 @@ MaterialsPanel::~MaterialsPanel()
 {
 	m_mgr.UnInit();
 	
+}
+
+ProjectPanel::ProjectPanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
+{
+	wxBoxSizer* bSizer3;
+	bSizer3 = new wxBoxSizer( wxVERTICAL );
+	
+	m_notebook2 = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_panel11 = new wxPanel( m_notebook2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer5;
+	bSizer5 = new wxBoxSizer( wxVERTICAL );
+	
+	
+	m_panel11->SetSizer( bSizer5 );
+	m_panel11->Layout();
+	bSizer5->Fit( m_panel11 );
+	m_notebook2->AddPage( m_panel11, wxT("Project"), false );
+	m_panel12 = new wxPanel( m_notebook2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer51;
+	bSizer51 = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizer61;
+	bSizer61 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_bpButton11 = new wxBitmapButton( m_panel12, wxID_ANY, wxBitmap( wxT("images/featureIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	bSizer61->Add( m_bpButton11, 0, wxALL, 2 );
+	
+	
+	bSizer51->Add( bSizer61, 0, wxEXPAND, 0 );
+	
+	assetList = new wxTreeCtrl( m_panel12, ASSET_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
+	bSizer51->Add( assetList, 1, wxALL|wxEXPAND, 1 );
+	
+	assetPropGrid = new wxPropertyGrid(m_panel12, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE);
+	bSizer51->Add( assetPropGrid, 1, wxALL|wxEXPAND, 2 );
+	
+	
+	m_panel12->SetSizer( bSizer51 );
+	m_panel12->Layout();
+	bSizer51->Fit( m_panel12 );
+	m_notebook2->AddPage( m_panel12, wxT("Assets"), true );
+	
+	bSizer3->Add( m_notebook2, 1, wxEXPAND | wxALL, 5 );
+	
+	
+	this->SetSizer( bSizer3 );
+	this->Layout();
+	moduleMenu = new wxMenu();
+	wxMenuItem* m_menuItem12;
+	m_menuItem12 = new wxMenuItem( moduleMenu, MENU_IMPORT_MESH, wxString( wxT("Import Mesh") ) , wxEmptyString, wxITEM_NORMAL );
+	moduleMenu->Append( m_menuItem12 );
+	
+	wxMenuItem* m_menuItem13;
+	m_menuItem13 = new wxMenuItem( moduleMenu, MENU_IMPORT_TEXTURE, wxString( wxT("Import Texture") ) , wxEmptyString, wxITEM_NORMAL );
+	moduleMenu->Append( m_menuItem13 );
+	
+	this->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ProjectPanel::ProjectPanelOnContextMenu ), NULL, this ); 
+	
+}
+
+ProjectPanel::~ProjectPanel()
+{
+	delete moduleMenu; 
+}
+
+ImportMeshWizard::ImportMeshWizard( wxWindow* parent, wxWindowID id, const wxString& title, const wxBitmap& bitmap, const wxPoint& pos, long style ) 
+{
+	this->Create( parent, id, title, bitmap, pos, style );
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxWizardPageSimple* m_wizPage2 = new wxWizardPageSimple( this );
+	m_pages.Add( m_wizPage2 );
+	
+	wxBoxSizer* bSizer16;
+	bSizer16 = new wxBoxSizer( wxVERTICAL );
+	
+	m_staticText1 = new wxStaticText( m_wizPage2, wxID_ANY, wxT("Mesh File:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText1->Wrap( -1 );
+	bSizer16->Add( m_staticText1, 0, wxALL, 5 );
+	
+	meshFilePath = new wxFilePickerCtrl( m_wizPage2, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	bSizer16->Add( meshFilePath, 0, wxALL|wxEXPAND, 5 );
+	
+	m_checkBox2 = new wxCheckBox( m_wizPage2, wxID_ANY, wxT("Import Animations"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_checkBox2->SetValue(true); 
+	bSizer16->Add( m_checkBox2, 0, wxALL, 5 );
+	
+	m_checkBox3 = new wxCheckBox( m_wizPage2, wxID_ANY, wxT("Y-Up"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer16->Add( m_checkBox3, 0, wxALL, 5 );
+	
+	
+	m_wizPage2->SetSizer( bSizer16 );
+	m_wizPage2->Layout();
+	bSizer16->Fit( m_wizPage2 );
+	wxWizardPageSimple* m_wizPage21 = new wxWizardPageSimple( this );
+	m_pages.Add( m_wizPage21 );
+	
+	wxBoxSizer* bSizer161;
+	bSizer161 = new wxBoxSizer( wxVERTICAL );
+	
+	m_staticText111 = new wxStaticText( m_wizPage21, wxID_ANY, wxT("Asset ID (no spaces):"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText111->Wrap( -1 );
+	bSizer161->Add( m_staticText111, 0, wxALL, 5 );
+	
+	assetID = new wxTextCtrl( m_wizPage21, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer161->Add( assetID, 0, wxALL|wxEXPAND, 5 );
+	
+	m_staticText121 = new wxStaticText( m_wizPage21, wxID_ANY, wxT("Import To Path:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText121->Wrap( -1 );
+	bSizer161->Add( m_staticText121, 0, wxALL, 5 );
+	
+	importPath = new wxDirPickerCtrl( m_wizPage21, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	bSizer161->Add( importPath, 0, wxALL|wxEXPAND, 5 );
+	
+	copyMeshCheck = new wxCheckBox( m_wizPage21, wxID_ANY, wxT("Copy Mesh File"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer161->Add( copyMeshCheck, 0, wxALL, 5 );
+	
+	
+	m_wizPage21->SetSizer( bSizer161 );
+	m_wizPage21->Layout();
+	bSizer161->Fit( m_wizPage21 );
+	
+	this->Centre( wxBOTH );
+	
+	for ( unsigned int i = 1; i < m_pages.GetCount(); i++ )
+	{
+		m_pages.Item( i )->SetPrev( m_pages.Item( i - 1 ) );
+		m_pages.Item( i - 1 )->SetNext( m_pages.Item( i ) );
+	}
+}
+
+ImportMeshWizard::~ImportMeshWizard()
+{
+	m_pages.Clear();
+}
+
+ImportTextureWizard::ImportTextureWizard( wxWindow* parent, wxWindowID id, const wxString& title, const wxBitmap& bitmap, const wxPoint& pos, long style ) 
+{
+	this->Create( parent, id, title, bitmap, pos, style );
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxWizardPageSimple* m_wizPage2 = new wxWizardPageSimple( this );
+	m_pages.Add( m_wizPage2 );
+	
+	wxBoxSizer* bSizer16;
+	bSizer16 = new wxBoxSizer( wxVERTICAL );
+	
+	m_staticText11 = new wxStaticText( m_wizPage2, wxID_ANY, wxT("Asset ID (no spaces):"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText11->Wrap( -1 );
+	bSizer16->Add( m_staticText11, 0, wxALL, 5 );
+	
+	m_textCtrl1 = new wxTextCtrl( m_wizPage2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer16->Add( m_textCtrl1, 0, wxALL|wxEXPAND, 5 );
+	
+	m_staticText1 = new wxStaticText( m_wizPage2, wxID_ANY, wxT("Texture File:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText1->Wrap( -1 );
+	bSizer16->Add( m_staticText1, 0, wxALL, 5 );
+	
+	m_filePicker1 = new wxFilePickerCtrl( m_wizPage2, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	bSizer16->Add( m_filePicker1, 0, wxALL|wxEXPAND, 5 );
+	
+	m_checkBox1 = new wxCheckBox( m_wizPage2, wxID_ANY, wxT("Generate Mip-Maps"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_checkBox1->SetValue(true); 
+	bSizer16->Add( m_checkBox1, 0, wxALL, 5 );
+	
+	
+	m_wizPage2->SetSizer( bSizer16 );
+	m_wizPage2->Layout();
+	bSizer16->Fit( m_wizPage2 );
+	
+	this->Centre( wxBOTH );
+	
+	for ( unsigned int i = 1; i < m_pages.GetCount(); i++ )
+	{
+		m_pages.Item( i )->SetPrev( m_pages.Item( i - 1 ) );
+		m_pages.Item( i - 1 )->SetNext( m_pages.Item( i ) );
+	}
+}
+
+ImportTextureWizard::~ImportTextureWizard()
+{
+	m_pages.Clear();
 }

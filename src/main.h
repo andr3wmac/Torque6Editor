@@ -30,6 +30,10 @@
 #	include "wx/wx.h"
 #endif
 
+#ifndef _PROJECT_TOOL_H_
+#include "projectTool/projectTool.h"
+#endif
+
 #ifndef _CONSOLE_TOOL_H_
 #include "consoleTool/consoleTool.h"
 #endif
@@ -71,6 +75,7 @@ public:
    ProjectManager    mProjectManager;
 
    // Tools
+   ProjectTool       mProjectTool;
    ConsoleTool       mConsoleTool;   
    MaterialsTool     mMaterialsTool;
    ProfilerTool      mProfilerTool;   
