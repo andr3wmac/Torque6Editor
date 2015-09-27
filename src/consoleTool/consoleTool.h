@@ -39,7 +39,7 @@
 #include <wx/treectrl.h>
 #endif
 
-class ConsoleTool : public wxEvtHandler, public ProjectTool
+class ConsoleTool : public wxEvtHandler, public EditorTool
 {
    protected:
       ConsolePanel*  mConsolePanel;

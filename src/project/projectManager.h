@@ -58,10 +58,10 @@ class EditorCamera : public Scene::SceneCamera
       DECLARE_PLUGIN_CONOBJECT(EditorCamera);
 };
 
-class ProjectTool
+class EditorTool
 {
    public:
-      ProjectTool();
+      EditorTool();
 
       bool              mOpen;
       ProjectManager*   mProjectManager;
@@ -107,6 +107,7 @@ class ProjectManager : public wxEvtHandler, public Rendering::Renderable
 
       S32               mEditorMode;
 
+      Graphics::ViewTableEntry* mRenderLayer4View;
       Graphics::ViewTableEntry* mEditorOverlayView;
 
       bool openProject(wxString projectPath);
@@ -126,7 +127,7 @@ class ProjectManager : public wxEvtHandler, public Rendering::Renderable
       virtual void OnKeyDown(wxKeyEvent& evt);
       virtual void OnKeyUp(wxKeyEvent& evt);
 
-      static wxVector<ProjectTool*> smProjectTools;
+      static wxVector<EditorTool*> smEditorTools;
       static void onProjectLoaded(wxString projectName, wxString projectPath);
       static void onProjectClosed();
 };

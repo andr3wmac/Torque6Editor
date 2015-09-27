@@ -50,7 +50,7 @@ public:
    }
 };
 
-class MaterialsTool : public wxEvtHandler, public ProjectTool
+class MaterialsTool : public wxEvtHandler, public EditorTool
 {
    protected:
       MaterialsPanel*   mMaterialsPanel;

@@ -43,7 +43,7 @@
 #include <plugins/plugins_shared.h>
 #endif
 
-class ProfilerTool : public wxEvtHandler, public ProjectTool
+class ProfilerTool : public wxEvtHandler, public EditorTool
 {
    protected:
       ProfilerPanel*       mProfilerPanel;

@@ -48,7 +48,7 @@ public:
    }
 };
 
-class ScriptsTool : public wxEvtHandler, public ProjectTool
+class ScriptsTool : public wxEvtHandler, public EditorTool
 {
    protected:
       ScriptsPanel*     mScriptsPanel;
