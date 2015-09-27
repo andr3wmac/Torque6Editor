@@ -1,12 +1,15 @@
 solution "Torque6Editor"
     -- Settings
-    BUILD_DIR           = "../" .. _ACTION .. "/"
+    BUILD_DIR           = "../bin"
+    PROJECT_DIR         = "../" .. _ACTION .. "/"
     LIB_DIR             = "../../engine/lib/"
+    LIB_PROJECT_DIR     = PROJECT_DIR .. "lib"
+    LIB_BUILD_DIR       = PROJECT_DIR .. "lib/bin"
     SRC_DIR             = "../../engine/src/"
     PLUGIN_DIR          = "../../engine/plugins/"
     PLUGIN_BUILD_DIR    = "../../engine/projects/shared-modules/"
-    EDITOR_DIR          = "../../"
     PROJECT             = "../../engine/projects/00-Console/"
+    EDITOR_DIR          = "../../"
 
     -- Solution
     configurations {
@@ -17,7 +20,7 @@ solution "Torque6Editor"
         "x32",
         "x64",
     }
-    location (BUILD_DIR)
+    location (PROJECT_DIR)
 
     -- Torque6 App
     dofile ("../../engine/build/scripts/Torque6App.lua")

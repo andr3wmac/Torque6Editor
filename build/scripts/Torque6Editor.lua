@@ -4,6 +4,7 @@ function Torque6Editor()
         language "C++"
         kind "WindowedApp"
         debugdir (EDITOR_DIR)
+        targetdir (BUILD_DIR)
 
         includedirs {
             SRC_DIR,
@@ -35,9 +36,6 @@ function Torque6Editor()
             defines     { "TORQUE_DEBUG", "TORQUE_ENABLE_PROFILER" }
             flags       { "Symbols" }
 
-        configuration "Release"
-            defines     {  }
-
         configuration "vs*"
             defines     { "_CRT_SECURE_NO_WARNINGS" }
 
@@ -60,20 +58,22 @@ function Torque6Editor()
         configuration { "windows", "x32", "Release" }
             includedirs { "$(wxwin)/lib/vc_lib/mswu" }
             libdirs { "$(wxwin)/lib/vc_lib" }
+            targetdir (BUILD_DIR .. "/windows.x32.release")
 
         configuration { "windows", "x32", "Debug" }
             includedirs { "$(wxwin)/lib/vc_lib/mswu" }
             libdirs { "$(wxwin)/lib/vc_lib" }
+            targetdir (BUILD_DIR .. "/windows.x32.debug")
 
         configuration { "windows", "x64", "Release" }
             includedirs { "$(wxwin)/lib/vc_lib/mswu" }
             libdirs { "$(wxwin)/lib/vc_x64_lib" }
-            targetdir   "../bin/windows.x64"
+            targetdir (BUILD_DIR .. "/windows.x64.release")
 
         configuration { "windows", "x64", "Debug" }
             includedirs { "$(wxwin)/lib/vc_lib/mswud" }
             libdirs { "$(wxwin)/lib/vc_x64_lib" }
-            targetdir   "../bin/windows.x64"
+            targetdir (BUILD_DIR .. "/windows.x64.debug")
 
         configuration { "windows", "Release" }
             links { "wxmsw31u_adv",
@@ -118,13 +118,11 @@ function Torque6Editor()
             targetdir   "../bin/bsd"
 
         configuration "linux or bsd"
-            defines     {  }
             links       { "m" }
             linkoptions { "-rdynamic" }
 
         configuration "macosx"
             targetdir   "../bin/darwin"
-            defines     {  }
             links       { "CoreServices.framework" }
 
         configuration { "macosx", "gmake" }
