@@ -94,7 +94,7 @@ Node* MaterialWindow::addVec2Node(Scene::BaseNode* node)
    newNode.addOutput(ColorI(50, 255, 50, 255));
 
    newNode.showColor = true;
-   newNode.color.set(0, 0, 0, 255);
+   newNode.color.set(0.0, 0.0, 0.0, 1.0);
 
    nodeList.push_back(newNode);
    return &nodeList.back();
@@ -140,7 +140,7 @@ Node* MaterialWindow::addVec4Node(Scene::BaseNode* node)
    newNode.addOutput(ColorI(200, 200, 200, 255));
 
    newNode.showColor = true;
-   newNode.color.set(0, 0, 0, 255);
+   newNode.color.set(0.0, 0.0, 0.0, 1.0);
 
    nodeList.push_back(newNode);
    return &nodeList.back();
@@ -187,6 +187,14 @@ Node* MaterialWindow::addTimeNode(Scene::BaseNode* node)
    newNode.y = mLastMousePoint.y;
    newNode.height = 70.0f;
    newNode.addOutput(ColorI(255, 255, 255, 255));
+
+   newNode.color.set(0.0f, 0.0f, 0.0f, 0.0f);
+   if (node != NULL)
+   {
+      Scene::TimeNode* time_node = dynamic_cast<Scene::TimeNode*>(node);
+      if (time_node)
+         newNode.color = ColorF(time_node->mMultiplier, 0.0f, 0.0f, 0.0f);
+   }
 
    nodeList.push_back(newNode);
    return &nodeList.back();
@@ -311,6 +319,10 @@ void MaterialWindow::addNode(Scene::MaterialTemplate* matTemplate, const char* t
          if ( node_name && dStrcmp(newNode->name, node_name) != 0 ) 
             newNode->name = getUniqueNodeName(node_name);
 
+         // No internal name set? Use the one that comes with the new node.
+         if (!node_name)
+            matNode->setInternalName(newNode->name);
+
          // Link it to the material node and set position.
          newNode->materialNode = matNode;
          newNode->x = matNode->mPosition.x;
@@ -321,6 +333,7 @@ void MaterialWindow::addNode(Scene::MaterialTemplate* matTemplate, const char* t
       // template and name it.
       if ( createMaterialNode && newNode->materialNode != NULL )
       {
+         newNode->materialNode->registerObject();
          newNode->materialNode->setInternalName(newNode->name);
          matTemplate->addObject(newNode->materialNode);
       }
@@ -432,6 +445,14 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
       return;
    }
 
+   // Texture
+   Scene::TextureNode* texture_node = dynamic_cast<Scene::TextureNode*>(node->materialNode);
+   if (texture_node)
+   {
+      texture_node->mSlot = node->textureSlot;
+      return;
+   }
+
    // Multiply
    Scene::MultiplyNode* mul_node = dynamic_cast<Scene::MultiplyNode*>(node->materialNode);
    if ( mul_node )
@@ -453,7 +474,15 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    Scene::FloatNode* float_node = dynamic_cast<Scene::FloatNode*>(node->materialNode);
    if ( float_node )
    {
-      float_node->mValue = (F32)node->color.red / 255.0f;
+      float_node->mValue = node->color.red;
+      return;
+   }
+
+   // Time
+   Scene::TimeNode* time_node = dynamic_cast<Scene::TimeNode*>(node->materialNode);
+   if (time_node)
+   {
+      time_node->mMultiplier = node->color.red;
       return;
    }
 
@@ -461,7 +490,7 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    Scene::Vec3Node* vec3_node = dynamic_cast<Scene::Vec3Node*>(node->materialNode);
    if ( vec3_node )
    {
-      vec3_node->mValue.set((F32)node->color.red / 255.0f, (F32)node->color.green / 255.0f, (F32)node->color.blue / 255.0f);
+      vec3_node->mValue.set(node->color.red, node->color.green, node->color.blue);
       return;
    }
 }

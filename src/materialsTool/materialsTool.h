@@ -52,24 +52,31 @@ public:
 
 class MaterialsTool : public wxEvtHandler, public EditorTool
 {
-   protected:
-      MaterialsPanel*   mMaterialsPanel;
-      wxTreeItemId      mMaterialTreeRoot;
-      wxImageList*      mIconList;
+   typedef EditorTool Parent;
 
    public:
-      MaterialsTool();
+      MaterialsPanel*         mMaterialsPanel;
+      wxTreeItemId            mMaterialTreeRoot;
+      wxImageList*            mIconList;
+      Node*                   mSelectedNode;
+      MaterialWindow*         mSelectedNodeParent;
+      //Vector<MaterialWindow*> mMaterialWindows;
+
+      MaterialsTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
       ~MaterialsTool();
 
       void refreshMaterialList();
+      void selectNode(MaterialWindow* parent, Node* node);
 
-      virtual void OnTreeEvent( wxTreeEvent& evt );
+      virtual void OnMenuEvent(wxCommandEvent& evt);
+      virtual void OnTreeEvent(wxTreeEvent& evt);
+      virtual void OnPropertyChanged(wxPropertyGridEvent& evt);
 
       virtual void initTool();
       virtual void openTool();
       virtual void closeTool();
 
-      virtual void onProjectLoaded(wxString projectName, wxString projectPath);
+      virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
       virtual void onProjectClosed();
 };
 

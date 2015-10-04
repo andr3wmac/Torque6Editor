@@ -85,22 +85,33 @@
 #include "3d/material/nodes/vec3Node.h"
 #endif
 
+class MaterialsTool;
+
 class MaterialWindow: public wxScrolledWindow
 {
    protected:
-      wxPoint     mMouseDownPoint;
-      wxPoint     mLastMousePoint;
-      Connection* mActiveConnection;
-      Node*       mSelectedNode;
+      wxPoint        mMouseDownPoint;
+      wxPoint        mLastMousePoint;
+      Connection*    mActiveConnection;
+      Node*          mSelectedNode;
+      MaterialsTool* mMaterialsTool;
+      MaterialAsset* mMaterialAsset;
+      bool           mRightMouseDown;
+      bool           mRightMouseDrag;
+
+      float          mWindowX;
+      float          mWindowY;
 
    public:
       Vector<Node> nodeList;
       Vector<Connection> connectionList;
 
-      MaterialWindow( wxWindow* parent );
+      MaterialWindow(wxWindow* parent, MaterialsTool* matTool);
 
       void loadMaterial(MaterialAsset* mat);
+      void saveMaterial();
 
+      MaterialAsset* getMaterialAsset() { return mMaterialAsset; }
       Node* findNode(const char* name);
       wxString getUniqueNodeName(wxString name);
       Connection* findConnectionFromOutput(const char* name, U32 index = -1);
@@ -129,6 +140,7 @@ class MaterialWindow: public wxScrolledWindow
       void OnMouseDown(wxMouseEvent &evt);
       void OnMouseUp(wxMouseEvent &evt);
       void OnRightMouseDown(wxMouseEvent &evt);
+      void OnRightMouseUp(wxMouseEvent &evt);
       void OnMenuEvent( wxCommandEvent& evt );
 
 private:

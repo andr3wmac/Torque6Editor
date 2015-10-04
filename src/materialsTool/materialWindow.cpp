@@ -23,18 +23,25 @@
 #include "wx/graphics.h"
 #include <wx/socket.h>
 #include "materialWindow.h"
+#include "materialsTool.h"
 
 wxBEGIN_EVENT_TABLE(MaterialWindow, wxScrolledWindow)
     EVT_PAINT                    (MaterialWindow::OnPaint)
     EVT_MOTION                   (MaterialWindow::OnMouseMove)
     EVT_LEFT_DOWN                (MaterialWindow::OnMouseDown)
     EVT_RIGHT_DOWN               (MaterialWindow::OnRightMouseDown)
+    EVT_RIGHT_UP                 (MaterialWindow::OnRightMouseUp)
     EVT_LEFT_UP                  (MaterialWindow::OnMouseUp)
 wxEND_EVENT_TABLE()
 
-MaterialWindow::MaterialWindow( wxWindow* parent )
-   : wxScrolledWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                           wxHSCROLL | wxVSCROLL | wxNO_FULL_REPAINT_ON_RESIZE)
+MaterialWindow::MaterialWindow(wxWindow* parent, MaterialsTool* matTool)
+   : wxScrolledWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL | wxVSCROLL | wxNO_FULL_REPAINT_ON_RESIZE),
+     mMaterialsTool(matTool),
+     mMaterialAsset(NULL),
+     mRightMouseDown(false),
+     mRightMouseDrag(false),
+     mWindowX(0.0f),
+     mWindowY(0.0f)
 {
    mActiveConnection = NULL;
    mSelectedNode = NULL;
@@ -60,12 +67,16 @@ void MaterialWindow::OnPaint(wxPaintEvent &WXUNUSED(event))
    gdc.Clear();
 
    // Draw Background Grid
+   int gridOffsetX = (int)mWindowX % 20;
+   int gridOffsetY = (int)mWindowY % 20;
    gdc.SetPen(wxPen( wxColour(128, 128, 128, 128), 1) );
    wxSize windowSize = GetSize();
-   for(int x = 0; x < windowSize.x; x += 20)
-      gdc.DrawLine(x, 0, x, windowSize.y);
-   for(int y = 0; y < windowSize.y; y += 20)
-      gdc.DrawLine(0, y, windowSize.x, y);
+   // Vertical Lines
+   for(int x = 0; x < (windowSize.x + 40); x += 20)
+      gdc.DrawLine(gridOffsetX + x - 20, gridOffsetY - 20, gridOffsetX + x - 20, gridOffsetY + windowSize.y + 40);
+   // Horizontal Lines
+   for(int y = 0; y < (windowSize.y + 40); y += 20)
+      gdc.DrawLine(gridOffsetX - 20, gridOffsetY + y - 20, gridOffsetX + windowSize.x + 40, gridOffsetY + y - 20);
 
    // Draw Nodes
    for(S32 n = 0; n < nodeList.size(); ++n )
@@ -84,6 +95,17 @@ void MaterialWindow::OnPaint(wxPaintEvent &WXUNUSED(event))
 
 void MaterialWindow::OnMouseMove(wxMouseEvent &evt)
 {
+   if (mRightMouseDown)
+   {
+      mRightMouseDrag = true;
+      wxPoint mouseDelta = evt.GetPosition() - mLastMousePoint;
+      mLastMousePoint = evt.GetPosition();
+      mWindowX += mouseDelta.x;
+      mWindowY += mouseDelta.y;
+      Refresh(false);
+      return;
+   }
+
    mLastMousePoint = evt.GetPosition();
    wxPoint mousePoint = evt.GetPosition();
 
@@ -107,8 +129,8 @@ void MaterialWindow::OnMouseMove(wxMouseEvent &evt)
       Node* node = &nodeList[n];
       node->mouseOver = false;
 
-      if ( mousePoint.x >= node->x && mousePoint.x <= node->x + node->width
-         && mousePoint.y >= node->y && mousePoint.y <= node->y + node->height )
+      if ( mousePoint.x >= (mWindowX + node->x) && mousePoint.x <= (mWindowX + node->x + node->width)
+         && mousePoint.y >= (mWindowY + node->y) && mousePoint.y <= (mWindowY + node->y + node->height) )
       {
          node->mouseOver = true;
 
@@ -219,7 +241,7 @@ void MaterialWindow::OnMouseDown(wxMouseEvent &evt)
             }
          }
 
-         //selectNode(node);
+         mMaterialsTool->selectNode(this, node);
          mSelectedNode = node;
          return;
       }
@@ -250,85 +272,121 @@ void MaterialWindow::OnMouseUp(wxMouseEvent &event)
 
 void MaterialWindow::OnRightMouseDown(wxMouseEvent &evt)
 {
+   mRightMouseDown = true;
+   mRightMouseDrag = false;
+   mMouseDownPoint = evt.GetPosition();
    mLastMousePoint = evt.GetPosition();
+}
 
-   wxMenu* menu = new wxMenu; 
-   menu->Append(0, wxT("Deferred")); 
-   menu->Append(1, wxT("Float")); 
-   menu->Append(2, wxT("Vec2")); 
-   menu->Append(3, wxT("Vec3")); 
-   menu->Append(4, wxT("Vec4")); 
-   menu->Append(5, wxT("Texture")); 
-   menu->Append(6, wxT("Time")); 
-   menu->Append(7, wxT("Cos")); 
-   menu->Append(8, wxT("Sin")); 
-   menu->Append(9, wxT("Multiply")); 
-   PopupMenu(menu, wxDefaultPosition); 
-   delete menu; 
+void MaterialWindow::OnRightMouseUp(wxMouseEvent &evt)
+{
+   // If right mouse wasn't dragged we open context menu.
+   if (!mRightMouseDrag)
+   {
+      mLastMousePoint = evt.GetPosition();
+
+      wxMenu* menu = new wxMenu;
+      menu->Append(0, wxT("Deferred"));
+      menu->Append(1, wxT("Float"));
+      menu->Append(2, wxT("Vec2"));
+      menu->Append(3, wxT("Vec3"));
+      menu->Append(4, wxT("Vec4"));
+      menu->Append(5, wxT("Texture"));
+      menu->Append(6, wxT("Time"));
+      menu->Append(7, wxT("Cos"));
+      menu->Append(8, wxT("Sin"));
+      menu->Append(9, wxT("Multiply"));
+      PopupMenu(menu, wxDefaultPosition);
+      delete menu;
+   }
+
+   // Reset
+   mRightMouseDown = false;
+   mRightMouseDrag = false;
 }
 
 void MaterialWindow::OnMenuEvent( wxCommandEvent& evt )
 {
    switch( evt.GetId() )
    {
-      case 0: addDeferredNode(); break;
-      case 1: addFloatNode(); break;
-      case 2: addVec2Node(); break;
-      case 3: addVec3Node(); break;
-      case 4: addVec4Node(); break;
-      case 5: addTextureNode(); break;
-      case 6: addTimeNode(); break;
-      case 7: addCosNode(); break;
-      case 8: addSinNode(); break;
-      case 9: addMultiplyNode(); break;
+      case 0: addNode(mMaterialAsset->getTemplate(), "Deferred"); break;
+      case 1: addNode(mMaterialAsset->getTemplate(), "Float"); break;
+      case 2: addNode(mMaterialAsset->getTemplate(), "Vec2"); break;
+      case 3: addNode(mMaterialAsset->getTemplate(), "Vec3"); break;
+      case 4: addNode(mMaterialAsset->getTemplate(), "Vec4"); break;
+      case 5: addNode(mMaterialAsset->getTemplate(), "Texture"); break;
+      case 6: addNode(mMaterialAsset->getTemplate(), "Time"); break;
+      case 7: addNode(mMaterialAsset->getTemplate(), "Cos"); break;
+      case 8: addNode(mMaterialAsset->getTemplate(), "Sin"); break;
+      case 9: addNode(mMaterialAsset->getTemplate(), "Multiply"); break;
    }
 }
 
 void MaterialWindow::drawNode(wxGCDC& gdc, Node* node)
 {
+   // Background
    gdc.SetBrush(wxBrush(wxColour(75, 75, 75), wxBRUSHSTYLE_SOLID));
-   gdc.DrawRoundedRectangle(node->x, node->y, node->width, node->height, 10);
+   gdc.DrawRoundedRectangle(mWindowX + node->x, mWindowY + node->y, node->width, node->height, 10);
 
-   if ( node->mouseOver )
+   // Title Bar Background
+   if ( node->mouseOver || mSelectedNode == node )
       gdc.SetBrush(wxBrush(wxColour(50, 50, 50), wxBRUSHSTYLE_SOLID));
    else
       gdc.SetBrush(wxBrush(wxColour(30, 30, 30), wxBRUSHSTYLE_SOLID));
-   gdc.DrawRoundedRectangle(node->x + 5, node->y + 5, node->width - 10, 30, 10);
+   gdc.DrawRoundedRectangle(mWindowX + node->x + 5, mWindowY + node->y + 5, node->width - 10, 30, 10);
 
+   // Title Bar Text
    wxFont font(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false);
    gdc.SetFont(font);
    gdc.SetTextForeground(wxColour(200, 200, 190));
    wxSize textSize = gdc.GetTextExtent(node->name);
-   gdc.DrawText(node->name, node->x + (node->width / 2) - (textSize.GetWidth() / 2), node->y + 18 - (textSize.GetHeight() / 2));
+   gdc.DrawText(node->name, mWindowX + node->x + (node->width / 2) - (textSize.GetWidth() / 2), mWindowY + node->y + 18 - (textSize.GetHeight() / 2));
 
    // Input Points
    for(S32 n = 0; n < node->inputs.size(); ++n )
    {
       InputPoint* input = &node->inputs[n];
-      input->lastPosition = wxPoint(node->x + 12.0f, node->y + 49.0f + (n * 20.0f));
+      input->lastPosition = wxPoint(mWindowX + node->x + 12.0f, mWindowY + node->y + 49.0f + (n * 20.0f));
 
       U8 alpha_val = input->mouseOver ? 255 : 175;
 
       gdc.SetBrush(wxBrush(wxColour(255, 255, 255, alpha_val), wxBRUSHSTYLE_SOLID));
-      gdc.DrawCircle(node->x + 12.0f, node->y + 49.0f + (n * 20.0f), 5);
+      gdc.DrawCircle(mWindowX + node->x + 12.0f, mWindowY + node->y + 49.0f + (n * 20.0f), 5);
 
       wxSize inputTextSize = gdc.GetTextExtent(input->name);
       wxFont inputfont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false);
       gdc.SetFont(inputfont);
       gdc.SetTextForeground(wxColour(255, 255, 255, alpha_val));
-      gdc.DrawText(input->name,  node->x + 22, node->y + 41 + (n * 20));
+      gdc.DrawText(input->name, mWindowX + node->x + 22, mWindowY + node->y + 41 + (n * 20));
    }
 
    // Output Points
    for(S32 n = 0; n < node->outputs.size(); ++n )
    {
       OutputPoint* output = &node->outputs[n];
-      output->lastPosition = wxPoint(node->x + node->width - 12.0f, node->y + 49.0f + (n * 20.0f));
+      output->lastPosition = wxPoint(mWindowX + node->x + node->width - 12.0f, mWindowY + node->y + 49.0f + (n * 20.0f));
 
       U8 alpha_val = output->mouseOver ? 255 : 175;
 
       gdc.SetBrush(wxBrush(wxColour(output->color.red, output->color.green, output->color.blue, alpha_val), wxBRUSHSTYLE_SOLID));
-      gdc.DrawCircle(node->x + node->width - 12.0f, node->y + 49.0f + (n * 20.0f), 5);
+      gdc.DrawCircle(mWindowX + node->x + node->width - 12.0f, mWindowY + node->y + 49.0f + (n * 20.0f), 5);
+   }
+
+   // Float can be shown in a single line of text.
+   if (node->type == "Float")
+   {
+      wxString floatValue = wxString::Format("%f", node->color.red);
+      wxFont inputfont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false);
+      gdc.SetFont(inputfont);
+      gdc.SetTextForeground(wxColour(255, 255, 255, 255));
+      gdc.DrawText(floatValue, mWindowX + node->x + 12.0f, mWindowY + node->y + 41);
+   }
+
+   // Vec3 and Vec4 draw a color preview.
+   if (node->type == "Vec3" || node->type == "Vec4")
+   {
+      gdc.SetBrush(wxBrush(wxColour(node->color.red * 255, node->color.green * 255, node->color.blue * 255, node->color.alpha * 255), wxBRUSHSTYLE_SOLID));
+      gdc.DrawRectangle(mWindowX + node->x + 12.0f, mWindowY + node->y + 16.0f + (node->height / 2.0f) - 32.0f, 64.0f, 64.0f);
    }
 }
 
@@ -381,8 +439,7 @@ wxString MaterialWindow::getUniqueNodeName(wxString name)
    U32 extension = 0;
    while(true)
    {
-      wxString newName;
-      name.Format("%s%d", name, extension);
+      wxString newName = wxString::Format("%s%d", name, extension);
 
       if ( !findNode(newName) )
          return newName;
@@ -437,9 +494,7 @@ Connection* MaterialWindow::findConnectionFromInput(const char* name, U32 index)
 
 void MaterialWindow::loadMaterial(MaterialAsset* mat)
 {
-   //clearMaterial();
-
-   //mMaterialAsset = mat;
+   mMaterialAsset = mat;
    Scene::MaterialTemplate* mMaterialTemplate = mat->getTemplate();
    
    for(S32 n = 0; n < mMaterialTemplate->size(); ++n)
@@ -453,4 +508,25 @@ void MaterialWindow::loadMaterial(MaterialAsset* mat)
       Node* node = &nodeList[n];
       addNodeConnection(node);
    }
+}
+
+void MaterialWindow::saveMaterial()
+{
+   if (mMaterialAsset == NULL)
+      return;
+
+   for (S32 n = 0; n < nodeList.size(); ++n)
+   {
+      Node* node = &nodeList[n];
+      saveNode(mMaterialAsset->getTemplate(), node);
+   }
+
+   for (S32 n = 0; n < connectionList.size(); ++n)
+   {
+      Connection* connection = &connectionList[n];
+      saveConnection(connection);
+   }
+
+   mMaterialAsset->saveMaterial();
+   mMaterialAsset->reloadMaterial();
 }

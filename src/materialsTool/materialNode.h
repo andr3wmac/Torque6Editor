@@ -55,10 +55,11 @@ class Node
       bool mouseOver;
 
       bool showColor;
-      ColorI color;
+      ColorF color;
 
       bool showTexture;
       bgfx::TextureHandle texture;
+      S32 textureSlot;
 
       Scene::BaseNode* materialNode;
 
@@ -78,6 +79,7 @@ class Node
          width = 100;
          height = 150;
          mouseOver = false;
+         textureSlot = 0;
       }
 
       void addInput(const char* name)
