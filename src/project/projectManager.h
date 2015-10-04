@@ -61,19 +61,19 @@ class EditorCamera : public Scene::SceneCamera
 class EditorTool
 {
    public:
-      EditorTool();
+      EditorTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
 
       bool              mOpen;
       ProjectManager*   mProjectManager;
       MainFrame*        mFrame;
       wxAuiManager*     mManager;
 
-      void init(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
-
       virtual void initTool() { }
+      virtual void destroyTool() { }
       virtual void openTool() { mOpen = true; }
       virtual void closeTool() { mOpen = false; }
       virtual void renderTool() { }
+      virtual void onSceneChanged() { }
       virtual void onProjectLoaded(wxString projectName, wxString path) {}
       virtual void onProjectClosed() {}
 
@@ -83,6 +83,7 @@ class EditorTool
       virtual bool onMouseRightUp(int x, int y) { return false; }
       virtual bool onMouseMove(int x, int y) { return false; }
       
+      static wxVector<EditorTool*> smEditorTools;
 };
 
 class ProjectManager : public wxEvtHandler, public Rendering::Renderable
@@ -92,6 +93,7 @@ class ProjectManager : public wxEvtHandler, public Rendering::Renderable
       ~ProjectManager();
 
       void init(wxAuiManager* manager, wxWindow* window);
+      bool isProjectLoaded() { return mProjectLoaded; }
 
       LIBRARY_HANDLE    mTorque6Library;
       initFunc          mTorque6Init;
@@ -127,8 +129,7 @@ class ProjectManager : public wxEvtHandler, public Rendering::Renderable
       virtual void OnKeyDown(wxKeyEvent& evt);
       virtual void OnKeyUp(wxKeyEvent& evt);
 
-      static wxVector<EditorTool*> smEditorTools;
-      static void onProjectLoaded(wxString projectName, wxString projectPath);
+      static void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
       static void onProjectClosed();
 };
  

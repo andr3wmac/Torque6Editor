@@ -45,13 +45,15 @@
 
 class ProfilerTool : public wxEvtHandler, public EditorTool
 {
+   typedef EditorTool Parent;
+
    protected:
       ProfilerPanel*       mProfilerPanel;
       ProfilerTreeModel    mProfilerData;
       int                  mFrameCount;
 
    public:
-      ProfilerTool();
+      ProfilerTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
       ~ProfilerTool();
 
       void processProfilerCachedData(ProfilerCachedData* data, ProfilerTreeModelNode* node);
@@ -62,7 +64,7 @@ class ProfilerTool : public wxEvtHandler, public EditorTool
 
       virtual void OnButtonEvent( wxCommandEvent& evt );
 
-      virtual void onProjectLoaded(wxString projectName, wxString projectPath);
+      virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
       virtual void onProjectClosed();
 };
 

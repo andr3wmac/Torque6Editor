@@ -35,8 +35,9 @@
 
 #include "profilerTool.h"
 
-ProfilerTool::ProfilerTool()
-   : mProfilerPanel( NULL )
+ProfilerTool::ProfilerTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
+   : Parent(_projectManager, _frame, _manager),
+     mProfilerPanel( NULL )
 {
    mFrameCount = 50;
 }
@@ -136,7 +137,7 @@ void ProfilerTool::OnButtonEvent( wxCommandEvent& evt )
    }
 }
 
-void ProfilerTool::onProjectLoaded(wxString projectName, wxString projectPath)
+void ProfilerTool::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
    if ( !mOpen ) return;
 }

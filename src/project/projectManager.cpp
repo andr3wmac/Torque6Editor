@@ -63,7 +63,9 @@ ProjectManager::ProjectManager()
 
 ProjectManager::~ProjectManager()
 {
-
+   closeProject();
+   if (mTorque6Library != NULL)
+      FreeLibrary(mTorque6Library);
 }
 
 void ProjectManager::init(wxAuiManager* manager, wxWindow* window)
@@ -138,6 +140,9 @@ bool ProjectManager::openProject(wxString projectPath)
 
 void ProjectManager::closeProject()
 {
+   if (!mProjectLoaded) 
+      return;
+
    setRendering(false);
 
    mProjectLoaded = false;
@@ -172,8 +177,8 @@ void ProjectManager::OnMouseMove(wxMouseEvent& evt)
    if (!mProjectLoaded)
       return;
 
-   for (unsigned int i = 0; i < smEditorTools.size(); ++i)
-      smEditorTools[i]->onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
+   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+      EditorTool::smEditorTools[i]->onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
 
    Plugins::Link.Engine.mouseMove(evt.GetPosition().x, evt.GetPosition().y);
 }
@@ -184,8 +189,8 @@ void ProjectManager::OnMouseLeftDown(wxMouseEvent& evt)
    if (!mProjectLoaded)
       return;
 
-   for (unsigned int i = 0; i < smEditorTools.size(); ++i)
-      smEditorTools[i]->onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
+   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+      EditorTool::smEditorTools[i]->onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
 
    Plugins::Link.Engine.mouseButton(true, true);
 }
@@ -194,8 +199,8 @@ void ProjectManager::OnMouseLeftUp(wxMouseEvent& evt)
    if (!mProjectLoaded)
       return;
 
-   for (unsigned int i = 0; i < smEditorTools.size(); ++i)
-      smEditorTools[i]->onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
+   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+      EditorTool::smEditorTools[i]->onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
 
    Plugins::Link.Engine.mouseButton(false, true);
 }
@@ -206,8 +211,8 @@ void ProjectManager::OnMouseRightDown(wxMouseEvent& evt)
    if (!mProjectLoaded)
       return;
 
-   for (unsigned int i = 0; i < smEditorTools.size(); ++i)
-      smEditorTools[i]->onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
+   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+      EditorTool::smEditorTools[i]->onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
 
    Plugins::Link.Engine.mouseButton(true, false);
 }
@@ -216,8 +221,8 @@ void ProjectManager::OnMouseRightUp(wxMouseEvent& evt)
    if (!mProjectLoaded)
       return;
 
-   for (unsigned int i = 0; i < smEditorTools.size(); ++i)
-      smEditorTools[i]->onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
+   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+      EditorTool::smEditorTools[i]->onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
 
    Plugins::Link.Engine.mouseButton(false, false);
 }
@@ -322,8 +327,8 @@ void ProjectManager::preRender()
 
 void ProjectManager::render()
 {
-   for(unsigned int i = 0; i < smEditorTools.size(); ++i)
-      smEditorTools[i]->renderTool();
+   for(unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+      EditorTool::smEditorTools[i]->renderTool();
 }
 
 void ProjectManager::postRender()
@@ -332,35 +337,27 @@ void ProjectManager::postRender()
 }
 
 // Project Tool Management
-wxVector<EditorTool*> ProjectManager::smEditorTools;
+wxVector<EditorTool*> EditorTool::smEditorTools;
 
-EditorTool::EditorTool()
+EditorTool::EditorTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
    :  mOpen(false),
-      mProjectManager(NULL),
-      mFrame(NULL),
-      mManager(NULL)
+      mProjectManager(_projectManager),
+      mFrame(_frame),
+      mManager(_manager)
 {
-   ProjectManager::smEditorTools.push_back(this);
+   //
 }
 
-void EditorTool::init(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
+void ProjectManager::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
-   mProjectManager   = _projectManager;
-   mFrame            = _frame;
-   mManager          = _manager;
-   initTool();
-}
-
-void ProjectManager::onProjectLoaded(wxString projectName, wxString projectPath)
-{
-   for(unsigned int i = 0; i < smEditorTools.size(); ++i)
-      smEditorTools[i]->onProjectLoaded(projectName, projectPath);
+   for(unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+      EditorTool::smEditorTools[i]->onProjectLoaded(projectName, projectPath);
 }
 
 void ProjectManager::onProjectClosed()
 {
-   for(unsigned int i = 0; i < smEditorTools.size(); ++i)
-      smEditorTools[i]->onProjectClosed();
+   for(unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+      EditorTool::smEditorTools[i]->onProjectClosed();
 }
 
 // ---------------------------------------------------------------
@@ -409,12 +406,13 @@ bool TextDropTarget::OnDropText(wxCoord x, wxCoord y, const wxString& text)
       {
          Scene::SceneEntity* newEntity = new Scene::SceneEntity();
          newEntity->setTemplateAsset(assetID);
-         
+         newEntity->registerObject("NewSceneEntity");
+
          Point3F worldRay = Plugins::Link.Rendering.screenToWorld(Point2I(x, y));
          Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
          newEntity->mPosition.set(editorPos + (worldRay * 10.0f));
 
-         Plugins::Link.Scene.addEntity(newEntity, "testDropEntity");
+         Plugins::Link.Scene.addEntity(newEntity, "NewSceneEntity");
       }
 
       // MeshAsset
@@ -423,14 +421,16 @@ bool TextDropTarget::OnDropText(wxCoord x, wxCoord y, const wxString& text)
          Scene::SceneEntity* newEntity = new Scene::SceneEntity();
 
          Scene::MeshComponent* meshComponent = new Scene::MeshComponent();
+         meshComponent->registerObject("NewMeshComponent");
          meshComponent->setMesh(assetID.c_str());
          newEntity->addComponent(meshComponent);
+         newEntity->registerObject("NewSceneEntity");
 
          Point3F worldRay = Plugins::Link.Rendering.screenToWorld(Point2I(x, y));
          Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
          newEntity->mPosition.set(editorPos + (worldRay * 10.0f));
 
-         Plugins::Link.Scene.addEntity(newEntity, "testMeshEntity");
+         Plugins::Link.Scene.addEntity(newEntity, "NewSceneEntity");
       }
    }
 

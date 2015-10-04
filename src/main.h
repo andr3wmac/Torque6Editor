@@ -74,14 +74,6 @@ public:
    // Torque 6 Project Manager
    ProjectManager    mProjectManager;
 
-   // Tools
-   ProjectTool       mProjectTool;
-   ConsoleTool       mConsoleTool;   
-   MaterialsTool     mMaterialsTool;
-   ProfilerTool      mProfilerTool;   
-   SceneTool         mSceneTool;
-   ScriptsTool       mScriptsTool;
-
    // Events
 	virtual bool OnInit();
    virtual void OnMenuEvent( wxCommandEvent& evt );

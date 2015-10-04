@@ -91,6 +91,8 @@ class ModuleDefinition;
 
 class ProjectTool : public wxEvtHandler, public EditorTool
 {
+   typedef EditorTool Parent;
+
    protected:
       ProjectPanel*  mProjectPanel;
       wxImageList*   mAssetIconList;
@@ -99,7 +101,7 @@ class ProjectTool : public wxEvtHandler, public EditorTool
       ModuleDefinition* mSelectedModule;
 
    public:
-      ProjectTool();
+      ProjectTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
       ~ProjectTool();
 
       const char* getAssetCategoryName(const char* _name);
@@ -116,7 +118,7 @@ class ProjectTool : public wxEvtHandler, public EditorTool
       virtual void openTool();
       virtual void closeTool();
 
-      virtual void onProjectLoaded(wxString projectName, wxString projectPath);
+      virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
       virtual void onProjectClosed();
 
       void loadAssetDefinitionProperties(wxPropertyGrid* propertyGrid, const AssetDefinition* assetDef);

@@ -51,20 +51,29 @@ bool Torque6Editor::OnInit()
    mProjectManager.init(mManager, mFrame->mainPanel);
 
    // Tools
-   // TODO: replace this with one function for all tools.
-   mProjectTool.init(&mProjectManager, mFrame, mManager);
-   mConsoleTool.init(&mProjectManager, mFrame, mManager);
-   mMaterialsTool.init(&mProjectManager, mFrame, mManager);
-   mProfilerTool.init(&mProjectManager, mFrame, mManager);
-   mSceneTool.init(&mProjectManager, mFrame, mManager);
-   mScriptsTool.init(&mProjectManager, mFrame, mManager);
+   EditorTool::smEditorTools.push_back(new ProjectTool(&mProjectManager, mFrame, mManager));
+   EditorTool::smEditorTools.push_back(new ConsoleTool(&mProjectManager, mFrame, mManager));
+   EditorTool::smEditorTools.push_back(new MaterialsTool(&mProjectManager, mFrame, mManager));
+   EditorTool::smEditorTools.push_back(new ProfilerTool(&mProjectManager, mFrame, mManager));
+   EditorTool::smEditorTools.push_back(new SceneTool(&mProjectManager, mFrame, mManager));
+   EditorTool::smEditorTools.push_back(new ScriptsTool(&mProjectManager, mFrame, mManager));
+
+   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+      EditorTool::smEditorTools[i]->initTool();
 
 	return true;
 }
 
 Torque6Editor::~Torque6Editor()
 {
+   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+   {
+      EditorTool* tool = EditorTool::smEditorTools[i];
+      tool->destroyTool();
+      //delete tool;
+   }
 
+   mProjectManager.closeProject();
 }
 
 void Torque6Editor::OnMenuEvent( wxCommandEvent& evt )
@@ -87,27 +96,27 @@ void Torque6Editor::OnMenuEvent( wxCommandEvent& evt )
    switch (evt.GetId())
    {
       case MENU_PROJECT:
-         mProjectTool.openTool();
+         EditorTool::smEditorTools[0]->openTool();
          break;
 
       case MENU_CONSOLE:
-         mConsoleTool.openTool();
+         EditorTool::smEditorTools[1]->openTool();
          break;
 
       case MENU_MATERIALS:
-         mMaterialsTool.openTool();
+         EditorTool::smEditorTools[2]->openTool();
          break;
 
       case MENU_PROFILER:
-         mProfilerTool.openTool();
+         EditorTool::smEditorTools[3]->openTool();
          break;
 
       case MENU_SCENE:
-         mSceneTool.openTool();
+         EditorTool::smEditorTools[4]->openTool();
          break;
 
       case MENU_SCRIPTS:
-         mScriptsTool.openTool();
+         EditorTool::smEditorTools[5]->openTool();
          break;
 
       default:

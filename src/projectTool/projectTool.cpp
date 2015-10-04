@@ -40,8 +40,9 @@
 #include <bx/bx.h>
 #include <bx/fpumath.h>
 
-ProjectTool::ProjectTool()
-   : mProjectPanel(NULL),
+ProjectTool::ProjectTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
+   : Parent(_projectManager, _frame, _manager),
+     mProjectPanel(NULL),
      mSelectedModule(NULL)
 {
    mAssetIconList = new wxImageList(16, 16);
@@ -106,7 +107,7 @@ void ProjectTool::closeTool()
    mManager->Update();
 }
 
-void ProjectTool::onProjectLoaded(wxString projectName, wxString projectPath)
+void ProjectTool::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
    refreshAssetList();
 }

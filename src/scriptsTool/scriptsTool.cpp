@@ -42,8 +42,9 @@
 
 #include "scriptsTool.h"
 
-ScriptsTool::ScriptsTool()
-   : mScriptsPanel( NULL )
+ScriptsTool::ScriptsTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
+   : Parent(_projectManager, _frame, _manager),
+     mScriptsPanel( NULL )
 {
    Catalogue::AddLexerModule(&lmTorqueScript);
 
@@ -99,7 +100,7 @@ void ScriptsTool::closeTool()
    mManager->Update();
 }
 
-void ScriptsTool::loadProject(wxString projectName, wxString projectPath)
+void ScriptsTool::loadProject(const wxString& projectName, const wxString& projectPath)
 {
    wxTreeItemId root = mScriptsPanel->m_scriptsTree->AddRoot(projectName, 0);
    findAllScripts(root, projectPath);
@@ -152,7 +153,7 @@ void ScriptsTool::OnTreeEvent( wxTreeEvent& evt )
    }
 }
 
-void ScriptsTool::onProjectLoaded(wxString projectName, wxString projectPath)
+void ScriptsTool::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
    if ( !mOpen ) return;
 

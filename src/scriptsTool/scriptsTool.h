@@ -50,15 +50,17 @@ public:
 
 class ScriptsTool : public wxEvtHandler, public EditorTool
 {
+   typedef EditorTool Parent;
+
    protected:
       ScriptsPanel*     mScriptsPanel;
       wxImageList*      mIconList;
 
    public:
-      ScriptsTool();
+      ScriptsTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
       ~ScriptsTool();
 
-      void loadProject(wxString projectName, wxString projectPath);
+      void loadProject(const wxString& projectName, const wxString& projectPath);
       void findAllScripts(wxTreeItemId treeParent, wxString folder);
 
       virtual void initTool();
@@ -67,7 +69,7 @@ class ScriptsTool : public wxEvtHandler, public EditorTool
 
       virtual void OnTreeEvent( wxTreeEvent& evt );
 
-      virtual void onProjectLoaded(wxString projectName, wxString projectPath);
+      virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
       virtual void onProjectClosed();
 };
 

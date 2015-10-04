@@ -41,18 +41,20 @@
 
 class ConsoleTool : public wxEvtHandler, public EditorTool
 {
+   typedef EditorTool Parent;
+
    protected:
       ConsolePanel*  mConsolePanel;
 
    public:
-      ConsoleTool();
+      ConsoleTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
       ~ConsoleTool();
 
       virtual void initTool();
       virtual void openTool();
       virtual void closeTool();
 
-      virtual void onProjectLoaded(wxString projectName, wxString projectPath);
+      virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
       virtual void onProjectClosed();
 };
 

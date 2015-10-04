@@ -35,8 +35,9 @@
 
 #include "consoleTool.h"
 
-ConsoleTool::ConsoleTool()
-   : mConsolePanel(NULL)
+ConsoleTool::ConsoleTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
+   : Parent(_projectManager, _frame, _manager),
+     mConsolePanel(NULL)
 {
 
 }
@@ -77,7 +78,7 @@ void ConsoleTool::closeTool()
    mManager->Update();
 }
 
-void ConsoleTool::onProjectLoaded(wxString projectName, wxString projectPath)
+void ConsoleTool::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
    if ( !mOpen ) return;
 }
