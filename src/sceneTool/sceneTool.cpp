@@ -39,10 +39,12 @@
 #include <bx/bx.h>
 #include <bx/fpumath.h>
 
-SceneTool::SceneTool()
-   : mScenePanel(NULL),
+SceneTool::SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
+   : Parent(_projectManager, _frame, _manager),
+     mScenePanel(NULL),
      mSelectedObject(NULL),
-     mSelectedEntity(NULL)
+     mSelectedEntity(NULL),
+     mSelectedFeature(NULL)
 {
    mEntityIconList = new wxImageList(16, 16);
    mFeatureIconList = new wxImageList( 16, 16 );
@@ -58,6 +60,8 @@ void SceneTool::initTool()
    mGizmo.mProjectManager = mProjectManager;
    mScenePanel = new ScenePanel(mFrame, wxID_ANY);
 
+   mScenePanel->Connect(wxID_ANY, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SceneTool::OnMenuEvent), NULL, this);
+
    // Entity Icons.
    mEntityIconList->Add(wxBitmap("images/entityIcon.png", wxBITMAP_TYPE_PNG));
    mEntityIconList->Add(wxBitmap("images/componentIcon.png", wxBITMAP_TYPE_PNG));
@@ -66,7 +70,7 @@ void SceneTool::initTool()
    // Entity Events
    mScenePanel->entityList->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(SceneTool::OnTreeEvent), NULL, this);
    mScenePanel->entityList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneTool::OnTreeMenu), NULL, this);
-   mScenePanel->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnPropertyChanged), NULL, this);
+   mScenePanel->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnEntityPropChanged), NULL, this);
 
    // Feature Icons.
    mFeatureIconList->Add(wxBitmap("images/featureIcon.png", wxBITMAP_TYPE_PNG));
@@ -75,7 +79,10 @@ void SceneTool::initTool()
    // Feature Events
    mScenePanel->featureList->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(SceneTool::OnTreeEvent), NULL, this);
    mScenePanel->featureList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneTool::OnTreeMenu), NULL, this);
-   mScenePanel->featurePropGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnPropertyChanged), NULL, this);
+   mScenePanel->featurePropGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnFeaturePropChanged), NULL, this);
+
+   // Feature Menu Events
+   mScenePanel->addFeatureMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnMenuEvent), NULL, this);
 
    mEntityListRoot = mScenePanel->entityList->AddRoot("ROOT");
    mFeatureListRoot = mScenePanel->featureList->AddRoot("ROOT");
@@ -91,6 +98,9 @@ void SceneTool::initTool()
                                                   .Left()
                                                   .Hide());
    mManager->Update();
+
+   // Refresh Mesh and Material Choices
+   refreshChoices();
 }
 
 void SceneTool::openTool()
@@ -103,6 +113,7 @@ void SceneTool::openTool()
    {
       refreshEntityList();
       refreshFeatureList();
+      refreshChoices();
    }
 }
 
@@ -169,16 +180,80 @@ bool SceneTool::onMouseMove(int x, int y)
    return false;
 }
 
-
-void SceneTool::onProjectLoaded(wxString projectName, wxString projectPath)
+void SceneTool::onSceneChanged()
 {
    refreshEntityList();
    refreshFeatureList();
+   refreshChoices();
+}
+
+void SceneTool::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
+{
+   refreshEntityList();
+   refreshFeatureList();
+   refreshChoices();
 }
 
 void SceneTool::onProjectClosed()
 {
    //
+}
+
+void SceneTool::OnMenuEvent(wxCommandEvent& evt)
+{
+   if (evt.GetId() == SCENE_NEW)
+      Plugins::Link.Scene.clear();
+
+   if (evt.GetId() == SCENE_OPEN)
+   {
+      wxFileDialog openFile(mFrame, wxT("Open Scene File"), "", "", "taml files (*.taml)|*.taml", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+      if (openFile.ShowModal() == wxID_OK)
+         Plugins::Link.Scene.load(openFile.GetPath());
+   }
+
+   if (evt.GetId() == SCENE_SAVE)
+   {
+      wxFileDialog saveFile(mFrame, wxT("Save Scene File"), "", "", "taml files (*.taml)|*.taml", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+      if (saveFile.ShowModal() == wxID_OK)
+         Plugins::Link.Scene.save(saveFile.GetPath());
+   }
+
+   if (evt.GetId() == ADD_FEATURE_BUTTON)
+      mFrame->PopupMenu(mScenePanel->addFeatureMenu, wxDefaultPosition);
+
+   if (evt.GetId() == ADD_FEATURE_DLAA)
+   {
+      Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("DLAA"));
+      Plugins::Link.Scene.addFeature(feature);
+   }
+
+   if (evt.GetId() == ADD_FEATURE_SSAO)
+   {
+      Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("SSAO"));
+      Plugins::Link.Scene.addFeature(feature);
+   }
+
+   if (evt.GetId() == ADD_FEATURE_HDR)
+   {
+      Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("HDR"));
+      Plugins::Link.Scene.addFeature(feature);
+   }
+
+   if (evt.GetId() == ADD_FEATURE_SKYBOX)
+   {
+      Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("SimpleSkybox"));
+      Plugins::Link.Scene.addFeature(feature);
+   }
+
+   if (evt.GetId() == ADD_FEATURE_DIRLIGHT)
+   {
+      Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("DirectionalLight"));
+      Plugins::Link.Scene.addFeature(feature);
+   }
+
+   refreshEntityList();
+   refreshFeatureList();
+   refreshChoices();
 }
 
 void SceneTool::OnTreeEvent( wxTreeEvent& evt )
@@ -211,6 +286,7 @@ void SceneTool::OnTreeEvent( wxTreeEvent& evt )
       FeatureTreeItemData* data = dynamic_cast<FeatureTreeItemData*>(mScenePanel->featureList->GetItemData(evt.GetItem()));
       if (data)
       {
+         mSelectedFeature = data->objPtr;
          loadObjectProperties(mScenePanel->featurePropGrid, data->objPtr);
          return;
       }
@@ -239,18 +315,41 @@ void SceneTool::OnTreeMenu( wxTreeEvent& evt )
    delete menu; 
 } 
 
-void SceneTool::OnPropertyChanged( wxPropertyGridEvent& evt ) 
-{ 
+void SceneTool::OnEntityPropChanged(wxPropertyGridEvent& evt)
+{
+   wxString name = evt.GetPropertyName();
+   wxVariant val = evt.GetPropertyValue();
+   wxString strVal = val.GetString();
+   
+   if (name == "MeshAsset")
+   {
+      long intVal = val.GetInteger();
+      strVal = mMeshChoices.GetLabel(intVal);
+   }
+   else if (name.StartsWith("Material"))
+   {
+      long intVal = val.GetInteger();
+      strVal = mMaterialChoices.GetLabel(intVal);
+   }
+
+   mSelectedObject->setDataField(Plugins::Link.StringTableLink->insert(name), NULL, strVal);
+   mSelectedEntity->refresh();
+}
+
+void SceneTool::OnFeaturePropChanged(wxPropertyGridEvent& evt)
+{
    wxString name = evt.GetPropertyName();
    wxVariant val = evt.GetPropertyValue();
    wxString strVal = val.GetString();
 
-   mSelectedObject->setField(name, strVal);
-   Plugins::Link.Scene.refresh();
+   mSelectedFeature->setField(name, strVal);
 }
 
 void SceneTool::refreshEntityList()
 {
+   if (!mProjectManager->isProjectLoaded())
+      return;
+
    // Clear list.
    mScenePanel->entityList->DeleteAllItems();
    mEntityListRoot = mScenePanel->entityList->AddRoot("ROOT");
@@ -288,6 +387,9 @@ void SceneTool::refreshEntityList()
 
 void SceneTool::refreshFeatureList()
 {
+   if (!mProjectManager->isProjectLoaded())
+      return;
+
    // Clear list.
    mScenePanel->featureList->DeleteAllItems();
    mEntityListRoot = mScenePanel->featureList->AddRoot("ROOT");
@@ -304,13 +406,51 @@ void SceneTool::refreshFeatureList()
    }
 }
 
+void SceneTool::refreshChoices()
+{
+   if (!mProjectManager->isProjectLoaded())
+      return;
+
+   mMaterialChoices.Clear();
+   mMeshChoices.Clear();
+
+   Vector<const AssetDefinition*> assetDefinitions = Plugins::Link.AssetDatabaseLink.getDeclaredAssets();
+
+   // Iterate sorted asset definitions.
+   for (Vector<const AssetDefinition*>::iterator assetItr = assetDefinitions.begin(); assetItr != assetDefinitions.end(); ++assetItr)
+   {
+      // Fetch asset definition.
+      const AssetDefinition* pAssetDefinition = *assetItr;
+
+      //char buf[256];
+      //dStrcpy(buf, pAssetDefinition->mAssetId);
+      //const char* moduleName = dStrtok(buf, ":");
+      //const char* assetName = dStrtok(NULL, ":");
+
+      // Populate Material choices menu.
+      if (dStrcmp(pAssetDefinition->mAssetType, "MaterialAsset") == 0)
+         mMaterialChoices.Add(pAssetDefinition->mAssetId, mMaterialChoices.GetCount());
+
+      // Populate Mesh choices menu.
+      if (dStrcmp(pAssetDefinition->mAssetType, "MeshAsset") == 0)
+         mMeshChoices.Add(pAssetDefinition->mAssetId, mMeshChoices.GetCount());
+   }
+}
+
+static S32 QSORT_CALLBACK compareEntries(const void* a, const void* b)
+{
+   SimFieldDictionary::Entry *fa = *((SimFieldDictionary::Entry **)a);
+   SimFieldDictionary::Entry *fb = *((SimFieldDictionary::Entry **)b);
+   return dStricmp(fa->slotName, fb->slotName);
+}
+
 void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* obj)
 {
    propertyGrid->Clear();
 
+   // Add static fields.
    wxString fieldGroup("");
    bool addFieldGroup = false;
-
    AbstractClassRep::FieldList fieldList = obj->getFieldList();
    for(Vector<AbstractClassRep::Field>::iterator itr = fieldList.begin(); itr != fieldList.end(); itr++)
    {
@@ -339,11 +479,34 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
             addFieldGroup = false;
          }
 
-         if ( f->type ==  Plugins::Link.Con.TypeBool )
-            propertyGrid->Append( new wxBoolProperty(f->pFieldname, f->pFieldname, val) );
-         else 
-            propertyGrid->Append( new wxStringProperty(f->pFieldname, f->pFieldname, val) );
+         if (dStrcmp(f->pFieldname, "MeshAsset") == 0)
+            propertyGrid->Append(new wxEnumProperty("MeshAsset", wxPG_LABEL, mMeshChoices));
+         else if (dStrncmp(f->pFieldname, "Material", 8) == 0)
+            propertyGrid->Append(new wxEnumProperty(f->pFieldname, wxPG_LABEL, mMaterialChoices));
+         else if (f->type == Plugins::Link.Con.TypeBool)
+            propertyGrid->Append(new wxBoolProperty(f->pFieldname, f->pFieldname, val));
+         else
+            propertyGrid->Append(new wxStringProperty(f->pFieldname, f->pFieldname, val));
       }
+   }
+
+   // Get list of dynamic fields and sort by name
+   Vector<SimFieldDictionary::Entry *> flist;
+   SimFieldDictionary* fieldDictionary = obj->getFieldDictionary();
+   for (SimFieldDictionaryIterator ditr(fieldDictionary); *ditr; ++ditr)
+      flist.push_back(*ditr);
+   dQsort(flist.address(), flist.size(), sizeof(SimFieldDictionary::Entry *), compareEntries);
+
+   // Add dynamic fields.
+   propertyGrid->Append(new wxPropertyCategory("Other"));
+   for (U32 i = 0; i < (U32)flist.size(); i++)
+   {
+      SimFieldDictionary::Entry* entry = flist[i];
+
+      if (dStrncmp(entry->slotName, "Material", 8) == 0)
+         propertyGrid->Append(new wxEnumProperty(entry->slotName, wxPG_LABEL, mMaterialChoices));
+      else
+         propertyGrid->Append(new wxStringProperty(entry->slotName, entry->slotName, entry->value));
    }
 }
 
@@ -360,7 +523,7 @@ void SceneTool::selectEntity(Scene::SceneEntity* entity)
 void SceneTool::selectComponent(Scene::BaseComponent* component)
 {
    mSelectedObject = component;
-   mSelectedEntity = NULL;
+   mSelectedEntity = component->mOwnerEntity;
 
    loadObjectProperties(mScenePanel->propertyGrid, component);
 }

@@ -34,7 +34,6 @@
 #include <wx/propgrid/propgrid.h>
 #include <wx/propgrid/advprops.h>
 #include <wx/notebook.h>
-#include <wx/scrolwin.h>
 #include <wx/stattext.h>
 #include <wx/filepicker.h>
 #include <wx/checkbox.h>
@@ -55,11 +54,21 @@ WX_DEFINE_ARRAY_PTR( wxWizardPageSimple*, WizardPages );
 #define TOOLBAR_ROTATE 1007
 #define TOOLBAR_SCALE 1008
 #define PROFILER_START 1009
-#define ENTITY_LIST 1010
-#define FEATURE_LIST 1011
-#define ASSET_LIST 1012
-#define MENU_IMPORT_MESH 1013
-#define MENU_IMPORT_TEXTURE 1014
+#define SCENE_NEW 1010
+#define SCENE_OPEN 1011
+#define SCENE_SAVE 1012
+#define ENTITY_LIST 1013
+#define ADD_FEATURE_BUTTON 1014
+#define FEATURE_LIST 1015
+#define ADD_FEATURE_DLAA 1016
+#define ADD_FEATURE_SSAO 1017
+#define ADD_FEATURE_HDR 1018
+#define ADD_FEATURE_SKYBOX 1019
+#define ADD_FEATURE_DIRLIGHT 1020
+#define MATERIAL_SAVE 1021
+#define ASSET_LIST 1022
+#define MENU_IMPORT_MESH 1023
+#define MENU_IMPORT_TEXTURE 1024
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainFrame
@@ -160,9 +169,15 @@ class ScenePanel : public wxPanel
 		wxPropertyGrid* propertyGrid;
 		wxTreeCtrl* featureList;
 		wxPropertyGrid* featurePropGrid;
+		wxMenu* addFeatureMenu;
 		
 		ScenePanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
 		~ScenePanel();
+		
+		void m_panel12OnContextMenu( wxMouseEvent &event )
+		{
+			m_panel12->PopupMenu( addFeatureMenu, event.GetPosition() );
+		}
 	
 };
 
@@ -176,20 +191,10 @@ class MaterialsPanel : public wxPanel
 	protected:
 		wxPanel* m_panel;
 		wxBitmapButton* m_bpButton1;
-		wxScrolledWindow* m_scrolledWindow1;
-		wxButton* m_button1;
-		wxButton* m_button2;
-		wxButton* m_button3;
-		wxButton* m_button4;
-		wxButton* m_button5;
-		wxButton* m_button6;
-		wxButton* m_button7;
-		wxButton* m_button8;
-		wxButton* m_button9;
-		wxButton* m_button10;
 	
 	public:
 		wxTreeCtrl* m_materialTree;
+		wxPropertyGrid* propertyGrid;
 		wxAuiNotebook* m_materialNotebook;
 		
 		MaterialsPanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 498,301 ), long style = wxTAB_TRAVERSAL ); wxAuiManager m_mgr;

@@ -67,6 +67,8 @@ public:
 
 class SceneTool : public wxEvtHandler, public EditorTool
 {
+   typedef EditorTool Parent;
+
    protected:
       ScenePanel*    mScenePanel;
       wxImageList*   mEntityIconList;
@@ -77,22 +79,29 @@ class SceneTool : public wxEvtHandler, public EditorTool
       
       SimObject*           mSelectedObject;
       Scene::SceneEntity*  mSelectedEntity;
+      SimObject*           mSelectedFeature;
+
+      wxPGChoices mMeshChoices;
+      wxPGChoices mMaterialChoices;
 
       Gizmo mGizmo;
 
    public:
-      SceneTool();
+      SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
       ~SceneTool();
 
       void refreshEntityList();
       void refreshFeatureList();
+      void refreshChoices();
       void loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* obj);
       void selectEntity(Scene::SceneEntity* entity);
       void selectComponent(Scene::BaseComponent* component);
 
+      void OnMenuEvent(wxCommandEvent& evt);
       void OnTreeEvent( wxTreeEvent& evt );
       void OnTreeMenu( wxTreeEvent& evt );
-      void OnPropertyChanged( wxPropertyGridEvent& evt );
+      void OnEntityPropChanged(wxPropertyGridEvent& evt);
+      void OnFeaturePropChanged( wxPropertyGridEvent& evt );
 
       virtual void initTool();
       virtual void openTool();
@@ -103,7 +112,8 @@ class SceneTool : public wxEvtHandler, public EditorTool
       virtual bool onMouseLeftUp(int x, int y);
       virtual bool onMouseMove(int x, int y);
 
-      virtual void onProjectLoaded(wxString projectName, wxString projectPath);
+      virtual void onSceneChanged();
+      virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
       virtual void onProjectClosed();
 };
 
