@@ -50,10 +50,18 @@ class Gizmo
       Point3F  mDownPoint;
       F32      mDownAngle;
 
+      Point3F  mSelectedPosition;
+      Point3F  mSelectedRotation;
+      Point3F  mSelectedScale;
+
    public:
       ProjectManager*      mProjectManager;
       SimObject*           mSelectedObject;
       Scene::SceneEntity*  mSelectedEntity;
+
+      F32 mTranslateSnap;
+      F32 mScaleSnap;
+      F32 mRotateSnap;
 
       Gizmo();
       ~Gizmo();

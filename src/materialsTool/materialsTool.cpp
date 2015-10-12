@@ -56,6 +56,7 @@ void MaterialsTool::initTool()
    mMaterialsPanel = new MaterialsPanel(mFrame);
 
    // Icons
+   mIconList->Add(wxBitmap("images/moduleIcon.png", wxBITMAP_TYPE_PNG));
    mIconList->Add(wxBitmap("images/materialIcon.png", wxBITMAP_TYPE_PNG));
    mMaterialsPanel->m_materialTree->AssignImageList(mIconList);
 
@@ -179,7 +180,7 @@ void MaterialsTool::refreshMaterialList()
       }
 
       char* asset_name = dStrtok(NULL, ":");
-      mMaterialsPanel->m_materialTree->AppendItem(itemParent, asset_name, 0, -1, new MaterialsTreeItemData(assetID));
+      mMaterialsPanel->m_materialTree->AppendItem(itemParent, asset_name, 1, -1, new MaterialsTreeItemData(assetID));
    }
 }
 

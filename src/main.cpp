@@ -45,7 +45,6 @@ bool Torque6Editor::OnInit()
 
    // Main Toolbar Events
    mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(Torque6Editor::OnToolbarEvent), NULL, this);
-   //mFrame->mainToolbar->SetDropdownMenu(TOOLBAR_MOVE, mFrame->translateMenu);
 
    // Torque 6 Project Manager
    mProjectManager.init(mManager, mFrame->mainPanel);
@@ -128,15 +127,15 @@ void Torque6Editor::OnToolbarEvent( wxCommandEvent& evt )
 {
    switch(evt.GetId())
    {
-      case TOOLBAR_MOVE:
+      case 0:
          mProjectManager.mEditorMode = 0;
          break;
 
-      case TOOLBAR_ROTATE:
+      case 1:
          mProjectManager.mEditorMode = 1;
          break;
 
-      case TOOLBAR_SCALE:
+      case 2:
          mProjectManager.mEditorMode = 2;
          break;
 

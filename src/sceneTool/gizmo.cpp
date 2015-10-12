@@ -124,7 +124,10 @@ Gizmo::Gizmo()
       mDragGreen(false),
       mDragBlue(false),
       mDownAngle(0.0f),
-      mHovering(false)
+      mHovering(false),
+      mTranslateSnap(0.0f),
+      mScaleSnap(0.0f),
+      mRotateSnap(0.0f)
 {
    //
 }
@@ -138,6 +141,9 @@ void Gizmo::selectEntity(Scene::SceneEntity* entity)
 {
    mSelectedObject = entity;
    mSelectedEntity = entity;
+   mSelectedPosition = entity->mPosition;
+   mSelectedRotation = entity->mRotation;
+   mSelectedScale = entity->mScale;
 }
 
 void Gizmo::render()
@@ -313,6 +319,15 @@ bool Gizmo::onMouseMove(int x, int y)
    return false;
 }
 
+Point3F snap(const Point3F& input, F32 snapTo)
+{
+   Point3F snapped = input;
+   snapped.x = mFloor(snapped.x / snapTo) * snapTo;
+   snapped.y = mFloor(snapped.y / snapTo) * snapTo;
+   snapped.z = mFloor(snapped.z / snapTo) * snapTo;
+   return snapped;
+}
+
 void Gizmo::dragTranslate(int x, int y)
 {
    Point3F dragVector = Point3F::Zero;
@@ -329,7 +344,14 @@ void Gizmo::dragTranslate(int x, int y)
 
    // Move mode.
    mDownPoint += dragVector;
-   mSelectedEntity->mPosition += dragVector;
+   mSelectedPosition += dragVector;
+
+   // Snapping
+   if (mTranslateSnap > 0.0f)
+      mSelectedEntity->mPosition = snap(mSelectedPosition, mTranslateSnap);
+   else
+      mSelectedEntity->mPosition = mSelectedPosition;
+
    mSelectedEntity->refresh();
 }
 
@@ -343,26 +365,30 @@ void Gizmo::dragRotate(int x, int y)
    {
       Point3F xPoint = getPointOnXPlane(editorPos, editorPos + (worldRay * 1000.0f));
       dragAngle = mAtan(xPoint.z, xPoint.y) - mDownAngle;
-      mSelectedEntity->mRotation.x += dragAngle;
-      mSelectedEntity->refresh();
+      mSelectedRotation.x += dragAngle;
    }
 
    if (mDragGreen)
    {
       Point3F yPoint = getPointOnYPlane(editorPos, editorPos + (worldRay * 1000.0f));
       dragAngle = mAtan(yPoint.z, yPoint.x) - mDownAngle;
-      mSelectedEntity->mRotation.y += dragAngle;
-      mSelectedEntity->refresh();
+      mSelectedRotation.y += dragAngle;
    }
 
    if (mDragBlue)
    {
       Point3F zPoint = getPointOnZPlane(editorPos, editorPos + (worldRay * 1000.0f));
       dragAngle = mAtan(zPoint.y, zPoint.x) - mDownAngle;
-      mSelectedEntity->mRotation.z += dragAngle;
-      mSelectedEntity->refresh();
+      mSelectedRotation.z += dragAngle;
    }
 
+   // Snapping
+   if (mRotateSnap > 0.0f)
+      mSelectedEntity->mRotation = snap(mSelectedRotation, mRotateSnap);
+   else
+      mSelectedEntity->mRotation = mSelectedRotation;
+
+   mSelectedEntity->refresh();
    mDownAngle += dragAngle;
 }
 
@@ -381,6 +407,13 @@ void Gizmo::dragScale(int x, int y)
       dragVector = mSelectBluePoint - mDownPoint;
 
    mDownPoint += dragVector;
-   mSelectedEntity->mScale += dragVector;
+   mSelectedScale += dragVector;
+
+   // Snapping
+   if (mScaleSnap > 0.0f)
+      mSelectedEntity->mScale = snap(mSelectedScale, mScaleSnap);
+   else
+      mSelectedEntity->mScale = mSelectedScale;
+   
    mSelectedEntity->refresh();
 }

@@ -270,7 +270,7 @@ void ProjectManager::OnKeyDown(wxKeyEvent& evt)
    switch (evt.GetKeyCode())
    {
       case 87: // W
-         mCameraPanVelocity.z = -1.0;
+         mCameraPanVelocity.y = -1.0;
          break;
 
       case 65: // A
@@ -278,7 +278,7 @@ void ProjectManager::OnKeyDown(wxKeyEvent& evt)
          break;
 
       case 83: // S
-         mCameraPanVelocity.z = 1.0;
+         mCameraPanVelocity.y = 1.0;
          break;
 
       case 68: // D
@@ -298,7 +298,7 @@ void ProjectManager::OnKeyUp(wxKeyEvent& evt)
    switch (evt.GetKeyCode())
    {
       case 87: // W
-         mCameraPanVelocity.z = 0.0;
+         mCameraPanVelocity.y = 0.0;
          break;
 
       case 65: // A
@@ -306,7 +306,7 @@ void ProjectManager::OnKeyUp(wxKeyEvent& evt)
          break;
 
       case 83: // S
-         mCameraPanVelocity.z = 0.0;
+         mCameraPanVelocity.y = 0.0;
          break;
 
       case 68: // D
@@ -432,6 +432,10 @@ bool TextDropTarget::OnDropText(wxCoord x, wxCoord y, const wxString& text)
 
          Plugins::Link.Scene.addEntity(newEntity, "NewSceneEntity");
       }
+
+      // Inform the tools the scene has changed.
+      for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+         EditorTool::smEditorTools[i]->onSceneChanged();
    }
 
    return true;

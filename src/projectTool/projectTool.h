@@ -98,7 +98,11 @@ class ProjectTool : public wxEvtHandler, public EditorTool
       wxImageList*   mAssetIconList;
       wxTreeItemId   mAssetListRoot;
 
-      ModuleDefinition* mSelectedModule;
+      ModuleDefinition*       mSelectedModule;
+      const AssetDefinition*  mSelectedAssetDef;
+      AssetBase*              mSelectedAsset;
+      MaterialAsset*          mSelectedMaterialAsset;
+      wxPGChoices             mTextureAssetChoices;
 
    public:
       ProjectTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
@@ -106,7 +110,9 @@ class ProjectTool : public wxEvtHandler, public EditorTool
 
       const char* getAssetCategoryName(const char* _name);
 
+      void refresh();
       void refreshAssetList();
+      void refreshChoices();
 
       void OnTreeDrag(wxTreeEvent& evt);
       void OnTreeEvent(wxTreeEvent& evt);

@@ -81,8 +81,13 @@ class SceneTool : public wxEvtHandler, public EditorTool
       Scene::SceneEntity*  mSelectedEntity;
       SimObject*           mSelectedFeature;
 
+      wxMenu* mTranslateMenu;
+      wxMenu* mRotateMenu;
+      wxMenu* mScaleMenu;
+
       wxPGChoices mMeshChoices;
       wxPGChoices mMaterialChoices;
+      wxPGChoices mEntityTemplateChoices;
 
       Gizmo mGizmo;
 
@@ -102,6 +107,10 @@ class SceneTool : public wxEvtHandler, public EditorTool
       void OnTreeMenu( wxTreeEvent& evt );
       void OnEntityPropChanged(wxPropertyGridEvent& evt);
       void OnFeaturePropChanged( wxPropertyGridEvent& evt );
+      void OnToolbarDropdownEvent(wxCommandEvent& evt);
+      void OnTranslateMenuEvent(wxCommandEvent& evt);
+      void OnRotateMenuEvent(wxCommandEvent& evt);
+      void OnScaleMenuEvent(wxCommandEvent& evt);
 
       virtual void initTool();
       virtual void openTool();

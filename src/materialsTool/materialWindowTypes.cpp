@@ -95,6 +95,12 @@ Node* MaterialWindow::addVec2Node(Scene::BaseNode* node)
 
    newNode.showColor = true;
    newNode.color.set(0.0, 0.0, 0.0, 1.0);
+   if (node != NULL)
+   {
+      Scene::Vec2Node* vec2_node = dynamic_cast<Scene::Vec2Node*>(node);
+      if (vec2_node)
+         newNode.color = ColorF(vec2_node->mValue.x, vec2_node->mValue.y, 0.0, 1.0);
+   }
 
    nodeList.push_back(newNode);
    return &nodeList.back();
@@ -141,6 +147,12 @@ Node* MaterialWindow::addVec4Node(Scene::BaseNode* node)
 
    newNode.showColor = true;
    newNode.color.set(0.0, 0.0, 0.0, 1.0);
+   if (node != NULL)
+   {
+      Scene::Vec4Node* vec4_node = dynamic_cast<Scene::Vec4Node*>(node);
+      if (vec4_node)
+         newNode.color = ColorF(vec4_node->mValue.x, vec4_node->mValue.y, vec4_node->mValue.z, vec4_node->mValue.w);
+   }
 
    nodeList.push_back(newNode);
    return &nodeList.back();
@@ -271,6 +283,7 @@ void MaterialWindow::addNode(Scene::MaterialTemplate* matTemplate, const char* t
    }
    if ( dStrcmp(type, "Vec2") == 0 )
    {
+      if (createMaterialNode) matNode = new Scene::Vec2Node();
       newNode = addVec2Node(matNode);
    }
    if ( dStrcmp(type, "Vec3") == 0 ) 
@@ -280,6 +293,7 @@ void MaterialWindow::addNode(Scene::MaterialTemplate* matTemplate, const char* t
    }
    if ( dStrcmp(type, "Vec4") == 0 ) 
    {
+      if (createMaterialNode) matNode = new Scene::Vec4Node();
       newNode = addVec4Node(matNode);
    }
    if ( dStrcmp(type, "Texture") == 0 ) 
@@ -306,6 +320,7 @@ void MaterialWindow::addNode(Scene::MaterialTemplate* matTemplate, const char* t
    }
    if ( dStrcmp(type, "Cos") == 0 ) 
    {
+      if (createMaterialNode) matNode = new Scene::CosNode();
       newNode = addCosNode(matNode);
    }
 
@@ -374,6 +389,14 @@ void MaterialWindow::addNodeConnection(Node* node)
       addConnection(sin_node->mXSrc, 0, node->name, 0);
       return;
    }
+
+   // Cos
+   Scene::CosNode* cos_node = dynamic_cast<Scene::CosNode*>(node->materialNode);
+   if (sin_node)
+   {
+      addConnection(cos_node->mXSrc, 0, node->name, 0);
+      return;
+   }
 }
 
 void MaterialWindow::saveConnection(Connection* connection)
@@ -428,6 +451,15 @@ void MaterialWindow::saveConnection(Connection* connection)
          sin_node->mXSrc = Link.StringTableLink->insert(connection->outputNodeName);
       return;
    }
+
+   // Cos
+   Scene::CosNode* cos_node = dynamic_cast<Scene::CosNode*>(inputNode->materialNode);
+   if (cos_node)
+   {
+      if (connection->inputIndex == 0)
+         cos_node->mXSrc = Link.StringTableLink->insert(connection->outputNodeName);
+      return;
+   }
 }
 
 void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
@@ -470,6 +502,14 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
       return;
    }
 
+   // Cos
+   Scene::CosNode* cos_node = dynamic_cast<Scene::CosNode*>(node->materialNode);
+   if (cos_node)
+   {
+      cos_node->mXSrc = Link.StringTableLink->EmptyString;
+      return;
+   }
+
    // Float
    Scene::FloatNode* float_node = dynamic_cast<Scene::FloatNode*>(node->materialNode);
    if ( float_node )
@@ -486,6 +526,14 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
       return;
    }
 
+   // Vec2
+   Scene::Vec2Node* vec2_node = dynamic_cast<Scene::Vec2Node*>(node->materialNode);
+   if (vec2_node)
+   {
+      vec2_node->mValue.set(node->color.red, node->color.green);
+      return;
+   }
+
    // Vec3
    Scene::Vec3Node* vec3_node = dynamic_cast<Scene::Vec3Node*>(node->materialNode);
    if ( vec3_node )
@@ -493,4 +541,42 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
       vec3_node->mValue.set(node->color.red, node->color.green, node->color.blue);
       return;
    }
+
+   // Vec4
+   Scene::Vec4Node* vec4_node = dynamic_cast<Scene::Vec4Node*>(node->materialNode);
+   if (vec4_node)
+   {
+      vec4_node->mValue.set(node->color.red, node->color.green, node->color.blue, node->color.alpha);
+      return;
+   }
+}
+
+void MaterialWindow::deleteNode(Scene::MaterialTemplate* matTemplate, Node* targetNode)
+{
+   // Erase any connections.
+   Vector<Connection> newConnectionList;
+   for (S32 n = 0; n < connectionList.size(); ++n)
+   {
+      Connection* connection = &connectionList[n];
+      if (dStrcmp(connection->inputNodeName, targetNode->name) != 0 && dStrcmp(connection->outputNodeName, targetNode->name) != 0)
+         newConnectionList.push_back(*connection);
+   }
+   connectionList.clear();
+   connectionList.merge(newConnectionList);
+   mActiveConnection = NULL;
+
+   // Erase from Template
+   if (matTemplate != NULL && targetNode->materialNode != NULL)
+      matTemplate->removeObject(targetNode->materialNode);
+
+   // Erase the Node
+   Vector<Node> newNodeList;
+   for (S32 n = 0; n < nodeList.size(); ++n)
+   {
+      Node* node = &nodeList[n];
+      if (node != targetNode)
+         newNodeList.push_back(*node);
+   }
+   nodeList.clear();
+   nodeList.merge(newNodeList);
 }

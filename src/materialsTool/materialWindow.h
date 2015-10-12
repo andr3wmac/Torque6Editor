@@ -73,6 +73,10 @@
 #include "3d/material/nodes/sinNode.h"
 #endif
 
+#ifndef _COS_NODE_H_
+#include "3d/material/nodes/cosNode.h"
+#endif
+
 #ifndef _TEXTURE_NODE_H_
 #include "3d/material/nodes/textureNode.h"
 #endif
@@ -81,8 +85,16 @@
 #include "3d/material/nodes/timeNode.h"
 #endif
 
+#ifndef _VEC2_NODE_H_
+#include "3d/material/nodes/vec2Node.h"
+#endif
+
 #ifndef _VEC3_NODE_H_
 #include "3d/material/nodes/vec3Node.h"
+#endif
+
+#ifndef _VEC4_NODE_H_
+#include "3d/material/nodes/vec4Node.h"
 #endif
 
 class MaterialsTool;
@@ -93,6 +105,7 @@ class MaterialWindow: public wxScrolledWindow
       wxPoint        mMouseDownPoint;
       wxPoint        mLastMousePoint;
       Connection*    mActiveConnection;
+      Node*          mHoverNode;
       Node*          mSelectedNode;
       MaterialsTool* mMaterialsTool;
       MaterialAsset* mMaterialAsset;
@@ -130,6 +143,7 @@ class MaterialWindow: public wxScrolledWindow
       Node* addMultiplyNode(Scene::BaseNode* node = NULL);
       void  addNode(Scene::MaterialTemplate* matTemplate, const char* type, Scene::BaseNode* node = NULL);
       void  addNodeConnection(Node* node);
+      void  deleteNode(Scene::MaterialTemplate* matTemplate, Node* node);
       void  saveConnection(Connection* connection);
       void  saveNode(Scene::MaterialTemplate* matTemplate, Node* node);
       void  drawNode(wxGCDC& gdc, Node* node);

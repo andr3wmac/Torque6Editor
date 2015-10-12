@@ -89,8 +89,8 @@ void ScriptsTool::openTool()
    paneInfo.Show();
    mManager->Update();
 
-   //if ( mProjectManager->mProjectLoaded )
-   //   loadProject(mProjectManager->mProjectName, mProjectManager->mProjectPath);
+   if ( mProjectManager->isProjectLoaded() )
+      loadProject(mProjectManager->mProjectName, mProjectManager->mProjectPath);
 }
 
 void ScriptsTool::closeTool()

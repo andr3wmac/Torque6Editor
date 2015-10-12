@@ -43,7 +43,10 @@
 ProjectTool::ProjectTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
    : Parent(_projectManager, _frame, _manager),
      mProjectPanel(NULL),
-     mSelectedModule(NULL)
+     mSelectedModule(NULL),
+     mSelectedAssetDef(NULL),
+     mSelectedAsset(NULL),
+     mSelectedMaterialAsset(NULL)
 {
    mAssetIconList = new wxImageList(16, 16);
 }
@@ -95,9 +98,7 @@ void ProjectTool::openTool()
    mManager->Update();
 
    if (mProjectManager->mProjectLoaded)
-   {
-      refreshAssetList();
-   }
+      refresh();
 }
 
 void ProjectTool::closeTool()
@@ -109,7 +110,7 @@ void ProjectTool::closeTool()
 
 void ProjectTool::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
-   refreshAssetList();
+   refresh();
 }
 
 void ProjectTool::onProjectClosed()
@@ -214,7 +215,7 @@ void ProjectTool::OnMenuEvent(wxCommandEvent& evt)
          // Create asset definition.
          Plugins::Link.Scene.createMeshAsset(assetID.c_str(), relativePath, importPath.c_str());
          Plugins::Link.AssetDatabaseLink.addDeclaredAsset(mSelectedModule, importPath.c_str());
-         refreshAssetList();
+         refresh();
       }
 
       wizard->Destroy();
@@ -222,16 +223,78 @@ void ProjectTool::OnMenuEvent(wxCommandEvent& evt)
    if (evt.GetId() == MENU_IMPORT_TEXTURE)
    {
       ImportTextureWizard* wizard = new ImportTextureWizard(mFrame);
-      wizard->RunWizard(wizard->m_pages[0]);
+      
+      // Set initial import path, the user can change it.
+      wxString importPath = mSelectedModule->getModulePath();
+      importPath.Append("/textures");
+      wizard->importPath->SetPath(importPath);
+
+      if (wizard->RunWizard(wizard->m_pages[0]))
+      {
+         wxString assetID = wizard->assetID->GetValue();
+         wxString texturePath = wizard->textureFilePath->GetFileName().GetFullPath();
+         wxString textureFile = wizard->textureFilePath->GetFileName().GetFullName();
+         wxString importPath = wizard->importPath->GetPath();
+
+         // Copy file (optional)
+         if (wizard->copyTextureCheck->GetValue())
+         {
+            wxString moduleTexturePath(importPath);
+            moduleTexturePath.Append("/");
+            moduleTexturePath.Append(textureFile);
+
+            Plugins::Link.Platform.createPath(moduleTexturePath.c_str());
+            Plugins::Link.Platform.pathCopy(texturePath.c_str(), moduleTexturePath.c_str(), false);
+            texturePath = moduleTexturePath;
+         }
+
+         // Make path relative to module directory.
+         char buf[1024];
+         const char* fullPath = Plugins::Link.Platform.makeFullPathName(texturePath.c_str(), buf, sizeof(buf), NULL);
+         StringTableEntry relativePath = Plugins::Link.Platform.makeRelativePathName(fullPath, importPath);
+
+         // Create full import path.
+         importPath.Append("/");
+         importPath.Append(assetID);
+         importPath.Append(".asset.taml");
+
+         // Create asset definition.
+         Plugins::Link.Scene.createTextureAsset(assetID.c_str(), relativePath, importPath.c_str());
+         Plugins::Link.AssetDatabaseLink.addDeclaredAsset(mSelectedModule, importPath.c_str());
+         refresh();
+      }
+
       wizard->Destroy();
    }
 }
 
 void ProjectTool::OnPropertyChanged( wxPropertyGridEvent& evt )
 { 
+   if (!mSelectedAssetDef || !mSelectedAsset)
+      return;
+
    wxString name = evt.GetPropertyName();
    wxVariant val = evt.GetPropertyValue();
    wxString strVal = val.GetString();
+
+   if (name.StartsWith("TextureAsset"))
+   {
+      long intVal = val.GetInteger();
+      strVal = mTextureAssetChoices.GetLabel(intVal);
+   }
+
+   // Set Value.
+   mSelectedAsset->setDataField(Plugins::Link.StringTableLink->insert(name), NULL, strVal);
+
+   // Refresh textures if it's a MaterialAsset.
+   if (mSelectedMaterialAsset)
+      mSelectedMaterialAsset->loadTextures();
+
+   // Refresh Scene.
+   Plugins::Link.Scene.refresh();
+
+   // Reload object properties.
+   loadAssetDefinitionProperties(mProjectPanel->assetPropGrid, mSelectedAssetDef);
 }
 
 const char* ProjectTool::getAssetCategoryName(const char* _name)
@@ -251,7 +314,16 @@ const char* ProjectTool::getAssetCategoryName(const char* _name)
    if (dStrcmp(_name, "ShaderAsset") == 0)
       return "Shaders";
 
+   if (dStrcmp(_name, "TextureAsset") == 0)
+      return "Textures";
+
    return _name;
+}
+
+void ProjectTool::refresh()
+{
+   refreshAssetList();
+   refreshChoices();
 }
 
 void ProjectTool::refreshAssetList()
@@ -334,15 +406,54 @@ void ProjectTool::refreshAssetList()
    }
 }
 
+void ProjectTool::refreshChoices()
+{
+   if (!mProjectManager->isProjectLoaded())
+      return;
+
+   mTextureAssetChoices.Clear();
+   mTextureAssetChoices.Add("", 0);
+
+   Vector<const AssetDefinition*> assetDefinitions = Plugins::Link.AssetDatabaseLink.getDeclaredAssets();
+
+   // Iterate sorted asset definitions.
+   for (Vector<const AssetDefinition*>::iterator assetItr = assetDefinitions.begin(); assetItr != assetDefinitions.end(); ++assetItr)
+   {
+      // Fetch asset definition.
+      const AssetDefinition* pAssetDefinition = *assetItr;
+
+      // Populate TextureAsset choices menu.
+      if (dStrcmp(pAssetDefinition->mAssetType, "TextureAsset") == 0)
+         mTextureAssetChoices.Add(pAssetDefinition->mAssetId, mTextureAssetChoices.GetCount());
+   }
+}
+
+static S32 QSORT_CALLBACK compareEntries(const void* a, const void* b)
+{
+   SimFieldDictionary::Entry *fa = *((SimFieldDictionary::Entry **)a);
+   SimFieldDictionary::Entry *fb = *((SimFieldDictionary::Entry **)b);
+   return dStricmp(fa->slotName, fb->slotName);
+}
+
 void ProjectTool::loadAssetDefinitionProperties(wxPropertyGrid* propertyGrid, const AssetDefinition* assetDef)
 {
    propertyGrid->Clear();
 
+   // Fetch the asset.
    AssetBase* asset = Plugins::Link.AssetDatabaseLink.getAssetBase(assetDef->mAssetId);
+
+   mSelectedAssetDef = assetDef;
+   mSelectedAsset = asset;
+   mSelectedMaterialAsset = NULL;
+
+   // Determine if this is a material asset.
+   bool isMaterialAsset = (dStrcmp(assetDef->mAssetType, "MaterialAsset") == 0);
+   wxPGProperty* texturesCategory = NULL;
 
    wxString fieldGroup("");
    bool addFieldGroup = false;
 
+   // Static Fields
    AbstractClassRep::FieldList fieldList = asset->getFieldList();
    for (Vector<AbstractClassRep::Field>::iterator itr = fieldList.begin(); itr != fieldList.end(); itr++)
    {
@@ -367,7 +478,10 @@ void ProjectTool::loadAssetDefinitionProperties(wxPropertyGrid* propertyGrid, co
 
          if (addFieldGroup)
          {
-            propertyGrid->Append(new wxPropertyCategory(fieldGroup));
+            if ( fieldGroup == "Textures" )
+               texturesCategory = propertyGrid->Append(new wxPropertyCategory(fieldGroup));
+            else
+               propertyGrid->Append(new wxPropertyCategory(fieldGroup));
             addFieldGroup = false;
          }
 
@@ -378,12 +492,55 @@ void ProjectTool::loadAssetDefinitionProperties(wxPropertyGrid* propertyGrid, co
       }
    }
 
+   // Get list of dynamic fields and sort by name
+   Vector<SimFieldDictionary::Entry *> flist;
+   SimFieldDictionary* fieldDictionary = asset->getFieldDictionary();
+   for (SimFieldDictionaryIterator ditr(fieldDictionary); *ditr; ++ditr)
+      flist.push_back(*ditr);
+   dQsort(flist.address(), flist.size(), sizeof(SimFieldDictionary::Entry *), compareEntries);
 
+   // Add dynamic fields.
+   propertyGrid->Append(new wxPropertyCategory("Other"));
+   for (U32 i = 0; i < (U32)flist.size(); i++)
+   {
+      SimFieldDictionary::Entry* entry = flist[i];
 
-   StringTableEntry texture0 = Plugins::Link.StringTableLink->insert("Texture0");
-   propertyGrid->Append(new wxStringProperty("Texture0", "Texture0", asset->getDataField(texture0, NULL)));
-   //propertyGrid->Append(new wxStringProperty("Name", "AssetName", assetDef->mAssetName));
-   //propertyGrid->Append(new wxStringProperty("Description", "AssetDescription", assetDef->mAssetDescription));
-   //propertyGrid->Append(new wxBoolProperty("Auto Unload", "AutoUnload", assetDef->mAssetAutoUnload));
-   //propertyGrid->Append(new wxStringProperty("Base File Path", "BaseFilePath", assetDef->mAssetBaseFilePath));
+      if (isMaterialAsset && dStrncmp(entry->slotName, "TextureAsset", 12) == 0)
+         continue;
+      else if (isMaterialAsset && dStrncmp(entry->slotName, "TextureFile", 11) == 0)
+         continue;
+      else if (dStrncmp(entry->slotName, "TextureAsset", 12) == 0)
+         propertyGrid->Append(new wxEnumProperty(entry->slotName, wxPG_LABEL, mTextureAssetChoices));
+      else if (dStrncmp(entry->slotName, "TextureFile", 11) == 0)
+         propertyGrid->Append(new wxFileProperty(entry->slotName, wxPG_LABEL, entry->value));
+      else
+         propertyGrid->Append(new wxStringProperty(entry->slotName, entry->slotName, entry->value));
+   }
+
+   // Determine if this is a material asset.
+   if (isMaterialAsset)
+   {
+      mSelectedMaterialAsset = dynamic_cast<MaterialAsset*>(asset);
+
+      if ( texturesCategory == NULL )
+         texturesCategory = propertyGrid->Append(new wxPropertyCategory("Textures"));
+
+      for (S32 n = 0; n < mSelectedMaterialAsset->getTextureCount(); ++n)
+      {
+         char fieldName[32];
+
+         // Texture Asset?
+         dSprintf(fieldName, 32, "TextureAsset%d", n);
+         const char* textureAssetId = mSelectedMaterialAsset->getDataField(Plugins::Link.StringTableLink->insert(fieldName), NULL);
+         propertyGrid->AppendIn(texturesCategory, new wxEditEnumProperty(wxString(fieldName), wxPG_LABEL, mTextureAssetChoices, textureAssetId));
+
+         // Texture File?
+         dSprintf(fieldName, 32, "TextureFile%d", n);
+         const char* texturePath = mSelectedMaterialAsset->expandAssetFilePath(mSelectedMaterialAsset->getDataField(Plugins::Link.StringTableLink->insert(fieldName), NULL));
+         if ( texturePath )
+            propertyGrid->AppendIn(texturesCategory, new wxFileProperty(wxString(fieldName), wxPG_LABEL, wxString(texturePath)));
+         else
+            propertyGrid->AppendIn(texturesCategory, new wxFileProperty(wxString(fieldName), wxPG_LABEL, ""));
+      }
+   }
 }

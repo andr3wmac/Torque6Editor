@@ -50,25 +50,27 @@ WX_DEFINE_ARRAY_PTR( wxWizardPageSimple*, WizardPages );
 #define MENU_SCRIPTS 1003
 #define MENU_MATERIALS 1004
 #define MENU_PROFILER 1005
-#define TOOLBAR_MOVE 1006
-#define TOOLBAR_ROTATE 1007
-#define TOOLBAR_SCALE 1008
-#define PROFILER_START 1009
-#define SCENE_NEW 1010
-#define SCENE_OPEN 1011
-#define SCENE_SAVE 1012
-#define ENTITY_LIST 1013
-#define ADD_FEATURE_BUTTON 1014
-#define FEATURE_LIST 1015
-#define ADD_FEATURE_DLAA 1016
-#define ADD_FEATURE_SSAO 1017
-#define ADD_FEATURE_HDR 1018
-#define ADD_FEATURE_SKYBOX 1019
-#define ADD_FEATURE_DIRLIGHT 1020
-#define MATERIAL_SAVE 1021
-#define ASSET_LIST 1022
-#define MENU_IMPORT_MESH 1023
-#define MENU_IMPORT_TEXTURE 1024
+#define PROFILER_START 1006
+#define SCENE_NEW 1007
+#define SCENE_OPEN 1008
+#define SCENE_SAVE 1009
+#define ENTITY_LIST 1010
+#define ADD_FEATURE_BUTTON 1011
+#define FEATURE_LIST 1012
+#define ADD_FEATURE_DLAA 1013
+#define ADD_FEATURE_SSAO 1014
+#define ADD_FEATURE_HDR 1015
+#define ADD_FEATURE_SKYBOX 1016
+#define ADD_FEATURE_DIRLIGHT 1017
+#define TRANSLATE_SNAP_NONE 1018
+#define TRANSLATE_SNAP_1 1019
+#define TRANSLATE_SNAP_2 1020
+#define TRANSLATE_SNAP_3 1021
+#define TRANSLATE_SNAP_4 1022
+#define MATERIAL_SAVE 1023
+#define ASSET_LIST 1024
+#define MENU_IMPORT_MESH 1025
+#define MENU_IMPORT_TEXTURE 1026
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainFrame
@@ -80,27 +82,17 @@ class MainFrame : public wxFrame
 	protected:
 		wxMenu* m_menu1;
 		wxMenu* m_menu2;
-		wxToolBarToolBase* m_tool1; 
-		wxToolBarToolBase* m_tool2; 
-		wxToolBarToolBase* m_tool3; 
-		wxMenu* m_menu21;
 	
 	public:
 		wxMenuBar* mainMenuBar;
 		wxMenuItem* m_menuItem1;
 		wxToolBar* mainToolbar;
-		wxMenu* translateMenu;
 		wxPanel* mainPanel;
 		
 		MainFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Torque 6 Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1024,768 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		wxAuiManager m_mgr;
 		
 		~MainFrame();
-		
-		void MainFrameOnContextMenu( wxMouseEvent &event )
-		{
-			this->PopupMenu( translateMenu, event.GetPosition() );
-		}
 	
 };
 
@@ -170,6 +162,7 @@ class ScenePanel : public wxPanel
 		wxTreeCtrl* featureList;
 		wxPropertyGrid* featurePropGrid;
 		wxMenu* addFeatureMenu;
+		wxMenu* translateMenu;
 		
 		ScenePanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
 		~ScenePanel();
@@ -177,6 +170,11 @@ class ScenePanel : public wxPanel
 		void m_panel12OnContextMenu( wxMouseEvent &event )
 		{
 			m_panel12->PopupMenu( addFeatureMenu, event.GetPosition() );
+		}
+		
+		void ScenePanelOnContextMenu( wxMouseEvent &event )
+		{
+			this->PopupMenu( translateMenu, event.GetPosition() );
 		}
 	
 };
@@ -265,13 +263,16 @@ class ImportTextureWizard : public wxWizard
 	private:
 	
 	protected:
-		wxStaticText* m_staticText11;
-		wxTextCtrl* m_textCtrl1;
 		wxStaticText* m_staticText1;
-		wxFilePickerCtrl* m_filePicker1;
-		wxCheckBox* m_checkBox1;
+		wxStaticText* m_staticText111;
+		wxStaticText* m_staticText121;
 	
 	public:
+		wxFilePickerCtrl* textureFilePath;
+		wxCheckBox* generateMipsCheck;
+		wxTextCtrl* assetID;
+		wxDirPickerCtrl* importPath;
+		wxCheckBox* copyTextureCheck;
 		
 		ImportTextureWizard( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import Texture"), const wxBitmap& bitmap = wxNullBitmap, const wxPoint& pos = wxDefaultPosition, long style = wxDEFAULT_DIALOG_STYLE );
 		WizardPages m_pages;

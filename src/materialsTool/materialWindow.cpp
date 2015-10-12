@@ -44,7 +44,8 @@ MaterialWindow::MaterialWindow(wxWindow* parent, MaterialsTool* matTool)
      mWindowY(0.0f)
 {
    mActiveConnection = NULL;
-   mSelectedNode = NULL;
+   mSelectedNode     = NULL;
+   mHoverNode        = NULL;
 
    Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MaterialWindow::OnMenuEvent), NULL, this);
    SetVirtualSize(1000, 1000);
@@ -106,6 +107,7 @@ void MaterialWindow::OnMouseMove(wxMouseEvent &evt)
       return;
    }
 
+   mHoverNode = NULL;
    mLastMousePoint = evt.GetPosition();
    wxPoint mousePoint = evt.GetPosition();
 
@@ -133,6 +135,7 @@ void MaterialWindow::OnMouseMove(wxMouseEvent &evt)
          && mousePoint.y >= (mWindowY + node->y) && mousePoint.y <= (mWindowY + node->y + node->height) )
       {
          node->mouseOver = true;
+         mHoverNode = node;
 
          for ( S32 i = 0; i < node->inputs.size(); ++i )
          {
@@ -286,6 +289,13 @@ void MaterialWindow::OnRightMouseUp(wxMouseEvent &evt)
       mLastMousePoint = evt.GetPosition();
 
       wxMenu* menu = new wxMenu;
+
+      if (mHoverNode != NULL)
+      {
+         menu->Append(10, wxT("Delete Node"));
+         menu->AppendSeparator();
+      }
+
       menu->Append(0, wxT("Deferred"));
       menu->Append(1, wxT("Float"));
       menu->Append(2, wxT("Vec2"));
@@ -309,6 +319,7 @@ void MaterialWindow::OnMenuEvent( wxCommandEvent& evt )
 {
    switch( evt.GetId() )
    {
+      // Add Nodes
       case 0: addNode(mMaterialAsset->getTemplate(), "Deferred"); break;
       case 1: addNode(mMaterialAsset->getTemplate(), "Float"); break;
       case 2: addNode(mMaterialAsset->getTemplate(), "Vec2"); break;
@@ -319,6 +330,11 @@ void MaterialWindow::OnMenuEvent( wxCommandEvent& evt )
       case 7: addNode(mMaterialAsset->getTemplate(), "Cos"); break;
       case 8: addNode(mMaterialAsset->getTemplate(), "Sin"); break;
       case 9: addNode(mMaterialAsset->getTemplate(), "Multiply"); break;
+
+      // Delete Node
+      case 10:
+         deleteNode(mMaterialAsset->getTemplate(), mHoverNode);
+         break;
    }
 }
 

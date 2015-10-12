@@ -48,11 +48,40 @@ SceneTool::SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiMa
 {
    mEntityIconList = new wxImageList(16, 16);
    mFeatureIconList = new wxImageList( 16, 16 );
+
+   // Translate Menu
+   mTranslateMenu = new wxMenu;
+   mTranslateMenu->Append(0, wxT("Snap: None"), wxEmptyString, wxITEM_RADIO);
+   mTranslateMenu->Append(1, wxT("Snap: 0.1"), wxEmptyString, wxITEM_RADIO);
+   mTranslateMenu->Append(2, wxT("Snap: 0.5"), wxEmptyString, wxITEM_RADIO);
+   mTranslateMenu->Append(3, wxT("Snap: 1.0"), wxEmptyString, wxITEM_RADIO);
+   mTranslateMenu->Append(4, wxT("Snap: 5.0"), wxEmptyString, wxITEM_RADIO);
+   mTranslateMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnTranslateMenuEvent), NULL, this);
+
+   // Rotate Menu
+   mRotateMenu = new wxMenu;
+   mRotateMenu->Append(0, wxT("Snap: None"), wxEmptyString, wxITEM_RADIO);
+   mRotateMenu->Append(1, wxT("Snap: 5 Degrees"), wxEmptyString, wxITEM_RADIO);
+   mRotateMenu->Append(2, wxT("Snap: 15 Degrees"), wxEmptyString, wxITEM_RADIO);
+   mRotateMenu->Append(3, wxT("Snap: 45 Degrees"), wxEmptyString, wxITEM_RADIO);
+   mRotateMenu->Append(4, wxT("Snap: 90 Degrees"), wxEmptyString, wxITEM_RADIO);
+   mRotateMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnRotateMenuEvent), NULL, this);
+
+   // Scale Menu
+   mScaleMenu = new wxMenu;
+   mScaleMenu->Append(0, wxT("Snap: None"), wxEmptyString, wxITEM_RADIO);
+   mScaleMenu->Append(1, wxT("Snap: 0.1"), wxEmptyString, wxITEM_RADIO);
+   mScaleMenu->Append(2, wxT("Snap: 0.5"), wxEmptyString, wxITEM_RADIO);
+   mScaleMenu->Append(3, wxT("Snap: 1.0"), wxEmptyString, wxITEM_RADIO);
+   mScaleMenu->Append(4, wxT("Snap: 5.0"), wxEmptyString, wxITEM_RADIO);
+   mScaleMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnScaleMenuEvent), NULL, this);
 }
 
 SceneTool::~SceneTool()
 {
-
+   delete mTranslateMenu;
+   delete mRotateMenu;
+   delete mScaleMenu;
 }
 
 void SceneTool::initTool()
@@ -98,6 +127,15 @@ void SceneTool::initTool()
                                                   .Left()
                                                   .Hide());
    mManager->Update();
+
+   // Add Tools to toolabr
+   mFrame->mainToolbar->AddTool(0, wxT("Move"), wxBitmap(wxT("images/translate.png"), wxBITMAP_TYPE_ANY), wxNullBitmap, wxITEM_DROPDOWN, wxT("Move"), wxEmptyString, NULL);
+   mFrame->mainToolbar->AddTool(1, wxT("Rotate"), wxBitmap(wxT("images/rotate.png"), wxBITMAP_TYPE_ANY), wxNullBitmap, wxITEM_DROPDOWN, wxT("Rotate"), wxEmptyString, NULL);
+   mFrame->mainToolbar->AddTool(2, wxT("Scale"), wxBitmap(wxT("images/scale.png"), wxBITMAP_TYPE_ANY), wxNullBitmap, wxITEM_DROPDOWN, wxT("Scale"), wxEmptyString, NULL);
+   mFrame->mainToolbar->Realize();
+
+   // Toolbar Dropdown Events
+   mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_TOOL_DROPDOWN_CLICKED, wxCommandEventHandler(SceneTool::OnToolbarDropdownEvent), NULL, this);
 
    // Refresh Mesh and Material Choices
    refreshChoices();
@@ -326,12 +364,16 @@ void SceneTool::OnEntityPropChanged(wxPropertyGridEvent& evt)
       long intVal = val.GetInteger();
       strVal = mMeshChoices.GetLabel(intVal);
    }
-   else if (name.StartsWith("Material"))
+   else if (name.StartsWith("MaterialAsset"))
    {
       long intVal = val.GetInteger();
       strVal = mMaterialChoices.GetLabel(intVal);
    }
-
+   else if (name.StartsWith("SubMesh"))
+   {
+      strVal = val.GetBool() ? "true" : "false";
+   }
+   
    mSelectedObject->setDataField(Plugins::Link.StringTableLink->insert(name), NULL, strVal);
    mSelectedEntity->refresh();
 }
@@ -413,6 +455,7 @@ void SceneTool::refreshChoices()
 
    mMaterialChoices.Clear();
    mMeshChoices.Clear();
+   mEntityTemplateChoices.Clear();
 
    Vector<const AssetDefinition*> assetDefinitions = Plugins::Link.AssetDatabaseLink.getDeclaredAssets();
 
@@ -434,6 +477,11 @@ void SceneTool::refreshChoices()
       // Populate Mesh choices menu.
       if (dStrcmp(pAssetDefinition->mAssetType, "MeshAsset") == 0)
          mMeshChoices.Add(pAssetDefinition->mAssetId, mMeshChoices.GetCount());
+
+      // Entity Templates
+      if (dStrcmp(pAssetDefinition->mAssetType, "EntityTemplateAsset") == 0)
+         mEntityTemplateChoices.Add(pAssetDefinition->mAssetId, mMeshChoices.GetCount());
+      
    }
 }
 
@@ -481,8 +529,6 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
 
          if (dStrcmp(f->pFieldname, "MeshAsset") == 0)
             propertyGrid->Append(new wxEnumProperty("MeshAsset", wxPG_LABEL, mMeshChoices));
-         else if (dStrncmp(f->pFieldname, "Material", 8) == 0)
-            propertyGrid->Append(new wxEnumProperty(f->pFieldname, wxPG_LABEL, mMaterialChoices));
          else if (f->type == Plugins::Link.Con.TypeBool)
             propertyGrid->Append(new wxBoolProperty(f->pFieldname, f->pFieldname, val));
          else
@@ -498,15 +544,31 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
    dQsort(flist.address(), flist.size(), sizeof(SimFieldDictionary::Entry *), compareEntries);
 
    // Add dynamic fields.
-   propertyGrid->Append(new wxPropertyCategory("Other"));
+   wxPGProperty* materialsCategory = NULL;
+   wxPGProperty* submeshCategory = NULL;
+   wxPGProperty* otherCategory = NULL;
    for (U32 i = 0; i < (U32)flist.size(); i++)
    {
       SimFieldDictionary::Entry* entry = flist[i];
 
-      if (dStrncmp(entry->slotName, "Material", 8) == 0)
+      if (dStrncmp(entry->slotName, "MaterialAsset", 13) == 0)
+      {
+         if (materialsCategory == NULL)
+            materialsCategory = propertyGrid->Append(new wxPropertyCategory("Materials"));
          propertyGrid->Append(new wxEnumProperty(entry->slotName, wxPG_LABEL, mMaterialChoices));
+      }
+      else if (dStrncmp(entry->slotName, "SubMesh", 7) == 0)
+      {
+         if (submeshCategory == NULL)
+            submeshCategory = propertyGrid->Append(new wxPropertyCategory("SubMeshes"));
+         propertyGrid->AppendIn(submeshCategory, new wxBoolProperty(entry->slotName, wxPG_LABEL, dAtob(entry->value)));
+      }
       else
-         propertyGrid->Append(new wxStringProperty(entry->slotName, entry->slotName, entry->value));
+      {
+         if (otherCategory == NULL)
+            otherCategory = propertyGrid->Append(new wxPropertyCategory("Other"));
+         propertyGrid->AppendIn(otherCategory, new wxStringProperty(entry->slotName, entry->slotName, entry->value));
+      }
    }
 }
 
@@ -526,4 +588,103 @@ void SceneTool::selectComponent(Scene::BaseComponent* component)
    mSelectedEntity = component->mOwnerEntity;
 
    loadObjectProperties(mScenePanel->propertyGrid, component);
+}
+
+void SceneTool::OnToolbarDropdownEvent(wxCommandEvent& evt)
+{
+   switch (evt.GetId())
+   {
+      case 0:
+         mFrame->PopupMenu(mTranslateMenu, wxDefaultPosition);
+         break;
+
+      case 1:
+         mFrame->PopupMenu(mRotateMenu, wxDefaultPosition);
+         break;
+
+      case 2:
+         mFrame->PopupMenu(mScaleMenu, wxDefaultPosition);
+         break;
+
+      default:
+         break;
+   }
+}
+
+void SceneTool::OnTranslateMenuEvent(wxCommandEvent& evt)
+{
+   switch (evt.GetId())
+   {
+      case 0:
+         mGizmo.mTranslateSnap = 0.0f;
+         break;
+
+      case 1:
+         mGizmo.mTranslateSnap = 0.1f;
+         break;
+
+      case 2:
+         mGizmo.mTranslateSnap = 0.5f;
+         break;
+
+      case 3:
+         mGizmo.mTranslateSnap = 1.0f;
+         break;
+
+      case 4:
+         mGizmo.mTranslateSnap = 5.0f;
+         break;
+   }
+}
+
+void SceneTool::OnRotateMenuEvent(wxCommandEvent& evt)
+{
+   switch (evt.GetId())
+   {
+      case 0:
+         mGizmo.mRotateSnap = 0.0f;
+         break;
+
+      case 1:
+         mGizmo.mRotateSnap = M_PI_F / 36.0f;
+         break;
+
+      case 2:
+         mGizmo.mRotateSnap = M_PI_F / 12.0f;
+         break;
+
+      case 3:
+         mGizmo.mRotateSnap = M_PI_F / 4.0f;
+         break;
+
+      case 4:
+         mGizmo.mRotateSnap = M_PI_F / 2.0f;
+         break;
+   }
+}
+
+void SceneTool::OnScaleMenuEvent(wxCommandEvent& evt)
+{
+   switch (evt.GetId())
+   {
+      case 0:
+         mGizmo.mScaleSnap = 0.0f;
+         break;
+
+      case 1:
+         mGizmo.mScaleSnap = 0.1f;
+         break;
+
+      case 2:
+         mGizmo.mScaleSnap = 0.5f;
+         break;
+
+      case 3:
+         mGizmo.mScaleSnap = 1.0f;
+         break;
+
+      case 4:
+         mGizmo.mScaleSnap = 5.0f;
+         break;   
+   }
 }

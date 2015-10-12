@@ -68,26 +68,9 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	this->SetMenuBar( mainMenuBar );
 	
 	mainToolbar = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_HORIZONTAL ); 
-	m_tool1 = mainToolbar->AddTool( TOOLBAR_MOVE, wxT("Move"), wxBitmap( wxT("images/translate.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxT("Move"), wxEmptyString, NULL ); 
-	
-	m_tool2 = mainToolbar->AddTool( TOOLBAR_ROTATE, wxT("Rotate"), wxBitmap( wxT("images/rotate.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxT("Rotate"), wxEmptyString, NULL ); 
-	
-	m_tool3 = mainToolbar->AddTool( TOOLBAR_SCALE, wxT("Scale"), wxBitmap( wxT("images/scale.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxT("Scale"), wxEmptyString, NULL ); 
-	
 	mainToolbar->Realize();
-	m_mgr.AddPane( mainToolbar, wxAuiPaneInfo() .Top() .CaptionVisible( false ).CloseButton( false ).Gripper().Dock().Resizable().FloatingSize( wxSize( 37,57 ) ).Layer( 1 ) );
+	m_mgr.AddPane( mainToolbar, wxAuiPaneInfo() .Top() .CaptionVisible( false ).CloseButton( false ).Gripper().Dock().Resizable().FloatingSize( wxSize( 37,57 ) ).MinSize( wxSize( -1,39 ) ).Layer( 1 ) );
 	
-	
-	translateMenu = new wxMenu();
-	wxMenuItem* m_menuItem11;
-	m_menuItem11 = new wxMenuItem( translateMenu, wxID_ANY, wxString( wxT("MyMenuItem") ) , wxEmptyString, wxITEM_NORMAL );
-	translateMenu->Append( m_menuItem11 );
-	
-	m_menu21 = new wxMenu();
-	wxMenuItem* m_menu21Item = new wxMenuItem( translateMenu, wxID_ANY, wxT("MyMenu"), wxEmptyString, wxITEM_NORMAL, m_menu21 );
-	translateMenu->Append( m_menu21Item );
-	
-	this->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( MainFrame::MainFrameOnContextMenu ), NULL, this ); 
 	
 	mainPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	m_mgr.AddPane( mainPanel, wxAuiPaneInfo() .Left() .CaptionVisible( false ).CloseButton( false ).PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ).CentrePane() );
@@ -101,7 +84,6 @@ MainFrame::~MainFrame()
 {
 	m_mgr.UnInit();
 	
-	delete translateMenu; 
 }
 
 ScriptsPanel::ScriptsPanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
@@ -285,11 +267,35 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	this->SetSizer( bSizer3 );
 	this->Layout();
+	translateMenu = new wxMenu();
+	wxMenuItem* m_menuItem114;
+	m_menuItem114 = new wxMenuItem( translateMenu, TRANSLATE_SNAP_NONE, wxString( wxT("Snap: None") ) , wxEmptyString, wxITEM_RADIO );
+	translateMenu->Append( m_menuItem114 );
+	
+	wxMenuItem* m_menuItem11;
+	m_menuItem11 = new wxMenuItem( translateMenu, TRANSLATE_SNAP_1, wxString( wxT("Snap: 0.1") ) , wxEmptyString, wxITEM_RADIO );
+	translateMenu->Append( m_menuItem11 );
+	
+	wxMenuItem* m_menuItem111;
+	m_menuItem111 = new wxMenuItem( translateMenu, TRANSLATE_SNAP_2, wxString( wxT("Snap: 0.25") ) , wxEmptyString, wxITEM_RADIO );
+	translateMenu->Append( m_menuItem111 );
+	
+	wxMenuItem* m_menuItem112;
+	m_menuItem112 = new wxMenuItem( translateMenu, TRANSLATE_SNAP_3, wxString( wxT("Snap: 0.5") ) , wxEmptyString, wxITEM_RADIO );
+	translateMenu->Append( m_menuItem112 );
+	
+	wxMenuItem* m_menuItem113;
+	m_menuItem113 = new wxMenuItem( translateMenu, TRANSLATE_SNAP_4, wxString( wxT("Snap: 1.0") ) , wxEmptyString, wxITEM_RADIO );
+	translateMenu->Append( m_menuItem113 );
+	
+	this->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ScenePanel::ScenePanelOnContextMenu ), NULL, this ); 
+	
 }
 
 ScenePanel::~ScenePanel()
 {
 	delete addFeatureMenu; 
+	delete translateMenu; 
 }
 
 MaterialsPanel::MaterialsPanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
@@ -481,28 +487,48 @@ ImportTextureWizard::ImportTextureWizard( wxWindow* parent, wxWindowID id, const
 	wxBoxSizer* bSizer16;
 	bSizer16 = new wxBoxSizer( wxVERTICAL );
 	
-	m_staticText11 = new wxStaticText( m_wizPage2, wxID_ANY, wxT("Asset ID (no spaces):"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText11->Wrap( -1 );
-	bSizer16->Add( m_staticText11, 0, wxALL, 5 );
-	
-	m_textCtrl1 = new wxTextCtrl( m_wizPage2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer16->Add( m_textCtrl1, 0, wxALL|wxEXPAND, 5 );
-	
 	m_staticText1 = new wxStaticText( m_wizPage2, wxID_ANY, wxT("Texture File:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText1->Wrap( -1 );
 	bSizer16->Add( m_staticText1, 0, wxALL, 5 );
 	
-	m_filePicker1 = new wxFilePickerCtrl( m_wizPage2, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
-	bSizer16->Add( m_filePicker1, 0, wxALL|wxEXPAND, 5 );
+	textureFilePath = new wxFilePickerCtrl( m_wizPage2, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	bSizer16->Add( textureFilePath, 0, wxALL|wxEXPAND, 5 );
 	
-	m_checkBox1 = new wxCheckBox( m_wizPage2, wxID_ANY, wxT("Generate Mip-Maps"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_checkBox1->SetValue(true); 
-	bSizer16->Add( m_checkBox1, 0, wxALL, 5 );
+	generateMipsCheck = new wxCheckBox( m_wizPage2, wxID_ANY, wxT("Generate Mip-Maps"), wxDefaultPosition, wxDefaultSize, 0 );
+	generateMipsCheck->SetValue(true); 
+	bSizer16->Add( generateMipsCheck, 0, wxALL, 5 );
 	
 	
 	m_wizPage2->SetSizer( bSizer16 );
 	m_wizPage2->Layout();
 	bSizer16->Fit( m_wizPage2 );
+	wxWizardPageSimple* m_wizPage21 = new wxWizardPageSimple( this );
+	m_pages.Add( m_wizPage21 );
+	
+	wxBoxSizer* bSizer161;
+	bSizer161 = new wxBoxSizer( wxVERTICAL );
+	
+	m_staticText111 = new wxStaticText( m_wizPage21, wxID_ANY, wxT("Asset ID (no spaces):"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText111->Wrap( -1 );
+	bSizer161->Add( m_staticText111, 0, wxALL, 5 );
+	
+	assetID = new wxTextCtrl( m_wizPage21, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer161->Add( assetID, 0, wxALL|wxEXPAND, 5 );
+	
+	m_staticText121 = new wxStaticText( m_wizPage21, wxID_ANY, wxT("Import To Path:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText121->Wrap( -1 );
+	bSizer161->Add( m_staticText121, 0, wxALL, 5 );
+	
+	importPath = new wxDirPickerCtrl( m_wizPage21, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	bSizer161->Add( importPath, 0, wxALL|wxEXPAND, 5 );
+	
+	copyTextureCheck = new wxCheckBox( m_wizPage21, wxID_ANY, wxT("Copy Texture File"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer161->Add( copyTextureCheck, 0, wxALL, 5 );
+	
+	
+	m_wizPage21->SetSizer( bSizer161 );
+	m_wizPage21->Layout();
+	bSizer161->Fit( m_wizPage21 );
 	
 	this->Centre( wxBOTH );
 	
