@@ -60,6 +60,7 @@ class MaterialsTool : public wxEvtHandler, public EditorTool
       wxImageList*            mIconList;
       Node*                   mSelectedNode;
       MaterialWindow*         mSelectedNodeParent;
+      ModuleDefinition*       mSelectedModule;
       //Vector<MaterialWindow*> mMaterialWindows;
 
       MaterialsTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
@@ -70,6 +71,8 @@ class MaterialsTool : public wxEvtHandler, public EditorTool
 
       virtual void OnMenuEvent(wxCommandEvent& evt);
       virtual void OnTreeEvent(wxTreeEvent& evt);
+      virtual void OnTreeMenu(wxTreeEvent& evt);
+      virtual void OnModuleMenuEvent(wxCommandEvent& evt);
       virtual void OnPropertyChanged(wxPropertyGridEvent& evt);
 
       virtual void initTool();

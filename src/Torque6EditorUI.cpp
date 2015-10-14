@@ -396,6 +396,10 @@ ProjectPanel::ProjectPanel( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	m_menuItem13 = new wxMenuItem( moduleMenu, MENU_IMPORT_TEXTURE, wxString( wxT("Import Texture") ) , wxEmptyString, wxITEM_NORMAL );
 	moduleMenu->Append( m_menuItem13 );
 	
+	wxMenuItem* m_menuItem121;
+	m_menuItem121 = new wxMenuItem( moduleMenu, MENU_NEW_MATERIAL, wxString( wxT("New Material") ) , wxEmptyString, wxITEM_NORMAL );
+	moduleMenu->Append( m_menuItem121 );
+	
 	this->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ProjectPanel::ProjectPanelOnContextMenu ), NULL, this ); 
 	
 }
@@ -540,6 +544,50 @@ ImportTextureWizard::ImportTextureWizard( wxWindow* parent, wxWindowID id, const
 }
 
 ImportTextureWizard::~ImportTextureWizard()
+{
+	m_pages.Clear();
+}
+
+NewMaterialWizard::NewMaterialWizard( wxWindow* parent, wxWindowID id, const wxString& title, const wxBitmap& bitmap, const wxPoint& pos, long style ) 
+{
+	this->Create( parent, id, title, bitmap, pos, style );
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxWizardPageSimple* m_wizPage21 = new wxWizardPageSimple( this );
+	m_pages.Add( m_wizPage21 );
+	
+	wxBoxSizer* bSizer161;
+	bSizer161 = new wxBoxSizer( wxVERTICAL );
+	
+	m_staticText111 = new wxStaticText( m_wizPage21, wxID_ANY, wxT("Asset ID (no spaces):"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText111->Wrap( -1 );
+	bSizer161->Add( m_staticText111, 0, wxALL, 5 );
+	
+	assetID = new wxTextCtrl( m_wizPage21, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer161->Add( assetID, 0, wxALL|wxEXPAND, 5 );
+	
+	m_staticText121 = new wxStaticText( m_wizPage21, wxID_ANY, wxT("Save To Path:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText121->Wrap( -1 );
+	bSizer161->Add( m_staticText121, 0, wxALL, 5 );
+	
+	savePath = new wxDirPickerCtrl( m_wizPage21, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	bSizer161->Add( savePath, 0, wxALL|wxEXPAND, 5 );
+	
+	
+	m_wizPage21->SetSizer( bSizer161 );
+	m_wizPage21->Layout();
+	bSizer161->Fit( m_wizPage21 );
+	
+	this->Centre( wxBOTH );
+	
+	for ( unsigned int i = 1; i < m_pages.GetCount(); i++ )
+	{
+		m_pages.Item( i )->SetPrev( m_pages.Item( i - 1 ) );
+		m_pages.Item( i - 1 )->SetNext( m_pages.Item( i ) );
+	}
+}
+
+NewMaterialWizard::~NewMaterialWizard()
 {
 	m_pages.Clear();
 }

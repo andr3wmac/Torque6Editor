@@ -220,6 +220,7 @@ void ProjectTool::OnMenuEvent(wxCommandEvent& evt)
 
       wizard->Destroy();
    }
+
    if (evt.GetId() == MENU_IMPORT_TEXTURE)
    {
       ImportTextureWizard* wizard = new ImportTextureWizard(mFrame);
@@ -265,6 +266,43 @@ void ProjectTool::OnMenuEvent(wxCommandEvent& evt)
       }
 
       wizard->Destroy();
+   }
+
+   if (evt.GetId() == MENU_NEW_MATERIAL)
+   {
+      NewMaterialWizard* wizard = new NewMaterialWizard(mFrame);
+
+      // Set initial import path, the user can change it.
+      wxString defaultSavePath = mSelectedModule->getModulePath();
+      defaultSavePath.Append("/materials");
+      wizard->savePath->SetPath(defaultSavePath);
+
+      if (wizard->RunWizard(wizard->m_pages[0]))
+      {
+         wxString assetID = wizard->assetID->GetValue();
+         wxString savePath = wizard->savePath->GetPath();
+
+         wxString assetPath("");
+         assetPath.Append(savePath);
+         assetPath.Append("/");
+         assetPath.Append(assetID);
+         assetPath.Append(".asset.taml");
+
+         wxString templateFileName("");
+         templateFileName.Append(assetID);
+         templateFileName.Append(".taml");
+
+         wxString templatePath("");
+         templatePath.Append(savePath);
+         templatePath.Append("/");
+         templatePath.Append(templateFileName);
+
+         // Create material template and then asset.
+         Plugins::Link.Scene.createMaterialTemplate(templatePath.c_str());
+         Plugins::Link.Scene.createMaterialAsset(assetID.c_str(), templateFileName.c_str(), assetPath.c_str());
+         Plugins::Link.AssetDatabaseLink.addDeclaredAsset(mSelectedModule, assetPath.c_str());
+         refresh();
+      }
    }
 }
 

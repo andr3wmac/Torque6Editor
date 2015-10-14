@@ -43,8 +43,8 @@ Node* MaterialWindow::addDeferredNode(Scene::BaseNode* node)
 {
    Node newNode;
    newNode.name = getUniqueNodeName("Deferred");
-   newNode.x = mLastMousePoint.x;
-   newNode.y = mLastMousePoint.y;
+   newNode.x = -mWindowX + mLastMousePoint.x;
+   newNode.y = -mWindowY + mLastMousePoint.y;
    newNode.type = "Deferred";
    newNode.width = 180.0f;
    newNode.height = 170.0f;
@@ -64,8 +64,8 @@ Node* MaterialWindow::addFloatNode(Scene::BaseNode* node)
    Node newNode;
    newNode.name = getUniqueNodeName("NewFloat");
    newNode.type = "Float";
-   newNode.x = mLastMousePoint.x;
-   newNode.y = mLastMousePoint.y;
+   newNode.x = -mWindowX + mLastMousePoint.x;
+   newNode.y = -mWindowY + mLastMousePoint.y;
    newNode.height = 70.0f;
    newNode.addOutput(ColorI(255, 255, 255, 255));
    
@@ -86,8 +86,8 @@ Node* MaterialWindow::addVec2Node(Scene::BaseNode* node)
    Node newNode;
    newNode.name = getUniqueNodeName("NewVec2");
    newNode.type = "Vec2";
-   newNode.x = mLastMousePoint.x;
-   newNode.y = mLastMousePoint.y;
+   newNode.x = -mWindowX + mLastMousePoint.x;
+   newNode.y = -mWindowY + mLastMousePoint.y;
    newNode.height = 110.0f;
    newNode.addOutput(ColorI(255, 255, 255, 255));
    newNode.addOutput(ColorI(255, 50, 50, 255));
@@ -112,8 +112,8 @@ Node* MaterialWindow::addVec3Node(Scene::BaseNode* node)
    newNode.height = 130.0f;
    newNode.name = getUniqueNodeName("NewVec3");
    newNode.type = "Vec3";
-   newNode.x = mLastMousePoint.x;
-   newNode.y = mLastMousePoint.y;
+   newNode.x = -mWindowX + mLastMousePoint.x;
+   newNode.y = -mWindowY + mLastMousePoint.y;
    newNode.addOutput(ColorI(255, 255, 255, 255));
    newNode.addOutput(ColorI(255, 50, 50, 255));
    newNode.addOutput(ColorI(50, 255, 50, 255));
@@ -137,8 +137,8 @@ Node* MaterialWindow::addVec4Node(Scene::BaseNode* node)
    Node newNode;
    newNode.name = getUniqueNodeName("NewVec4");
    newNode.type = "Vec4";
-   newNode.x = mLastMousePoint.x;
-   newNode.y = mLastMousePoint.y;
+   newNode.x = -mWindowX + mLastMousePoint.x;
+   newNode.y = -mWindowY + mLastMousePoint.y;
    newNode.addOutput(ColorI(255, 255, 255, 255));
    newNode.addOutput(ColorI(255, 50, 50, 255));
    newNode.addOutput(ColorI(50, 255, 50, 255));
@@ -163,8 +163,8 @@ Node* MaterialWindow::addTextureNode(Scene::BaseNode* node)
    Node newNode;
    newNode.name = getUniqueNodeName("NewTexture");
    newNode.type = "Texture";
-   newNode.x = mLastMousePoint.x;
-   newNode.y = mLastMousePoint.y;
+   newNode.x = -mWindowX + mLastMousePoint.x;
+   newNode.y = -mWindowY + mLastMousePoint.y;
    newNode.width = 135.0f;
    newNode.addOutput(ColorI(255, 255, 255, 255));
    newNode.addOutput(ColorI(255, 50, 50, 255));
@@ -195,8 +195,8 @@ Node* MaterialWindow::addTimeNode(Scene::BaseNode* node)
    Node newNode;
    newNode.name = getUniqueNodeName("NewTime");
    newNode.type = "Time";
-   newNode.x = mLastMousePoint.x;
-   newNode.y = mLastMousePoint.y;
+   newNode.x = -mWindowX + mLastMousePoint.x;
+   newNode.y = -mWindowY + mLastMousePoint.y;
    newNode.height = 70.0f;
    newNode.addOutput(ColorI(255, 255, 255, 255));
 
@@ -217,8 +217,8 @@ Node* MaterialWindow::addCosNode(Scene::BaseNode* node)
    Node newNode;
    newNode.name = getUniqueNodeName("NewCos");
    newNode.type = "Cos";
-   newNode.x = mLastMousePoint.x;
-   newNode.y = mLastMousePoint.y;
+   newNode.x = -mWindowX + mLastMousePoint.x;
+   newNode.y = -mWindowY + mLastMousePoint.y;
    newNode.height = 70.0f;
    newNode.addInput("x");
    newNode.addOutput(ColorI(255, 255, 255, 255));
@@ -232,8 +232,8 @@ Node* MaterialWindow::addSinNode(Scene::BaseNode* node)
    Node newNode;
    newNode.name = getUniqueNodeName("NewSin");
    newNode.type = "Sin";
-   newNode.x = mLastMousePoint.x;
-   newNode.y = mLastMousePoint.y;
+   newNode.x = -mWindowX + mLastMousePoint.x;
+   newNode.y = -mWindowY + mLastMousePoint.y;
    newNode.height = 70.0f;
    newNode.addInput("x");
    newNode.addOutput(ColorI(255, 255, 255, 255));
@@ -247,8 +247,8 @@ Node* MaterialWindow::addMultiplyNode(Scene::BaseNode* node)
    Node newNode;
    newNode.name = getUniqueNodeName("NewMultiply");
    newNode.type = "Multiply";
-   newNode.x = mLastMousePoint.x;
-   newNode.y = mLastMousePoint.y;
+   newNode.x = -mWindowX + mLastMousePoint.x;
+   newNode.y = -mWindowY + mLastMousePoint.y;
    newNode.width = 120.0f;
    newNode.height = 90.0f;
    newNode.addInput("a");
@@ -340,8 +340,6 @@ void MaterialWindow::addNode(Scene::MaterialTemplate* matTemplate, const char* t
 
          // Link it to the material node and set position.
          newNode->materialNode = matNode;
-         newNode->x = matNode->mPosition.x;
-         newNode->y = matNode->mPosition.y;
       }
 
       // If we created a new material node we need to add it to the
@@ -351,6 +349,11 @@ void MaterialWindow::addNode(Scene::MaterialTemplate* matTemplate, const char* t
          newNode->materialNode->registerObject();
          newNode->materialNode->setInternalName(newNode->name);
          matTemplate->addObject(newNode->materialNode);
+      }
+      else {
+         // Load Position.
+         newNode->x = matNode->mPosition.x;
+         newNode->y = matNode->mPosition.y;
       }
    }
 }

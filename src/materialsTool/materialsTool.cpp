@@ -34,12 +34,15 @@
 #include "../Torque6EditorUI.h"
 
 #include "materialsTool.h"
+#include "plugins/plugins_shared.h"
+#include "module/moduleManager.h"
 
 MaterialsTool::MaterialsTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
    : Parent(_projectManager, _frame, _manager),
      mMaterialsPanel(NULL),
      mSelectedNode(NULL),
-     mSelectedNodeParent(NULL)
+     mSelectedNodeParent(NULL),
+     mSelectedModule(NULL)
 {
    mIconList = new wxImageList( 16, 16 );
       
@@ -63,6 +66,7 @@ void MaterialsTool::initTool()
    // Events
    mMaterialsPanel->Connect(wxID_ANY, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MaterialsTool::OnMenuEvent), NULL, this);
    mMaterialsPanel->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(MaterialsTool::OnTreeEvent), NULL, this);
+   mMaterialsPanel->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(MaterialsTool::OnTreeMenu), NULL, this);
    mMaterialsPanel->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(MaterialsTool::OnPropertyChanged), NULL, this);
 
    // Root for material tree
@@ -149,6 +153,76 @@ void MaterialsTool::OnTreeEvent(wxTreeEvent& evt)
    }
 }
 
+void MaterialsTool::OnTreeMenu(wxTreeEvent& evt)
+{
+   MaterialsTreeItemData* data = dynamic_cast<MaterialsTreeItemData*>(mMaterialsPanel->m_materialTree->GetItemData(evt.GetItem()));
+   if (data)
+   {
+      MaterialAsset* mat = Plugins::Link.Scene.getMaterialAsset(data->assetId);
+      if (mat)
+      {
+         wxMenu* menu = new wxMenu;
+         menu->Append(0, wxT("Open Material"));
+         menu->Append(1, wxT("Delete Material"));
+         mFrame->PopupMenu(menu, wxDefaultPosition);
+         delete menu;
+      }
+   }
+   else {
+      wxString moduleName = mMaterialsPanel->m_materialTree->GetItemText(evt.GetItem());
+      mSelectedModule = Plugins::Link.ModuleDatabaseLink->findLoadedModule(moduleName.c_str());
+
+      if (mSelectedModule != NULL)
+      {
+         wxMenu* menu = new wxMenu;
+         menu->Append(0, wxT("New Material"));
+         menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MaterialsTool::OnModuleMenuEvent), NULL, this);
+         mFrame->PopupMenu(menu, wxDefaultPosition);
+         delete menu;
+      }
+   }
+}
+
+void MaterialsTool::OnModuleMenuEvent(wxCommandEvent& evt)
+{
+   if (evt.GetId() == 0)
+   {
+      NewMaterialWizard* wizard = new NewMaterialWizard(mFrame);
+
+      // Set initial import path, the user can change it.
+      wxString defaultSavePath = mSelectedModule->getModulePath();
+      defaultSavePath.Append("/materials");
+      wizard->savePath->SetPath(defaultSavePath);
+
+      if (wizard->RunWizard(wizard->m_pages[0]))
+      {
+         wxString assetID = wizard->assetID->GetValue();
+         wxString savePath = wizard->savePath->GetPath();
+
+         wxString assetPath("");
+         assetPath.Append(savePath);
+         assetPath.Append("/");
+         assetPath.Append(assetID);
+         assetPath.Append(".asset.taml");
+
+         wxString templateFileName("");
+         templateFileName.Append(assetID);
+         templateFileName.Append(".taml");
+
+         wxString templatePath("");
+         templatePath.Append(savePath);
+         templatePath.Append("/");
+         templatePath.Append(templateFileName);
+
+         // Create material template and then asset.
+         Plugins::Link.Scene.createMaterialTemplate(templatePath.c_str());
+         Plugins::Link.Scene.createMaterialAsset(assetID.c_str(), templateFileName.c_str(), assetPath.c_str());
+         Plugins::Link.AssetDatabaseLink.addDeclaredAsset(mSelectedModule, assetPath.c_str());
+         refreshMaterialList();
+      }
+   }
+}
+
 void MaterialsTool::refreshMaterialList()
 {
    if (!mProjectManager->isProjectLoaded())
@@ -162,21 +236,39 @@ void MaterialsTool::refreshMaterialList()
    AssetQuery assQuery;
    Plugins::Link.AssetDatabaseLink.findAssetType(&assQuery, "MaterialAsset", false);
 
+   mMaterialsPanel->m_materialTree[0].GetLabelText();
+
    bool inCategory = false;
    char last_mod_name[256];
+   char buf[256];
    wxTreeItemId itemParent = mMaterialTreeRoot;
+   Vector<wxTreeItemId> itemCategories;
    for ( U32 n = 0; n < assQuery.size(); n++)
    {
       StringTableEntry assetID = assQuery[n];
-      char buf[256];
       dStrcpy(buf, assetID);
 
       char* mod_name = dStrtok(buf, ":");
       if ( dStrcmp(last_mod_name, mod_name) != 0 )
       {
-         itemParent = mMaterialsPanel->m_materialTree->AppendItem(mMaterialTreeRoot, mod_name, 0, -1);
-         dStrcpy(last_mod_name, mod_name);
-         inCategory = true;
+         bool foundCategory = false;
+         for (U32 i = 0; i < itemCategories.size(); ++i)
+         {
+            if (mMaterialsPanel->m_materialTree->GetItemText(itemCategories[i]) == wxString(mod_name))
+            {
+               itemParent = itemCategories[i];
+               foundCategory = true;
+               break;
+            }
+         }
+
+         if (!foundCategory)
+         {
+            itemCategories.push_back(mMaterialsPanel->m_materialTree->AppendItem(mMaterialTreeRoot, mod_name, 0, -1));
+            itemParent = itemCategories.back();
+            dStrcpy(last_mod_name, mod_name);
+            inCategory = true;
+         }
       }
 
       char* asset_name = dStrtok(NULL, ":");

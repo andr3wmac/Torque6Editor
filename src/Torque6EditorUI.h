@@ -71,6 +71,7 @@ WX_DEFINE_ARRAY_PTR( wxWizardPageSimple*, WizardPages );
 #define ASSET_LIST 1024
 #define MENU_IMPORT_MESH 1025
 #define MENU_IMPORT_TEXTURE 1026
+#define MENU_NEW_MATERIAL 1027
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainFrame
@@ -277,6 +278,27 @@ class ImportTextureWizard : public wxWizard
 		ImportTextureWizard( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import Texture"), const wxBitmap& bitmap = wxNullBitmap, const wxPoint& pos = wxDefaultPosition, long style = wxDEFAULT_DIALOG_STYLE );
 		WizardPages m_pages;
 		~ImportTextureWizard();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class NewMaterialWizard
+///////////////////////////////////////////////////////////////////////////////
+class NewMaterialWizard : public wxWizard 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticText111;
+		wxStaticText* m_staticText121;
+	
+	public:
+		wxTextCtrl* assetID;
+		wxDirPickerCtrl* savePath;
+		
+		NewMaterialWizard( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Material"), const wxBitmap& bitmap = wxNullBitmap, const wxPoint& pos = wxDefaultPosition, long style = wxDEFAULT_DIALOG_STYLE );
+		WizardPages m_pages;
+		~NewMaterialWizard();
 	
 };
 
