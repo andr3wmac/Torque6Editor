@@ -259,6 +259,9 @@ void SceneTool::OnMenuEvent(wxCommandEvent& evt)
    if (evt.GetId() == ADD_FEATURE_BUTTON)
       mFrame->PopupMenu(mScenePanel->addFeatureMenu, wxDefaultPosition);
 
+   if (evt.GetId() == ADD_ENTITY_BUTTON)
+      openAddEntityMenu();
+
    if (evt.GetId() == ADD_FEATURE_DLAA)
    {
       Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("DLAA"));
@@ -292,6 +295,26 @@ void SceneTool::OnMenuEvent(wxCommandEvent& evt)
    refreshEntityList();
    refreshFeatureList();
    refreshChoices();
+}
+
+void SceneTool::openAddEntityMenu()
+{
+   wxMenu* menu = new wxMenu;
+   menu->Append(0, wxT("New Entity"));
+   menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnAddEntityMenuEvent), NULL, this);
+   mFrame->PopupMenu(menu, wxDefaultPosition);
+   delete menu;
+}
+
+void SceneTool::OnAddEntityMenuEvent(wxCommandEvent& evt)
+{
+   if (evt.GetId() == 0)
+   {
+      Scene::SceneEntity* newEntity = new Scene::SceneEntity();
+      newEntity->registerObject("NewSceneEntity");
+      Plugins::Link.Scene.addEntity(newEntity, "NewSceneEntity");
+      refreshEntityList();
+   }
 }
 
 void SceneTool::OnTreeEvent( wxTreeEvent& evt )

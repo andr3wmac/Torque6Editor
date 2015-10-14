@@ -101,6 +101,7 @@ class SceneTool : public wxEvtHandler, public EditorTool
       void loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* obj);
       void selectEntity(Scene::SceneEntity* entity);
       void selectComponent(Scene::BaseComponent* component);
+      void openAddEntityMenu();
 
       void OnMenuEvent(wxCommandEvent& evt);
       void OnTreeEvent( wxTreeEvent& evt );
@@ -111,6 +112,7 @@ class SceneTool : public wxEvtHandler, public EditorTool
       void OnTranslateMenuEvent(wxCommandEvent& evt);
       void OnRotateMenuEvent(wxCommandEvent& evt);
       void OnScaleMenuEvent(wxCommandEvent& evt);
+      void OnAddEntityMenuEvent(wxCommandEvent& evt);
 
       virtual void initTool();
       virtual void openTool();
