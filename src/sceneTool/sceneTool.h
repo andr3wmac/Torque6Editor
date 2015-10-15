@@ -81,6 +81,9 @@ class SceneTool : public wxEvtHandler, public EditorTool
       Scene::SceneEntity*  mSelectedEntity;
       SimObject*           mSelectedFeature;
 
+      Scene::SceneEntity*     mMenuEntity;
+      Scene::BaseComponent*   mMenuComponent;
+
       wxMenu* mTranslateMenu;
       wxMenu* mRotateMenu;
       wxMenu* mScaleMenu;
@@ -113,6 +116,8 @@ class SceneTool : public wxEvtHandler, public EditorTool
       void OnRotateMenuEvent(wxCommandEvent& evt);
       void OnScaleMenuEvent(wxCommandEvent& evt);
       void OnAddEntityMenuEvent(wxCommandEvent& evt);
+      void OnEntityMenuEvent(wxCommandEvent& evt);
+      void OnComponentMenuEvent(wxCommandEvent& evt);
 
       virtual void initTool();
       virtual void openTool();

@@ -39,12 +39,21 @@
 #include <bx/bx.h>
 #include <bx/fpumath.h>
 
+#include "3d/entity/components/animationComponent.h"
+#include "3d/entity/components/controllerComponent.h"
+#include "3d/entity/components/lightComponent.h"
+#include "3d/entity/components/meshComponent.h"
+#include "3d/entity/components/physicsComponent.h"
+#include "3d/entity/components/textComponent.h"
+
 SceneTool::SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
    : Parent(_projectManager, _frame, _manager),
      mScenePanel(NULL),
      mSelectedObject(NULL),
      mSelectedEntity(NULL),
-     mSelectedFeature(NULL)
+     mSelectedFeature(NULL),
+     mMenuEntity(NULL),
+     mMenuComponent(NULL)
 {
    mEntityIconList = new wxImageList(16, 16);
    mFeatureIconList = new wxImageList( 16, 16 );
@@ -356,25 +365,117 @@ void SceneTool::OnTreeEvent( wxTreeEvent& evt )
 
 void SceneTool::OnTreeMenu( wxTreeEvent& evt ) 
 { 
-   wxMenu* menu = new wxMenu; 
-   menu->Append(wxID_OPEN, wxT("Add Empty Entity")); 
-   menu->Append(wxID_OPEN, wxT("Add Entity from Template")); 
-   menu->AppendSeparator();
-   
-   wxMenu* compMenu = new wxMenu;
-   compMenu->Append(wxID_OPEN, wxT("AnimationComponent")); 
-   compMenu->Append(wxID_OPEN, wxT("LightComponent")); 
-   compMenu->Append(wxID_OPEN, wxT("MeshComponent")); 
-   compMenu->Append(wxID_OPEN, wxT("PhysicsComponent")); 
-   compMenu->Append(wxID_OPEN, wxT("TextComponent")); 
-   menu->AppendSubMenu(compMenu, wxT("Add Component"));
+   if (evt.GetId() == ENTITY_LIST)
+   {
+      EntityTreeItemData* data = dynamic_cast<EntityTreeItemData*>(mScenePanel->entityList->GetItemData(evt.GetItem()));
 
-   menu->AppendSeparator();
+      Scene::SceneEntity* entity = dynamic_cast<Scene::SceneEntity*>(data->objPtr);
+      if (entity)
+      {
+         mMenuEntity = entity;
 
-   menu->Append(wxID_OPEN, wxT("Delete")); 
-   mFrame->PopupMenu(menu, wxDefaultPosition); 
-   delete menu; 
+         wxMenu* menu = new wxMenu;
+         menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnEntityMenuEvent), NULL, this);
+         menu->Append(0, wxT("Delete Entity"));
+
+         wxMenu* compMenu = new wxMenu;
+         compMenu->Append(1, wxT("AnimationComponent"));
+         compMenu->Append(2, wxT("ControllerComponent"));
+         compMenu->Append(3, wxT("LightComponent"));
+         compMenu->Append(4, wxT("MeshComponent"));
+         compMenu->Append(5, wxT("PhysicsComponent"));
+         compMenu->Append(6, wxT("TextComponent"));
+         menu->AppendSubMenu(compMenu, wxT("Add Component"));
+
+         mFrame->PopupMenu(menu, wxDefaultPosition);
+         delete menu;
+
+         mMenuEntity = NULL;
+         return;
+      }
+
+      Scene::BaseComponent* component = dynamic_cast<Scene::BaseComponent*>(data->objPtr);
+      if (component)
+      {
+         mMenuComponent = component;
+
+         wxMenu* menu = new wxMenu;
+         menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnComponentMenuEvent), NULL, this);
+         menu->Append(0, wxT("Delete Component"));
+         mFrame->PopupMenu(menu, wxDefaultPosition);
+         delete menu;
+
+         mMenuComponent = NULL;
+         return;
+      }
+   }
 } 
+
+void SceneTool::OnEntityMenuEvent(wxCommandEvent& evt)
+{
+   // Delete Entity
+   if (evt.GetId() == 0)
+   {
+      Plugins::Link.Scene.removeEntity(mMenuEntity);
+      mMenuEntity = NULL;
+      refreshEntityList();
+      return;
+   }
+
+   // Add New Component
+   if (evt.GetId() > 0)
+   {
+      Scene::BaseComponent* newComponent = NULL;
+
+      switch (evt.GetId())
+      {
+         case 1:
+            newComponent = new Scene::AnimationComponent();
+            break;
+
+         case 2:
+            newComponent = new Scene::ControllerComponent();
+            break;
+
+         case 3:
+            newComponent = new Scene::LightComponent();
+            break;
+
+         case 4:
+            newComponent = new Scene::MeshComponent();
+            break;
+
+         case 5:
+            newComponent = new Scene::PhysicsComponent();
+            break;
+
+         case 6:
+            newComponent = new Scene::TextComponent();
+            break;
+      }
+
+      newComponent->registerObject();
+      mMenuEntity->addComponent(newComponent);
+      mMenuEntity->refresh();
+      refreshEntityList();
+   }
+}
+
+void SceneTool::OnComponentMenuEvent(wxCommandEvent& evt)
+{
+   // Delete Entity
+   if (evt.GetId() == 0)
+   {
+      // Sanity check. mOwnerEntity should never be NULL.
+      if (mMenuComponent->mOwnerEntity != NULL)
+      {
+         mMenuComponent->mOwnerEntity->removeComponent(mMenuComponent);
+         mMenuComponent = NULL;
+         refreshEntityList();
+         return;
+      }
+   }
+}
 
 void SceneTool::OnEntityPropChanged(wxPropertyGridEvent& evt)
 {
