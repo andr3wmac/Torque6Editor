@@ -90,22 +90,22 @@ bool LinePlaneIntersection(Point3F& intersection, Point3F linePoint, Point3F lin
    }
 }
 
-Point3F getPointOnXPlane(Point3F p1, Point3F p2)
+Point3F getPointOnXPlane(F32 x, Point3F p1, Point3F p2)
 {
-   F32 a = (0.0f - p1.x) / (p2.x - p1.x);
-   return Point3F(0.0f, p1.y + a*(p2.y - p1.y), p1.z + a*(p2.z - p1.z));
+   F32 a = (x - p1.x) / (p2.x - p1.x);
+   return Point3F(x, p1.y + a*(p2.y - p1.y), p1.z + a*(p2.z - p1.z));
 }
 
-Point3F getPointOnYPlane(Point3F p1, Point3F p2)
+Point3F getPointOnYPlane(F32 y, Point3F p1, Point3F p2)
 {
-   F32 a = (0.0f - p1.y) / (p2.y - p1.y);
-   return Point3F(p1.x + a*(p2.x - p1.x), 0.0f, p1.z + a*(p2.z - p1.z));
+   F32 a = (y - p1.y) / (p2.y - p1.y);
+   return Point3F(p1.x + a*(p2.x - p1.x), y, p1.z + a*(p2.z - p1.z));
 }
 
-Point3F getPointOnZPlane(Point3F p1, Point3F p2)
+Point3F getPointOnZPlane(F32 z, Point3F p1, Point3F p2)
 {
-   F32 a = (0.0f - p1.z) / (p2.z - p1.z);
-   return Point3F(p1.x + a*(p2.x - p1.x), p1.y + a*(p2.y - p1.y), 0.0f);
+   F32 a = (z - p1.z) / (p2.z - p1.z);
+   return Point3F(p1.x + a*(p2.x - p1.x), p1.y + a*(p2.y - p1.y), z);
 }
 
 Gizmo::Gizmo()
@@ -242,25 +242,28 @@ bool Gizmo::onMouseLeftDown(int x, int y)
    if (mSelectRed)
    {
       mDownPoint = mSelectRedPoint;
-      Point3F xPoint = getPointOnXPlane(editorPos, editorPos + (worldRay * 1000.0f));
+      Point3F xPoint = getPointOnXPlane(mSelectedEntity->mPosition.x, editorPos, editorPos + (worldRay * 1000.0f));
       mDownAngle = mAtan(xPoint.z, xPoint.y);
       mDragRed = true;
+      return true;
    }
 
    if (mSelectGreen)
    {
       mDownPoint = mSelectGreenPoint;
-      Point3F yPoint = getPointOnYPlane(editorPos, editorPos + (worldRay * 1000.0f));
+      Point3F yPoint = getPointOnYPlane(mSelectedEntity->mPosition.y, editorPos, editorPos + (worldRay * 1000.0f));
       mDownAngle = mAtan(yPoint.z, yPoint.x);
       mDragGreen = true;
+      return true;
    }
 
    if (mSelectBlue)
    {
       mDownPoint = mSelectBluePoint;
-      Point3F zPoint = getPointOnZPlane(editorPos, editorPos + (worldRay * 1000.0f));
+      Point3F zPoint = getPointOnZPlane(mSelectedEntity->mPosition.z, editorPos, editorPos + (worldRay * 1000.0f));
       mDownAngle = mAtan(zPoint.y, zPoint.x);
       mDragBlue = true;
+      return true;
    }
 
    return false;
@@ -282,38 +285,90 @@ bool Gizmo::onMouseMove(int x, int y)
    if (mSelectedEntity == NULL)
       return false;
 
+   // Determine the worldspace points we're closest to.
    Point3F dummyPoint;
    Point3F worldRay = Plugins::Link.Rendering.screenToWorld(Point2I(x, y));
    Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
-
    Plugins::Link.Rendering.closestPointsOnTwoLines(mSelectRedPoint, dummyPoint, mSelectedEntity->mPosition, Point3F(1000.0f, 0.0f, 0.0f), editorPos, worldRay * 1000.0f);
    Plugins::Link.Rendering.closestPointsOnTwoLines(mSelectGreenPoint, dummyPoint, mSelectedEntity->mPosition, Point3F(0.0, 1000.0f, 0.0f), editorPos, worldRay * 1000.0f);
    Plugins::Link.Rendering.closestPointsOnTwoLines(mSelectBluePoint, dummyPoint, mSelectedEntity->mPosition, Point3F(0.0f, 0.0f, 1000.0f), editorPos, worldRay * 1000.0f);
 
-   Point2I redPointScreen = Plugins::Link.Rendering.worldToScreen(mSelectRedPoint);
-   Point2I greenPointScreen = Plugins::Link.Rendering.worldToScreen(mSelectGreenPoint);
-   Point2I bluePointScreen = Plugins::Link.Rendering.worldToScreen(mSelectBluePoint);
-   F32 redDist = Point2F(x - redPointScreen.x, y - redPointScreen.y).len();
-   F32 greenDist = Point2F(x - greenPointScreen.x, y - greenPointScreen.y).len();
-   F32 blueDist = Point2F(x - bluePointScreen.x, y - bluePointScreen.y).len();
-
-   if (!mDragging)
-   {
-      mSelectRed = (redDist < greenDist && redDist < blueDist);
-      mSelectGreen = (greenDist < redDist && greenDist < blueDist);
-      mSelectBlue = (blueDist < greenDist && blueDist < redDist);
-   }
-
+   // Dragging
    if (mDragging)
    {
+      // Translate
       if (mProjectManager->mEditorMode == 0)
          dragTranslate(x, y);
 
+      // Rotate
       if (mProjectManager->mEditorMode == 1)
          dragRotate(x, y);
 
+      // Scale
       if (mProjectManager->mEditorMode == 2)
          dragScale(x, y);
+
+      return true;
+   }
+
+   // Reset Mouse Over
+   mSelectRed = false;
+   mSelectGreen = false;
+   mSelectBlue = false;
+
+   // Determine if the mouse is close enough to be within the gizmo.
+   Point3F camToEntity = mSelectedEntity->mPosition - editorPos;
+   F32 size = camToEntity.len() / 4.0f;
+   F32 dist = getMax((mSelectedEntity->mPosition - mSelectRedPoint).len(), (mSelectedEntity->mPosition - mSelectGreenPoint).len());
+       dist = getMax(dist, (mSelectedEntity->mPosition - mSelectBluePoint).len());
+   if (dist > size)
+      return false;
+
+   // Translate
+   if (mProjectManager->mEditorMode == 0)
+   {
+      Point2I entityPointScreen = Plugins::Link.Rendering.worldToScreen(mSelectedEntity->mPosition);
+      Point2I redPointScreen = Plugins::Link.Rendering.worldToScreen(mSelectRedPoint);
+      Point2I greenPointScreen = Plugins::Link.Rendering.worldToScreen(mSelectGreenPoint);
+      Point2I bluePointScreen = Plugins::Link.Rendering.worldToScreen(mSelectBluePoint);
+      F32 redDist = Point2F(x - redPointScreen.x, y - redPointScreen.y).len();
+      F32 greenDist = Point2F(x - greenPointScreen.x, y - greenPointScreen.y).len();
+      F32 blueDist = Point2F(x - bluePointScreen.x, y - bluePointScreen.y).len();
+      mSelectRed = (redDist < greenDist && redDist < blueDist);
+      mSelectGreen = (greenDist < redDist && greenDist < blueDist);
+      mSelectBlue = (blueDist < greenDist && blueDist < redDist);
+      return true;
+   }
+
+   // Rotate
+   if (mProjectManager->mEditorMode == 1)
+   {
+      Point3F xPoint = getPointOnXPlane(mSelectedEntity->mPosition.x, editorPos, editorPos + (worldRay * 1000.0f));
+      Point3F yPoint = getPointOnYPlane(mSelectedEntity->mPosition.y, editorPos, editorPos + (worldRay * 1000.0f));
+      Point3F zPoint = getPointOnZPlane(mSelectedEntity->mPosition.z, editorPos, editorPos + (worldRay * 1000.0f));
+      F32 redDist = (xPoint - editorPos).len();
+      F32 greenDist = (yPoint - editorPos).len();
+      F32 blueDist = (zPoint - editorPos).len();
+      mSelectRed = (redDist < greenDist && redDist < blueDist);
+      mSelectGreen = (greenDist < redDist && greenDist < blueDist);
+      mSelectBlue = (blueDist < greenDist && blueDist < redDist);
+      return true;
+   }
+
+   // Scale
+   if (mProjectManager->mEditorMode == 2)
+   {
+      Point2I entityPointScreen = Plugins::Link.Rendering.worldToScreen(mSelectedEntity->mPosition);
+      Point2I redPointScreen = Plugins::Link.Rendering.worldToScreen(mSelectRedPoint);
+      Point2I greenPointScreen = Plugins::Link.Rendering.worldToScreen(mSelectGreenPoint);
+      Point2I bluePointScreen = Plugins::Link.Rendering.worldToScreen(mSelectBluePoint);
+      F32 redDist = Point2F(x - redPointScreen.x, y - redPointScreen.y).len();
+      F32 greenDist = Point2F(x - greenPointScreen.x, y - greenPointScreen.y).len();
+      F32 blueDist = Point2F(x - bluePointScreen.x, y - bluePointScreen.y).len();
+      mSelectRed = (redDist < greenDist && redDist < blueDist);
+      mSelectGreen = (greenDist < redDist && greenDist < blueDist);
+      mSelectBlue = (blueDist < greenDist && blueDist < redDist);
+      return true;
    }
 
    return false;
@@ -363,21 +418,21 @@ void Gizmo::dragRotate(int x, int y)
 
    if (mDragRed)
    {
-      Point3F xPoint = getPointOnXPlane(editorPos, editorPos + (worldRay * 1000.0f));
+      Point3F xPoint = getPointOnXPlane(mSelectedEntity->mPosition.x, editorPos, editorPos + (worldRay * 1000.0f));
       dragAngle = mAtan(xPoint.z, xPoint.y) - mDownAngle;
       mSelectedRotation.x += dragAngle;
    }
 
    if (mDragGreen)
    {
-      Point3F yPoint = getPointOnYPlane(editorPos, editorPos + (worldRay * 1000.0f));
+      Point3F yPoint = getPointOnYPlane(mSelectedEntity->mPosition.y, editorPos, editorPos + (worldRay * 1000.0f));
       dragAngle = mAtan(yPoint.z, yPoint.x) - mDownAngle;
       mSelectedRotation.y += dragAngle;
    }
 
    if (mDragBlue)
    {
-      Point3F zPoint = getPointOnZPlane(editorPos, editorPos + (worldRay * 1000.0f));
+      Point3F zPoint = getPointOnZPlane(mSelectedEntity->mPosition.z, editorPos, editorPos + (worldRay * 1000.0f));
       dragAngle = mAtan(zPoint.y, zPoint.x) - mDownAngle;
       mSelectedRotation.z += dragAngle;
    }

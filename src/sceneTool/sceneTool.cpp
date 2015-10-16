@@ -197,15 +197,14 @@ bool SceneTool::onMouseLeftDown(int x, int y)
    Point3F worldRay = Plugins::Link.Rendering.screenToWorld(Point2I(x, y));
    Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
 
-   Scene::SceneEntity* hit = Plugins::Link.Scene.raycast(editorPos, editorPos + (worldRay * 1000.0f));
-   if (mSelectedObject != hit)
+   if (!mGizmo.onMouseLeftDown(x, y))
    {
-      if (hit)
-         selectEntity(hit);
-   }
-   else 
-   {
-      mGizmo.onMouseLeftDown(x, y);
+      Scene::SceneEntity* hit = Plugins::Link.Scene.raycast(editorPos, editorPos + (worldRay * 1000.0f));
+      if (mSelectedObject != hit)
+      {
+         if (hit)
+            selectEntity(hit);
+      }
    }
 
    return false;
