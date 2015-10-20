@@ -23,6 +23,7 @@
 #include "main.h"
 
 #include <wx/dir.h>
+#include <wx/utils.h> 
 #include "wx/treectrl.h"
 #include "wx/aui/aui.h"
  
@@ -75,21 +76,28 @@ Torque6Editor::~Torque6Editor()
    mProjectManager.closeProject();
 }
 
-void Torque6Editor::OnMenuEvent( wxCommandEvent& evt )
+void Torque6Editor::OnMenuEvent(wxCommandEvent& evt)
 {
-   if ( evt.GetId() == wxID_OPEN )
+   if (evt.GetId() == wxID_OPEN)
    {
       wxDirDialog openFolder(mFrame, wxT("Select Project Folder"), wxGetCwd());
-      if ( openFolder.ShowModal() == wxID_OK )
+      if (openFolder.ShowModal() == wxID_OK)
          mProjectManager.openProject(openFolder.GetPath());
 
       mManager->Update();
    }
 
-   if ( evt.GetId() == wxID_CLOSE )
+   if (evt.GetId() == wxID_CLOSE)
    {
       mProjectManager.closeProject();
       mManager->Update();
+   }
+
+   if (evt.GetId() == MENU_ABOUT)
+   {
+      AboutDialog *dlg = new AboutDialog(mFrame);
+      if (dlg->ShowModal() == wxID_OK)
+         dlg->Destroy();
    }
 
    switch (evt.GetId())
@@ -116,6 +124,18 @@ void Torque6Editor::OnMenuEvent( wxCommandEvent& evt )
 
       case MENU_SCRIPTS:
          EditorTool::smEditorTools[5]->openTool();
+         break;
+
+      case MENU_WEBSITE:
+         wxLaunchDefaultBrowser("http://www.torque6.com");
+         break;
+
+      case MENU_GITHUB:
+         wxLaunchDefaultBrowser("http://www.github.com/andr3wmac/Torque6");
+         break;
+
+      case MENU_FORUMS:
+         wxLaunchDefaultBrowser("http://forums.torque3d.org/viewforum.php?f=32");
          break;
 
       default:

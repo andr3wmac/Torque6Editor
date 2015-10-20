@@ -65,6 +65,27 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	
 	mainMenuBar->Append( m_menu2, wxT("Tools") ); 
 	
+	m_menu6 = new wxMenu();
+	wxMenuItem* m_menuItem26;
+	m_menuItem26 = new wxMenuItem( m_menu6, MENU_WEBSITE, wxString( wxT("Website") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu6->Append( m_menuItem26 );
+	
+	wxMenuItem* m_menuItem29;
+	m_menuItem29 = new wxMenuItem( m_menu6, MENU_GITHUB, wxString( wxT("GitHub") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu6->Append( m_menuItem29 );
+	
+	wxMenuItem* m_menuItem27;
+	m_menuItem27 = new wxMenuItem( m_menu6, MENU_FORUMS, wxString( wxT("Forums") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu6->Append( m_menuItem27 );
+	
+	m_menu6->AppendSeparator();
+	
+	wxMenuItem* m_menuItem28;
+	m_menuItem28 = new wxMenuItem( m_menu6, MENU_ABOUT, wxString( wxT("About") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu6->Append( m_menuItem28 );
+	
+	mainMenuBar->Append( m_menu6, wxT("Help") ); 
+	
 	this->SetMenuBar( mainMenuBar );
 	
 	mainToolbar = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_HORIZONTAL ); 
@@ -84,6 +105,47 @@ MainFrame::~MainFrame()
 {
 	m_mgr.UnInit();
 	
+}
+
+AboutDialog::AboutDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxSize( 464,265 ), wxSize( 464,265 ) );
+	
+	wxBoxSizer* bSizer23;
+	bSizer23 = new wxBoxSizer( wxVERTICAL );
+	
+	m_bitmap1 = new wxStaticBitmap( this, wxID_ANY, wxBitmap( wxT("images/logo.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer23->Add( m_bitmap1, 0, wxALIGN_CENTER|wxALL, 5 );
+	
+	m_staticText13 = new wxStaticText( this, wxID_ANY, wxT("Created By:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText13->Wrap( -1 );
+	m_staticText13->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), 70, 90, 92, false, wxEmptyString ) );
+	
+	bSizer23->Add( m_staticText13, 0, wxALL, 5 );
+	
+	m_staticText14 = new wxStaticText( this, wxID_ANY, wxT("     Andrew Mac ( http://www.andrewmac.ca )"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
+	m_staticText14->Wrap( -1 );
+	bSizer23->Add( m_staticText14, 0, wxALL, 5 );
+	
+	m_staticText15 = new wxStaticText( this, wxID_ANY, wxT("Contributors:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText15->Wrap( -1 );
+	m_staticText15->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), 70, 90, 92, false, wxEmptyString ) );
+	
+	bSizer23->Add( m_staticText15, 0, wxALL, 5 );
+	
+	m_staticText16 = new wxStaticText( this, wxID_ANY, wxT("     Lukas Jorgensen"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText16->Wrap( -1 );
+	bSizer23->Add( m_staticText16, 0, wxALL, 5 );
+	
+	
+	this->SetSizer( bSizer23 );
+	this->Layout();
+	
+	this->Centre( wxBOTH );
+}
+
+AboutDialog::~AboutDialog()
+{
 }
 
 ScriptsPanel::ScriptsPanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
@@ -213,7 +275,7 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	m_panel11->SetSizer( bSizer5 );
 	m_panel11->Layout();
 	bSizer5->Fit( m_panel11 );
-	m_notebook2->AddPage( m_panel11, wxT("Objects"), false );
+	m_notebook2->AddPage( m_panel11, wxT("Objects"), true );
 	m_panel12 = new wxPanel( m_notebook2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer51;
 	bSizer51 = new wxBoxSizer( wxVERTICAL );
@@ -260,7 +322,7 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	m_panel12->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ScenePanel::m_panel12OnContextMenu ), NULL, this ); 
 	
-	m_notebook2->AddPage( m_panel12, wxT("Features"), true );
+	m_notebook2->AddPage( m_panel12, wxT("Features"), false );
 	
 	bSizer3->Add( m_notebook2, 1, wxEXPAND | wxALL, 5 );
 	

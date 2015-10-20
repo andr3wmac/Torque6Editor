@@ -23,18 +23,20 @@
 #include <wx/panel.h>
 #include <wx/frame.h>
 #include <wx/aui/aui.h>
+#include <wx/statbmp.h>
+#include <wx/stattext.h>
+#include <wx/sizer.h>
+#include <wx/dialog.h>
 #include <wx/treectrl.h>
 #include <wx/aui/auibook.h>
 #include <wx/button.h>
 #include <wx/choice.h>
-#include <wx/sizer.h>
 #include <wx/dataview.h>
 #include <wx/bmpbuttn.h>
 #include <wx/srchctrl.h>
 #include <wx/propgrid/propgrid.h>
 #include <wx/propgrid/advprops.h>
 #include <wx/notebook.h>
-#include <wx/stattext.h>
 #include <wx/filepicker.h>
 #include <wx/checkbox.h>
 #include <wx/textctrl.h>
@@ -50,29 +52,33 @@ WX_DEFINE_ARRAY_PTR( wxWizardPageSimple*, WizardPages );
 #define MENU_SCRIPTS 1003
 #define MENU_MATERIALS 1004
 #define MENU_PROFILER 1005
-#define PROFILER_START 1006
-#define SCENE_NEW 1007
-#define SCENE_OPEN 1008
-#define SCENE_SAVE 1009
-#define ADD_ENTITY_BUTTON 1010
-#define ENTITY_LIST 1011
-#define ADD_FEATURE_BUTTON 1012
-#define FEATURE_LIST 1013
-#define ADD_FEATURE_DLAA 1014
-#define ADD_FEATURE_SSAO 1015
-#define ADD_FEATURE_HDR 1016
-#define ADD_FEATURE_SKYBOX 1017
-#define ADD_FEATURE_DIRLIGHT 1018
-#define TRANSLATE_SNAP_NONE 1019
-#define TRANSLATE_SNAP_1 1020
-#define TRANSLATE_SNAP_2 1021
-#define TRANSLATE_SNAP_3 1022
-#define TRANSLATE_SNAP_4 1023
-#define MATERIAL_SAVE 1024
-#define ASSET_LIST 1025
-#define MENU_IMPORT_MESH 1026
-#define MENU_IMPORT_TEXTURE 1027
-#define MENU_NEW_MATERIAL 1028
+#define MENU_WEBSITE 1006
+#define MENU_GITHUB 1007
+#define MENU_FORUMS 1008
+#define MENU_ABOUT 1009
+#define PROFILER_START 1010
+#define SCENE_NEW 1011
+#define SCENE_OPEN 1012
+#define SCENE_SAVE 1013
+#define ADD_ENTITY_BUTTON 1014
+#define ENTITY_LIST 1015
+#define ADD_FEATURE_BUTTON 1016
+#define FEATURE_LIST 1017
+#define ADD_FEATURE_DLAA 1018
+#define ADD_FEATURE_SSAO 1019
+#define ADD_FEATURE_HDR 1020
+#define ADD_FEATURE_SKYBOX 1021
+#define ADD_FEATURE_DIRLIGHT 1022
+#define TRANSLATE_SNAP_NONE 1023
+#define TRANSLATE_SNAP_1 1024
+#define TRANSLATE_SNAP_2 1025
+#define TRANSLATE_SNAP_3 1026
+#define TRANSLATE_SNAP_4 1027
+#define MATERIAL_SAVE 1028
+#define ASSET_LIST 1029
+#define MENU_IMPORT_MESH 1030
+#define MENU_IMPORT_TEXTURE 1031
+#define MENU_NEW_MATERIAL 1032
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainFrame
@@ -84,6 +90,7 @@ class MainFrame : public wxFrame
 	protected:
 		wxMenu* m_menu1;
 		wxMenu* m_menu2;
+		wxMenu* m_menu6;
 	
 	public:
 		wxMenuBar* mainMenuBar;
@@ -95,6 +102,27 @@ class MainFrame : public wxFrame
 		wxAuiManager m_mgr;
 		
 		~MainFrame();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class AboutDialog
+///////////////////////////////////////////////////////////////////////////////
+class AboutDialog : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticBitmap* m_bitmap1;
+		wxStaticText* m_staticText13;
+		wxStaticText* m_staticText14;
+		wxStaticText* m_staticText15;
+		wxStaticText* m_staticText16;
+	
+	public:
+		
+		AboutDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("About"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 464,265 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		~AboutDialog();
 	
 };
 
