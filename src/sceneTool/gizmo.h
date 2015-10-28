@@ -55,9 +55,10 @@ class Gizmo
       Point3F  mSelectedScale;
 
    public:
-      ProjectManager*      mProjectManager;
-      SimObject*           mSelectedObject;
-      Scene::SceneEntity*  mSelectedEntity;
+      ProjectManager*         mProjectManager;
+      SimObject*              mSelectedObject;
+      Scene::SceneEntity*     mSelectedEntity;
+      Scene::BaseComponent*   mSelectedComponent;
 
       F32 mTranslateSnap;
       F32 mScaleSnap;
@@ -67,6 +68,7 @@ class Gizmo
       ~Gizmo();
 
       void selectEntity(Scene::SceneEntity* entity);
+      void selectComponent(Scene::BaseComponent* component);
       void render();
 
       bool onMouseLeftDown(int x, int y);
