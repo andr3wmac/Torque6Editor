@@ -77,9 +77,10 @@ class SceneTool : public wxEvtHandler, public EditorTool
       wxImageList*   mFeatureIconList;
       wxTreeItemId   mFeatureListRoot;
       
-      SimObject*           mSelectedObject;
-      Scene::SceneEntity*  mSelectedEntity;
-      SimObject*           mSelectedFeature;
+      SimObject*              mSelectedObject;
+      Scene::SceneEntity*     mSelectedEntity;
+      Scene::BaseComponent*   mSelectedComponent;
+      SimObject*              mSelectedFeature;
 
       Scene::SceneEntity*     mMenuEntity;
       Scene::BaseComponent*   mMenuComponent;
@@ -93,6 +94,8 @@ class SceneTool : public wxEvtHandler, public EditorTool
       wxPGChoices mEntityTemplateChoices;
 
       Gizmo mGizmo;
+
+      TextureObject* mLightIcon;
 
    public:
       SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);

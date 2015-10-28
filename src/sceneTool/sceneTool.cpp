@@ -51,9 +51,11 @@ SceneTool::SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiMa
      mScenePanel(NULL),
      mSelectedObject(NULL),
      mSelectedEntity(NULL),
+     mSelectedComponent(NULL),
      mSelectedFeature(NULL),
      mMenuEntity(NULL),
-     mMenuComponent(NULL)
+     mMenuComponent(NULL),
+     mLightIcon(NULL)
 {
    mEntityIconList = new wxImageList(16, 16);
    mFeatureIconList = new wxImageList( 16, 16 );
@@ -138,13 +140,14 @@ void SceneTool::initTool()
    mManager->Update();
 
    // Add Tools to toolabr
-   mFrame->mainToolbar->AddTool(0, wxT("Move"), wxBitmap(wxT("images/translate.png"), wxBITMAP_TYPE_ANY), wxNullBitmap, wxITEM_DROPDOWN, wxT("Move"), wxEmptyString, NULL);
-   mFrame->mainToolbar->AddTool(1, wxT("Rotate"), wxBitmap(wxT("images/rotate.png"), wxBITMAP_TYPE_ANY), wxNullBitmap, wxITEM_DROPDOWN, wxT("Rotate"), wxEmptyString, NULL);
-   mFrame->mainToolbar->AddTool(2, wxT("Scale"), wxBitmap(wxT("images/scale.png"), wxBITMAP_TYPE_ANY), wxNullBitmap, wxITEM_DROPDOWN, wxT("Scale"), wxEmptyString, NULL);
+   mFrame->mainToolbar->AddTool(1, wxT("Move"), wxBitmap(wxT("images/translate.png"), wxBITMAP_TYPE_ANY), wxNullBitmap, wxITEM_DROPDOWN, wxT("Move"), wxEmptyString, NULL);
+   mFrame->mainToolbar->AddTool(2, wxT("Rotate"), wxBitmap(wxT("images/rotate.png"), wxBITMAP_TYPE_ANY), wxNullBitmap, wxITEM_DROPDOWN, wxT("Rotate"), wxEmptyString, NULL);
+   mFrame->mainToolbar->AddTool(3, wxT("Scale"), wxBitmap(wxT("images/scale.png"), wxBITMAP_TYPE_ANY), wxNullBitmap, wxITEM_DROPDOWN, wxT("Scale"), wxEmptyString, NULL);
+   mFrame->mainToolbar->AddSeparator();
    mFrame->mainToolbar->Realize();
 
    // Toolbar Dropdown Events
-   mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_TOOL_DROPDOWN_CLICKED, wxCommandEventHandler(SceneTool::OnToolbarDropdownEvent), NULL, this);
+   //mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_TOOL_DROPDOWN_CLICKED, wxCommandEventHandler(SceneTool::OnToolbarDropdownEvent), NULL, this);
 
    // Refresh Mesh and Material Choices
    refreshChoices();
@@ -173,21 +176,47 @@ void SceneTool::closeTool()
 
 void SceneTool::renderTool()
 {
-   if ( mSelectedObject != NULL )
+   if (mLightIcon != NULL)
    {
-      Scene::SceneEntity* entity = dynamic_cast<Scene::SceneEntity*>(mSelectedObject);
-      if (entity)
+      Vector<Rendering::LightData*> lightList = Plugins::Link.Rendering.getLightList();
+      for (U32 n = 0; n < lightList.size(); ++n)
       {
-         F32 transform[16];
-         bx::mtxSRT(transform,
-            entity->mScale.x, entity->mScale.y, entity->mScale.z,
-            entity->mRotation.x, entity->mRotation.y, entity->mRotation.z,
-            entity->mPosition.x, entity->mPosition.y, entity->mPosition.z);
-
-         // Bounding Box
-         Plugins::Link.Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, entity->mBoundingBox, ColorI(255, 255, 255, 255), NULL);
+         Rendering::LightData* light = lightList[n];
+         
+         Plugins::Link.Graphics.drawBillboard(mProjectManager->mRenderLayer4View->id, 
+                                              mLightIcon, 
+                                              light->position, 
+                                              1.0f, 1.0f, 
+                                              ColorI(light->color[0] * 255, light->color[1] * 255, light->color[2] * 255, 255), 
+                                              NULL);
       }
+   }
+   else {
+      mLightIcon = Plugins::Link.Graphics.loadTexture("light.png", TextureHandle::BitmapKeepTexture, BGFX_TEXTURE_NONE, false, false);
+   }
 
+   // Entity Selected
+   if (mSelectedEntity != NULL && mSelectedComponent == NULL)
+   {
+      // Bounding Box
+      Plugins::Link.Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, mSelectedEntity->mBoundingBox, ColorI(255, 255, 255, 255), NULL);
+
+      // Render Gizmo
+      mGizmo.render();
+
+      return;
+   }
+
+   // Component Selected
+   if (mSelectedEntity != NULL && mSelectedComponent != NULL)
+   {
+      Box3F boundingBox = mSelectedComponent->getBoundingBox();
+      boundingBox.transform(mSelectedEntity->mTransformMatrix);
+
+      // Bounding Box
+      Plugins::Link.Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, boundingBox, ColorI(0, 255, 0, 255), NULL);
+
+      // Render Gizmo
       mGizmo.render();
    }
 }
@@ -242,7 +271,7 @@ void SceneTool::onProjectLoaded(const wxString& projectName, const wxString& pro
 
 void SceneTool::onProjectClosed()
 {
-   //
+
 }
 
 void SceneTool::OnMenuEvent(wxCommandEvent& evt)
@@ -273,30 +302,42 @@ void SceneTool::OnMenuEvent(wxCommandEvent& evt)
    if (evt.GetId() == ADD_FEATURE_DLAA)
    {
       Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("DLAA"));
+      feature->registerObject();
       Plugins::Link.Scene.addFeature(feature);
    }
 
    if (evt.GetId() == ADD_FEATURE_SSAO)
    {
       Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("SSAO"));
+      feature->registerObject();
       Plugins::Link.Scene.addFeature(feature);
    }
 
    if (evt.GetId() == ADD_FEATURE_HDR)
    {
       Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("HDR"));
+      feature->registerObject();
       Plugins::Link.Scene.addFeature(feature);
    }
 
    if (evt.GetId() == ADD_FEATURE_SKYBOX)
    {
       Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("SimpleSkybox"));
+      feature->registerObject();
       Plugins::Link.Scene.addFeature(feature);
    }
 
    if (evt.GetId() == ADD_FEATURE_DIRLIGHT)
    {
       Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("DirectionalLight"));
+      feature->registerObject();
+      Plugins::Link.Scene.addFeature(feature);
+   }
+
+   if (evt.GetId() == ADD_FEATURE_SKYLIGHT)
+   {
+      Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("SkyLight"));
+      feature->registerObject();
       Plugins::Link.Scene.addFeature(feature);
    }
 
@@ -481,7 +522,7 @@ void SceneTool::OnEntityPropChanged(wxPropertyGridEvent& evt)
    wxString name = evt.GetPropertyName();
    wxVariant val = evt.GetPropertyValue();
    wxString strVal = val.GetString();
-   
+
    if (name == "MeshAsset")
    {
       long intVal = val.GetInteger();
@@ -496,7 +537,16 @@ void SceneTool::OnEntityPropChanged(wxPropertyGridEvent& evt)
    {
       strVal = val.GetBool() ? "true" : "false";
    }
-   
+
+   // Check field type.
+   U32 type = mSelectedObject->getDataFieldType(Plugins::Link.StringTableLink->insert(name), NULL);
+   if (type == Plugins::Link.Con.TypeColorF)
+   {
+      wxColour color;
+      color << val;
+      strVal.Printf("%f %f %f 1.0", color.Red() / 255.0f, color.Green() / 255.0f, color.Blue() / 255.0f);
+   }
+
    mSelectedObject->setDataField(Plugins::Link.StringTableLink->insert(name), NULL, strVal);
    mSelectedEntity->refresh();
 }
@@ -507,7 +557,16 @@ void SceneTool::OnFeaturePropChanged(wxPropertyGridEvent& evt)
    wxVariant val = evt.GetPropertyValue();
    wxString strVal = val.GetString();
 
-   mSelectedFeature->setField(name, strVal);
+   // Check field type.
+   U32 type = mSelectedFeature->getDataFieldType(Plugins::Link.StringTableLink->insert(name), NULL);
+   if (type == Plugins::Link.Con.TypeColorF)
+   {
+      wxColour color;
+      color << val;
+      strVal.Printf("%f %f %f 1.0", color.Red() / 255.0f, color.Green() / 255.0f, color.Blue() / 255.0f);
+   }
+
+   mSelectedFeature->setDataField(Plugins::Link.StringTableLink->insert(name), NULL, strVal);
 }
 
 void SceneTool::refreshEntityList()
@@ -637,21 +696,29 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
          continue;
       }
 
-      for(U32 j = 0; S32(j) < f->elementCount; j++)
-      {                      
-         const char *val = (*f->getDataFn)( obj, Plugins::Link.Con.getData(f->type, (void *) (((const char *)obj) + f->offset), j, f->table, f->flag) );
+      for (U32 j = 0; S32(j) < f->elementCount; j++)
+      {
+         const char *val = (*f->getDataFn)(obj, Plugins::Link.Con.getData(f->type, (void *)(((const char *)obj) + f->offset), j, f->table, f->flag));
 
-         if( !val )
+         if (!val)
             continue;
 
-         if ( addFieldGroup )
+         if (addFieldGroup)
          {
-            propertyGrid->Append( new wxPropertyCategory(fieldGroup) );
+            propertyGrid->Append(new wxPropertyCategory(fieldGroup));
             addFieldGroup = false;
          }
 
          if (dStrcmp(f->pFieldname, "MeshAsset") == 0)
             propertyGrid->Append(new wxEnumProperty("MeshAsset", wxPG_LABEL, mMeshChoices));
+         else if (f->type == Plugins::Link.Con.TypeColorF)
+         {
+            ColorF colorVal;
+            Plugins::Link.Con.setData(Plugins::Link.Con.TypeColorF, &colorVal, 0, 1, &val, NULL, 0);
+            wxColour color;
+            color.Set(colorVal.red * 255, colorVal.green * 255, colorVal.blue * 255, 255);
+            propertyGrid->Append(new wxColourProperty(f->pFieldname, f->pFieldname, color));
+         }
          else if (f->type == Plugins::Link.Con.TypeBool)
             propertyGrid->Append(new wxBoolProperty(f->pFieldname, f->pFieldname, val));
          else
@@ -698,7 +765,8 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
 void SceneTool::selectEntity(Scene::SceneEntity* entity)
 {
    mSelectedObject = entity;
-   mSelectedEntity = entity;
+   mSelectedEntity = entity; 
+   mSelectedComponent = NULL;
 
    mGizmo.selectEntity(entity);
 
@@ -709,6 +777,9 @@ void SceneTool::selectComponent(Scene::BaseComponent* component)
 {
    mSelectedObject = component;
    mSelectedEntity = component->mOwnerEntity;
+   mSelectedComponent = component;
+
+   mGizmo.selectComponent(component);
 
    loadObjectProperties(mScenePanel->propertyGrid, component);
 }
@@ -717,15 +788,15 @@ void SceneTool::OnToolbarDropdownEvent(wxCommandEvent& evt)
 {
    switch (evt.GetId())
    {
-      case 0:
+      case 1:
          mFrame->PopupMenu(mTranslateMenu, wxDefaultPosition);
          break;
 
-      case 1:
+      case 2:
          mFrame->PopupMenu(mRotateMenu, wxDefaultPosition);
          break;
 
-      case 2:
+      case 3:
          mFrame->PopupMenu(mScaleMenu, wxDefaultPosition);
          break;
 

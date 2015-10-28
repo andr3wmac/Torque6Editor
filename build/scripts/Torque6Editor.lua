@@ -31,6 +31,9 @@ function Torque6Editor()
         configuration "vs2015"
             windowstargetplatformversion "10.0.10240.0"
 
+        configuration "Release"
+            defines     { "TORQUE_ENABLE_PROFILER" }
+
         configuration "Debug"
             targetname "Torque6Editor_DEBUG"
             defines     { "TORQUE_DEBUG", "TORQUE_ENABLE_PROFILER" }
