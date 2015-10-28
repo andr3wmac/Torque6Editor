@@ -24,6 +24,7 @@
 
 #include <wx/dir.h>
 #include <wx/utils.h> 
+#include <wx/stdpaths.h>
 #include "wx/treectrl.h"
 #include "wx/aui/aui.h"
  
@@ -38,17 +39,24 @@ bool Torque6Editor::OnInit()
    mFrame->Show(true);
 	SetTopWindow(mFrame);
 
+   // Preload Dialogs
+   mAboutDialog = new AboutDialog(mFrame);
+
    // Setup Advanced UI Manager
    mManager = &mFrame->m_mgr;
 
    // Frame Events
    mFrame->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(Torque6Editor::OnMenuEvent), NULL, this);
 
-   // Main Toolbar Events
-   mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(Torque6Editor::OnToolbarEvent), NULL, this);
+   wxString runPath = wxPathOnly(wxStandardPaths::Get().GetExecutablePath());
+#ifdef TORQUE_DEBUG
+   runPath.Append("/Torque6App_DEBUG.exe");
+#else
+   runPath.Append("/Torque6App.exe");
+#endif
 
    // Torque 6 Project Manager
-   mProjectManager.init(mManager, mFrame->mainPanel);
+   mProjectManager.init(runPath, mManager, mFrame, mFrame->mainPanel);
 
    // Tools
    EditorTool::smEditorTools.push_back(new ProjectTool(&mProjectManager, mFrame, mManager));
@@ -73,6 +81,9 @@ Torque6Editor::~Torque6Editor()
       //delete tool;
    }
 
+   // Dialogs
+   mAboutDialog->Destroy();
+
    mProjectManager.closeProject();
 }
 
@@ -95,13 +106,23 @@ void Torque6Editor::OnMenuEvent(wxCommandEvent& evt)
 
    if (evt.GetId() == MENU_ABOUT)
    {
-      AboutDialog *dlg = new AboutDialog(mFrame);
-      if (dlg->ShowModal() == wxID_OK)
-         dlg->Destroy();
+      mAboutDialog->ShowModal();
    }
 
    switch (evt.GetId())
    {
+      case MENU_CAMERA_SLOW:
+         mProjectManager.mCameraSpeed = 0.1f;
+         break;
+
+      case MENU_CAMERA_NORMAL:
+         mProjectManager.mCameraSpeed = 0.5f;
+         break;
+
+      case MENU_CAMERA_FAST:
+         mProjectManager.mCameraSpeed = 1.0f;
+         break;
+
       case MENU_PROJECT:
          EditorTool::smEditorTools[0]->openTool();
          break;
@@ -136,27 +157,6 @@ void Torque6Editor::OnMenuEvent(wxCommandEvent& evt)
 
       case MENU_FORUMS:
          wxLaunchDefaultBrowser("http://forums.torque3d.org/viewforum.php?f=32");
-         break;
-
-      default:
-         break;
-   }
-}
-
-void Torque6Editor::OnToolbarEvent( wxCommandEvent& evt )
-{
-   switch(evt.GetId())
-   {
-      case 0:
-         mProjectManager.mEditorMode = 0;
-         break;
-
-      case 1:
-         mProjectManager.mEditorMode = 1;
-         break;
-
-      case 2:
-         mProjectManager.mEditorMode = 2;
          break;
 
       default:

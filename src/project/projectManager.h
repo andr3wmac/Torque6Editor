@@ -92,20 +92,24 @@ class ProjectManager : public wxEvtHandler, public Rendering::Renderable
       ProjectManager();
       ~ProjectManager();
 
-      void init(wxAuiManager* manager, wxWindow* window);
+      void init(wxString runPath, wxAuiManager* manager, MainFrame* frame, wxWindow* window);
       bool isProjectLoaded() { return mProjectLoaded; }
 
       LIBRARY_HANDLE    mTorque6Library;
       initFunc          mTorque6Init;
       shutdownFunc      mTorque6Shutdown;
 
+      wxString          mRunPath;
+
       bool              mProjectLoaded;
       wxString          mProjectName;
       wxString          mProjectPath;
       wxAuiManager*     mManager;
+      MainFrame*        mFrame;
       wxWindow*         mWindow;
       EditorCamera      mCamera;
       Point3F           mCameraPanVelocity;
+      F32               mCameraSpeed;
 
       S32               mEditorMode;
 
@@ -114,11 +118,13 @@ class ProjectManager : public wxEvtHandler, public Rendering::Renderable
 
       bool openProject(wxString projectPath);
       void closeProject();
+      void runProject();
 
       virtual void preRender();
       virtual void render();
       virtual void postRender();
 
+      virtual void OnToolbarEvent(wxCommandEvent& evt);
       virtual void OnIdle(wxIdleEvent& evt);
       virtual void OnSize(wxSizeEvent& evt);
       virtual void OnMouseMove(wxMouseEvent& evt);

@@ -38,6 +38,27 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	
 	mainMenuBar->Append( m_menu1, wxT("File") ); 
 	
+	m_menu7 = new wxMenu();
+	wxMenuItem* m_menuItem291;
+	m_menuItem291 = new wxMenuItem( m_menu7, wxID_ANY, wxString( wxT("Return to (0, 0, 0)") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu7->Append( m_menuItem291 );
+	
+	m_menu7->AppendSeparator();
+	
+	wxMenuItem* m_menuItem30;
+	m_menuItem30 = new wxMenuItem( m_menu7, MENU_CAMERA_SLOW, wxString( wxT("Speed: Slow") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu7->Append( m_menuItem30 );
+	
+	wxMenuItem* m_menuItem31;
+	m_menuItem31 = new wxMenuItem( m_menu7, MENU_CAMERA_NORMAL, wxString( wxT("Speed: Normal") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu7->Append( m_menuItem31 );
+	
+	wxMenuItem* m_menuItem32;
+	m_menuItem32 = new wxMenuItem( m_menu7, MENU_CAMERA_FAST, wxString( wxT("Speed: Fast") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu7->Append( m_menuItem32 );
+	
+	mainMenuBar->Append( m_menu7, wxT("Camera") ); 
+	
 	m_menu2 = new wxMenu();
 	wxMenuItem* m_menuItem5;
 	m_menuItem5 = new wxMenuItem( m_menu2, MENU_PROJECT, wxString( wxT("Project") ) , wxEmptyString, wxITEM_NORMAL );
@@ -319,6 +340,10 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	wxMenuItem* m_menuItem18;
 	m_menuItem18 = new wxMenuItem( addFeatureMenu, ADD_FEATURE_DIRLIGHT, wxString( wxT("Directional Light") ) , wxEmptyString, wxITEM_NORMAL );
 	addFeatureMenu->Append( m_menuItem18 );
+	
+	wxMenuItem* m_menuItem28;
+	m_menuItem28 = new wxMenuItem( addFeatureMenu, ADD_FEATURE_SKYLIGHT, wxString( wxT("Sky Light") ) , wxEmptyString, wxITEM_NORMAL );
+	addFeatureMenu->Append( m_menuItem28 );
 	
 	m_panel12->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ScenePanel::m_panel12OnContextMenu ), NULL, this ); 
 	

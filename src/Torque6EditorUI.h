@@ -46,39 +46,43 @@ WX_DEFINE_ARRAY_PTR( wxWizardPageSimple*, WizardPages );
 
 ///////////////////////////////////////////////////////////////////////////
 
-#define MENU_PROJECT 1000
-#define MENU_CONSOLE 1001
-#define MENU_SCENE 1002
-#define MENU_SCRIPTS 1003
-#define MENU_MATERIALS 1004
-#define MENU_PROFILER 1005
-#define MENU_WEBSITE 1006
-#define MENU_GITHUB 1007
-#define MENU_FORUMS 1008
-#define MENU_ABOUT 1009
-#define PROFILER_START 1010
-#define SCENE_NEW 1011
-#define SCENE_OPEN 1012
-#define SCENE_SAVE 1013
-#define ADD_ENTITY_BUTTON 1014
-#define ENTITY_LIST 1015
-#define ADD_FEATURE_BUTTON 1016
-#define FEATURE_LIST 1017
-#define ADD_FEATURE_DLAA 1018
-#define ADD_FEATURE_SSAO 1019
-#define ADD_FEATURE_HDR 1020
-#define ADD_FEATURE_SKYBOX 1021
-#define ADD_FEATURE_DIRLIGHT 1022
-#define TRANSLATE_SNAP_NONE 1023
-#define TRANSLATE_SNAP_1 1024
-#define TRANSLATE_SNAP_2 1025
-#define TRANSLATE_SNAP_3 1026
-#define TRANSLATE_SNAP_4 1027
-#define MATERIAL_SAVE 1028
-#define ASSET_LIST 1029
-#define MENU_IMPORT_MESH 1030
-#define MENU_IMPORT_TEXTURE 1031
-#define MENU_NEW_MATERIAL 1032
+#define MENU_CAMERA_SLOW 1000
+#define MENU_CAMERA_NORMAL 1001
+#define MENU_CAMERA_FAST 1002
+#define MENU_PROJECT 1003
+#define MENU_CONSOLE 1004
+#define MENU_SCENE 1005
+#define MENU_SCRIPTS 1006
+#define MENU_MATERIALS 1007
+#define MENU_PROFILER 1008
+#define MENU_WEBSITE 1009
+#define MENU_GITHUB 1010
+#define MENU_FORUMS 1011
+#define MENU_ABOUT 1012
+#define PROFILER_START 1013
+#define SCENE_NEW 1014
+#define SCENE_OPEN 1015
+#define SCENE_SAVE 1016
+#define ADD_ENTITY_BUTTON 1017
+#define ENTITY_LIST 1018
+#define ADD_FEATURE_BUTTON 1019
+#define FEATURE_LIST 1020
+#define ADD_FEATURE_DLAA 1021
+#define ADD_FEATURE_SSAO 1022
+#define ADD_FEATURE_HDR 1023
+#define ADD_FEATURE_SKYBOX 1024
+#define ADD_FEATURE_DIRLIGHT 1025
+#define ADD_FEATURE_SKYLIGHT 1026
+#define TRANSLATE_SNAP_NONE 1027
+#define TRANSLATE_SNAP_1 1028
+#define TRANSLATE_SNAP_2 1029
+#define TRANSLATE_SNAP_3 1030
+#define TRANSLATE_SNAP_4 1031
+#define MATERIAL_SAVE 1032
+#define ASSET_LIST 1033
+#define MENU_IMPORT_MESH 1034
+#define MENU_IMPORT_TEXTURE 1035
+#define MENU_NEW_MATERIAL 1036
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainFrame
@@ -89,6 +93,7 @@ class MainFrame : public wxFrame
 	
 	protected:
 		wxMenu* m_menu1;
+		wxMenu* m_menu7;
 		wxMenu* m_menu2;
 		wxMenu* m_menu6;
 	

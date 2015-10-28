@@ -28,6 +28,7 @@
 #endif
 
 #include <wx/dir.h>
+#include <wx/utils.h> 
 #include "wx/treectrl.h"
 #include "wx/aui/aui.h"
 #include "wx/dnd.h"
@@ -47,6 +48,7 @@ class TextDropTarget : public wxTextDropTarget
 
 ProjectManager::ProjectManager()
    :  mManager(NULL),
+      mFrame(NULL),
       mWindow(NULL),
       mProjectLoaded( false ), 
       mProjectName(""),
@@ -59,6 +61,7 @@ ProjectManager::ProjectManager()
       mEditorMode(0)
 {
    mCameraPanVelocity = Point3F::Zero;
+   mCameraSpeed = 0.5f;
 }
 
 ProjectManager::~ProjectManager()
@@ -68,10 +71,12 @@ ProjectManager::~ProjectManager()
       FreeLibrary(mTorque6Library);
 }
 
-void ProjectManager::init(wxAuiManager* manager, wxWindow* window)
+void ProjectManager::init(wxString runPath, wxAuiManager* manager, MainFrame* frame, wxWindow* window)
 {
+   mRunPath = runPath;
    mManager = manager;
-   mWindow = window;
+   mFrame   = frame;
+   mWindow  = window;
 
    TextDropTarget* dropTarget = new TextDropTarget();
    mWindow->SetDropTarget(dropTarget);
@@ -90,6 +95,14 @@ void ProjectManager::init(wxAuiManager* manager, wxWindow* window)
    // Keyboard Events
    mWindow->Connect(wxID_ANY, wxEVT_KEY_DOWN, wxKeyEventHandler(ProjectManager::OnKeyDown), NULL, this);
    mWindow->Connect(wxID_ANY, wxEVT_KEY_UP, wxKeyEventHandler(ProjectManager::OnKeyUp), NULL, this);
+
+   // Add Tools to toolabr
+   mFrame->mainToolbar->AddTool(0, wxT("Run"), wxBitmap(wxT("images/run.png"), wxBITMAP_TYPE_ANY), wxNullBitmap, wxITEM_NORMAL, wxT("Run"), wxEmptyString, NULL);
+   mFrame->mainToolbar->AddSeparator();
+   mFrame->mainToolbar->Realize();
+
+   // Toolbar Events
+   mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(ProjectManager::OnToolbarEvent), NULL, this);
 }
 
 bool ProjectManager::openProject(wxString projectPath)
@@ -97,7 +110,11 @@ bool ProjectManager::openProject(wxString projectPath)
    // Load Torque 6 DLL
    if ( mTorque6Library == NULL )
    {
+#ifdef TORQUE_DEBUG
       mTorque6Library = openLibrary("Torque6_DEBUG");
+#else
+      mTorque6Library = openLibrary("Torque6");
+#endif
 
       // Load Nessicary Functions
       mTorque6Init      = (initFunc)getLibraryFunc(mTorque6Library, "winInit");
@@ -153,6 +170,40 @@ void ProjectManager::closeProject()
    //FreeLibrary(T6_lib);
 
    onProjectClosed();
+}
+
+void ProjectManager::runProject()
+{
+   wxString command = "";
+   command.Append(mRunPath);
+   command.Append(" -project ");
+   command.Append(mProjectPath);
+   wxExecute(command);
+}
+
+void ProjectManager::OnToolbarEvent(wxCommandEvent& evt)
+{
+   switch (evt.GetId())
+   {
+      case 0:
+         runProject();
+         break;
+
+      case 1:
+         mEditorMode = 0;
+         break;
+
+      case 2:
+         mEditorMode = 1;
+         break;
+
+      case 3:
+         mEditorMode = 2;
+         break;
+
+      default:
+         break;
+   }
 }
 
 void ProjectManager::OnIdle(wxIdleEvent& evt)
@@ -270,19 +321,19 @@ void ProjectManager::OnKeyDown(wxKeyEvent& evt)
    switch (evt.GetKeyCode())
    {
       case 87: // W
-         mCameraPanVelocity.y = -1.0;
+         mCameraPanVelocity.y = -1.0 * mCameraSpeed;
          break;
 
       case 65: // A
-         mCameraPanVelocity.x = 1.0;
+         mCameraPanVelocity.x = 1.0 * mCameraSpeed;
          break;
 
       case 83: // S
-         mCameraPanVelocity.y = 1.0;
+         mCameraPanVelocity.y = 1.0 * mCameraSpeed;
          break;
 
       case 68: // D
-         mCameraPanVelocity.x = -1.0;
+         mCameraPanVelocity.x = -1.0 * mCameraSpeed;
          break;
    }
    mCamera.setPanVelocity(mCameraPanVelocity);

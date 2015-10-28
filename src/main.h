@@ -74,10 +74,12 @@ public:
    // Torque 6 Project Manager
    ProjectManager    mProjectManager;
 
+   // Dialogs
+   AboutDialog*      mAboutDialog;
+
    // Events
 	virtual bool OnInit();
    virtual void OnMenuEvent( wxCommandEvent& evt );
-   virtual void OnToolbarEvent( wxCommandEvent& evt );
 };
  
 DECLARE_APP(Torque6Editor)
