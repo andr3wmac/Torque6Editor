@@ -176,23 +176,21 @@ void SceneTool::closeTool()
 
 void SceneTool::renderTool()
 {
+   // Draw Light Icons
    if (mLightIcon != NULL)
    {
       Vector<Rendering::LightData*> lightList = Plugins::Link.Rendering.getLightList();
       for (U32 n = 0; n < lightList.size(); ++n)
       {
          Rendering::LightData* light = lightList[n];
-         
-         Plugins::Link.Graphics.drawBillboard(mProjectManager->mRenderLayer4View->id, 
-                                              mLightIcon, 
-                                              light->position, 
-                                              1.0f, 1.0f, 
-                                              ColorI(light->color[0] * 255, light->color[1] * 255, light->color[2] * 255, 255), 
+
+         Plugins::Link.Graphics.drawBillboard(mProjectManager->mRenderLayer4View->id,
+                                              mLightIcon,
+                                              light->position,
+                                              1.0f, 1.0f,
+                                              ColorI(light->color[0] * 255, light->color[1] * 255, light->color[2] * 255, 255),
                                               NULL);
       }
-   }
-   else {
-      mLightIcon = Plugins::Link.Graphics.loadTexture("light.png", TextureHandle::BitmapKeepTexture, BGFX_TEXTURE_NONE, false, false);
    }
 
    // Entity Selected
@@ -267,6 +265,9 @@ void SceneTool::onProjectLoaded(const wxString& projectName, const wxString& pro
    refreshEntityList();
    refreshFeatureList();
    refreshChoices();
+
+   if ( mLightIcon == NULL )
+      mLightIcon = Plugins::Link.Graphics.loadTexture("light.png", TextureHandle::BitmapKeepTexture, BGFX_TEXTURE_NONE, false, false);
 }
 
 void SceneTool::onProjectClosed()
