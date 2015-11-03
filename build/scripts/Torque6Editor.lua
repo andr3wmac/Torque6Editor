@@ -52,30 +52,30 @@ function Torque6Editor()
                     "wsock32",
                     "wininet", 
                   }
-            includedirs { "$(wxwin)/include",
-                          "$(wxwin)/src/stc/scintilla/include",
-                          "$(wxwin)/src/stc/scintilla/lexlib",
-                          "$(wxwin)/src/stc/scintilla/src",
+            includedirs { path.join(EDITOR_DIR, "wxWidgets/include"),
+                          path.join(EDITOR_DIR, "wxWidgets/src/stc/scintilla/include"),
+                          path.join(EDITOR_DIR, "wxWidgets/src/stc/scintilla/lexlib"),
+                          path.join(EDITOR_DIR, "wxWidgets/src/stc/scintilla/src"),
                         }
             
         configuration { "windows", "x32", "Release" }
-            includedirs { "$(wxwin)/lib/vc_lib/mswu" }
-            libdirs { "$(wxwin)/lib/vc_lib" }
+            includedirs { path.join(EDITOR_DIR, "wxWidgets/lib/vc_lib/mswu") }
+            libdirs { path.join(EDITOR_DIR, "wxWidgets/lib/vc_lib") }
             targetdir (BUILD_DIR .. "/windows.x32.release")
 
         configuration { "windows", "x32", "Debug" }
-            includedirs { "$(wxwin)/lib/vc_lib/mswu" }
-            libdirs { "$(wxwin)/lib/vc_lib" }
+            includedirs { path.join(EDITOR_DIR, "wxWidgets/lib/vc_lib/mswu") }
+            libdirs { path.join(EDITOR_DIR, "wxWidgets/lib/vc_lib") }
             targetdir (BUILD_DIR .. "/windows.x32.debug")
 
         configuration { "windows", "x64", "Release" }
-            includedirs { "$(wxwin)/lib/vc_lib/mswu" }
-            libdirs { "$(wxwin)/lib/vc_x64_lib" }
+            includedirs { path.join(EDITOR_DIR, "wxWidgets/lib/vc_lib/mswu") }
+            libdirs { path.join(EDITOR_DIR, "wxWidgets/lib/vc_x64_lib") }
             targetdir (BUILD_DIR .. "/windows.x64.release")
 
         configuration { "windows", "x64", "Debug" }
-            includedirs { "$(wxwin)/lib/vc_lib/mswud" }
-            libdirs { "$(wxwin)/lib/vc_x64_lib" }
+            includedirs { path.join(EDITOR_DIR, "wxWidgets/lib/vc_lib/mswud") }
+            libdirs { path.join(EDITOR_DIR, "wxWidgets/lib/vc_x64_lib") }
             targetdir (BUILD_DIR .. "/windows.x64.debug")
 
         configuration { "windows", "Release" }
