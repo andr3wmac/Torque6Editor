@@ -53,6 +53,7 @@ class Node
       F32 width;
       F32 height;
       bool mouseOver;
+      F32 alphaThreshold;
 
       bool showColor;
       ColorF color;
@@ -79,7 +80,8 @@ class Node
          width = 100;
          height = 150;
          mouseOver = false;
-         textureSlot = 0;
+         textureSlot = 0; 
+         alphaThreshold = 0.0f;
       }
 
       void addInput(const char* name)

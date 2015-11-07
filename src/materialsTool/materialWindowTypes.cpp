@@ -54,6 +54,13 @@ Node* MaterialWindow::addDeferredNode(Scene::BaseNode* node)
    newNode.addInput("Roughness");
    newNode.addInput("Emissive");
    newNode.addInput("World Position Offset");
+
+   if (node != NULL)
+   {
+      Scene::DeferredNode* def_node = dynamic_cast<Scene::DeferredNode*>(node);
+      if (def_node)
+         newNode.alphaThreshold = def_node->mAlphaThreshold;
+   }
    
    nodeList.push_back(newNode);
    return &nodeList.back();
@@ -177,6 +184,7 @@ Node* MaterialWindow::addTextureNode(Scene::BaseNode* node)
       Scene::TextureNode* tex_node = dynamic_cast<Scene::TextureNode*>(node);
       if ( tex_node )
       {
+         newNode.textureSlot = tex_node->mSlot;
          //bgfx::TextureHandle* tex = getTextureHandle(tex_node->mSlot);
          //if ( tex != NULL )
          //{
@@ -259,6 +267,30 @@ Node* MaterialWindow::addMultiplyNode(Scene::BaseNode* node)
    return &nodeList.back();
 }
 
+Node* MaterialWindow::addLerpNode(Scene::BaseNode* node)
+{
+   Node newNode;
+   newNode.name = getUniqueNodeName("NewLerp");
+   newNode.type = "Lerp";
+   newNode.x = -mWindowX + mLastMousePoint.x;
+   newNode.y = -mWindowY + mLastMousePoint.y;
+   newNode.width = 120.0f;
+   newNode.height = 110.0f;
+   newNode.addInput("a");
+   newNode.addInput("b");
+   newNode.addInput("amount");
+   if (node != NULL)
+   {
+      Scene::LerpNode* lerp_node = dynamic_cast<Scene::LerpNode*>(node);
+      if (lerp_node)
+         newNode.color = ColorF(lerp_node->mAmount, 0.0f, 0.0f, 0.0f);
+   }
+   newNode.addOutput(ColorI(255, 255, 255, 255));
+
+   nodeList.push_back(newNode);
+   return &nodeList.back();
+}
+
 void MaterialWindow::addNode(Scene::MaterialTemplate* matTemplate, const char* type, Scene::BaseNode* node)
 {
    if ( !matTemplate ) 
@@ -312,6 +344,11 @@ void MaterialWindow::addNode(Scene::MaterialTemplate* matTemplate, const char* t
    {
       if ( createMaterialNode ) matNode = new Scene::MultiplyNode();
       newNode = addMultiplyNode(matNode);
+   }
+   if (dStrcmp(type, "Lerp") == 0)
+   {
+      if (createMaterialNode) matNode = new Scene::LerpNode();
+      newNode = addLerpNode(matNode);
    }
    if ( dStrcmp(type, "Sin") == 0 ) 
    {
@@ -385,6 +422,16 @@ void MaterialWindow::addNodeConnection(Node* node)
       return;
    }
 
+   // Lerp
+   Scene::LerpNode* lerp_node = dynamic_cast<Scene::LerpNode*>(node->materialNode);
+   if (lerp_node)
+   {
+      addConnection(lerp_node->mInputASrc, 0, node->name, 0);
+      addConnection(lerp_node->mInputBSrc, 0, node->name, 1);
+      addConnection(lerp_node->mAmountSrc, 0, node->name, 2);
+      return;
+   }
+
    // Sin
    Scene::SinNode* sin_node = dynamic_cast<Scene::SinNode*>(node->materialNode);
    if ( sin_node )
@@ -446,6 +493,19 @@ void MaterialWindow::saveConnection(Connection* connection)
       return;
    }
 
+   // Lerp
+   Scene::LerpNode* lerp_node = dynamic_cast<Scene::LerpNode*>(inputNode->materialNode);
+   if (lerp_node)
+   {
+      if (connection->inputIndex == 0)
+         lerp_node->mInputASrc = Link.StringTableLink->insert(connection->outputNodeName);
+      if (connection->inputIndex == 1)
+         lerp_node->mInputBSrc = Link.StringTableLink->insert(connection->outputNodeName);
+      if (connection->inputIndex == 2)
+         lerp_node->mAmountSrc = Link.StringTableLink->insert(connection->outputNodeName);
+      return;
+   }
+
    // Sin
    Scene::SinNode* sin_node = dynamic_cast<Scene::SinNode*>(inputNode->materialNode);
    if ( sin_node )
@@ -471,12 +531,13 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    Scene::DeferredNode* def_node = dynamic_cast<Scene::DeferredNode*>(node->materialNode);
    if ( def_node )
    {
-      def_node->mColorSrc = Link.StringTableLink->EmptyString;
-      def_node->mNormalSrc = Link.StringTableLink->EmptyString;
-      def_node->mMetallicSrc = Link.StringTableLink->EmptyString;
-      def_node->mRoughnessSrc = Link.StringTableLink->EmptyString;
-      def_node->mEmissiveSrc = Link.StringTableLink->EmptyString;
-      def_node->mWorldPosOffsetSrc = Link.StringTableLink->EmptyString;
+      def_node->mColorSrc           = Link.StringTableLink->EmptyString;
+      def_node->mNormalSrc          = Link.StringTableLink->EmptyString;
+      def_node->mMetallicSrc        = Link.StringTableLink->EmptyString;
+      def_node->mRoughnessSrc       = Link.StringTableLink->EmptyString;
+      def_node->mEmissiveSrc        = Link.StringTableLink->EmptyString;
+      def_node->mWorldPosOffsetSrc  = Link.StringTableLink->EmptyString;
+      def_node->mAlphaThreshold     = node->alphaThreshold;
       return;
    }
 
@@ -494,6 +555,16 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    {
       mul_node->mInputASrc = Link.StringTableLink->EmptyString;
       mul_node->mInputBSrc = Link.StringTableLink->EmptyString;
+      return;
+   }
+
+   // Lerp
+   Scene::LerpNode* lerp_node = dynamic_cast<Scene::LerpNode*>(node->materialNode);
+   if (lerp_node)
+   {
+      lerp_node->mInputASrc = Link.StringTableLink->EmptyString;
+      lerp_node->mInputBSrc = Link.StringTableLink->EmptyString;
+      lerp_node->mAmountSrc = Link.StringTableLink->EmptyString;
       return;
    }
 

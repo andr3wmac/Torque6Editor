@@ -289,6 +289,10 @@ void MaterialsTool::selectNode(MaterialWindow* parent, Node* node)
    grid->Append(new wxStringProperty("Name", "Name", node->name));
    grid->Append(new wxPropertyCategory(node->type));
 
+   // Deferred
+   if (node->type == "Deferred")
+      grid->Append(new wxFloatProperty("AlphaThreshold", "AlphaThreshold", node->alphaThreshold));
+
    // Texture
    if (node->type == "Texture")
       grid->Append(new wxIntProperty("Slot", "Slot", node->textureSlot));
@@ -300,6 +304,10 @@ void MaterialsTool::selectNode(MaterialWindow* parent, Node* node)
    // Time
    if (node->type == "Time")
       grid->Append(new wxFloatProperty("Multiplier", "Multiplier", node->color.red));
+
+   // Lerp
+   if (node->type == "Lerp")
+      grid->Append(new wxFloatProperty("Amount", "Amount", node->color.red));
 
    // Vec2
    if (node->type == "Vec2")
@@ -336,6 +344,10 @@ void MaterialsTool::OnPropertyChanged(wxPropertyGridEvent& evt)
       if (mSelectedNode->materialNode != NULL)
          mSelectedNode->materialNode->setInternalName(mSelectedNode->name);
    }
+
+   // Slot is for Deferred
+   if (name == "AlphaThreshold")
+      mSelectedNode->alphaThreshold = val.GetDouble();
 
    // Slot is for Textures
    if (name == "Slot")

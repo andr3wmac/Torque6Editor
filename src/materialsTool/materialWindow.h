@@ -69,6 +69,10 @@
 #include "3d/material/nodes/multiplyNode.h"
 #endif
 
+#ifndef _LERP_NODE_H_
+#include "3d/material/nodes/lerpNode.h"
+#endif
+
 #ifndef _SIN_NODE_H_
 #include "3d/material/nodes/sinNode.h"
 #endif
@@ -141,6 +145,7 @@ class MaterialWindow: public wxScrolledWindow
       Node* addCosNode(Scene::BaseNode* node = NULL);
       Node* addSinNode(Scene::BaseNode* node = NULL);
       Node* addMultiplyNode(Scene::BaseNode* node = NULL);
+      Node* addLerpNode(Scene::BaseNode* node = NULL);
       void  addNode(Scene::MaterialTemplate* matTemplate, const char* type, Scene::BaseNode* node = NULL);
       void  addNodeConnection(Node* node);
       void  deleteNode(Scene::MaterialTemplate* matTemplate, Node* node);

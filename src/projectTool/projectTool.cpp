@@ -324,6 +324,9 @@ void ProjectTool::OnPropertyChanged( wxPropertyGridEvent& evt )
    // Set Value.
    mSelectedAsset->setDataField(Plugins::Link.StringTableLink->insert(name), NULL, strVal);
 
+   // Save the asset
+   mSelectedAsset->saveAsset();
+
    // Refresh textures if it's a MaterialAsset.
    if (mSelectedMaterialAsset)
       mSelectedMaterialAsset->loadTextures();
@@ -372,6 +375,24 @@ void ProjectTool::refreshAssetList()
 
    Vector<const AssetDefinition*> assetDefinitions = Plugins::Link.AssetDatabaseLink.getDeclaredAssets();
    Vector<Module> modules;
+
+   // Fetch all loaded module definitions.
+   ModuleManager::typeConstModuleDefinitionVector loadedModules;
+   Plugins::Link.ModuleDatabaseLink->findModules(true, loadedModules);
+
+   // Iterate found loaded module definitions.
+   for (ModuleManager::typeConstModuleDefinitionVector::const_iterator loadedModuleItr = loadedModules.begin(); loadedModuleItr != loadedModules.end(); ++loadedModuleItr)
+   {
+      // Fetch module definition.
+      const ModuleDefinition* module = *loadedModuleItr;
+
+      // Add to module list.
+      Module newModule;
+      newModule.moduleID = module->getModuleId();
+      newModule.moduleVersion = module->getVersionId();
+      newModule.treeItemID = mProjectPanel->assetList->AppendItem(mAssetListRoot, newModule.moduleID, 0, -1, new ModuleTreeItemData(newModule));
+      modules.push_back(newModule);
+   }
 
    // Iterate sorted asset definitions.
    for (Vector<const AssetDefinition*>::iterator assetItr = assetDefinitions.begin(); assetItr != assetDefinitions.end(); ++assetItr)
@@ -442,6 +463,9 @@ void ProjectTool::refreshAssetList()
          modules.push_back(newModule);
       }
    }
+
+   // Sort Modules by Name
+   mProjectPanel->assetList->SortChildren(mAssetListRoot);
 }
 
 void ProjectTool::refreshChoices()

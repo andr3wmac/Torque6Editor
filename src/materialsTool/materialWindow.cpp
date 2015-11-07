@@ -292,7 +292,7 @@ void MaterialWindow::OnRightMouseUp(wxMouseEvent &evt)
 
       if (mHoverNode != NULL)
       {
-         menu->Append(10, wxT("Delete Node"));
+         menu->Append(100, wxT("Delete Node"));
          menu->AppendSeparator();
       }
 
@@ -306,6 +306,7 @@ void MaterialWindow::OnRightMouseUp(wxMouseEvent &evt)
       menu->Append(7, wxT("Cos"));
       menu->Append(8, wxT("Sin"));
       menu->Append(9, wxT("Multiply"));
+      menu->Append(10, wxT("Lerp"));
       PopupMenu(menu, wxDefaultPosition);
       delete menu;
    }
@@ -330,9 +331,10 @@ void MaterialWindow::OnMenuEvent( wxCommandEvent& evt )
       case 7: addNode(mMaterialAsset->getTemplate(), "Cos"); break;
       case 8: addNode(mMaterialAsset->getTemplate(), "Sin"); break;
       case 9: addNode(mMaterialAsset->getTemplate(), "Multiply"); break;
+      case 10: addNode(mMaterialAsset->getTemplate(), "Lerp"); break;
 
       // Delete Node
-      case 10:
+      case 100:
          deleteNode(mMaterialAsset->getTemplate(), mHoverNode);
          break;
    }
