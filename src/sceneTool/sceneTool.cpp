@@ -55,7 +55,8 @@ SceneTool::SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiMa
      mSelectedFeature(NULL),
      mMenuEntity(NULL),
      mMenuComponent(NULL),
-     mLightIcon(NULL)
+     mLightIcon(NULL),
+     mRefreshing(false)
 {
    mEntityIconList = new wxImageList(16, 16);
    mFeatureIconList = new wxImageList( 16, 16 );
@@ -108,7 +109,7 @@ void SceneTool::initTool()
    mScenePanel->entityList->AssignImageList(mEntityIconList);
 
    // Entity Events
-   mScenePanel->entityList->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(SceneTool::OnTreeEvent), NULL, this);
+   mScenePanel->entityList->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(SceneTool::OnTreeEvent), NULL, this);
    mScenePanel->entityList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneTool::OnTreeMenu), NULL, this);
    mScenePanel->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnEntityPropChanged), NULL, this);
 
@@ -117,7 +118,7 @@ void SceneTool::initTool()
    mScenePanel->featureList->AssignImageList(mFeatureIconList);
 
    // Feature Events
-   mScenePanel->featureList->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(SceneTool::OnTreeEvent), NULL, this);
+   mScenePanel->featureList->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(SceneTool::OnTreeEvent), NULL, this);
    mScenePanel->featureList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneTool::OnTreeMenu), NULL, this);
    mScenePanel->featurePropGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnFeaturePropChanged), NULL, this);
 
@@ -147,7 +148,7 @@ void SceneTool::initTool()
    mFrame->mainToolbar->Realize();
 
    // Toolbar Dropdown Events
-   //mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_TOOL_DROPDOWN_CLICKED, wxCommandEventHandler(SceneTool::OnToolbarDropdownEvent), NULL, this);
+   mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_TOOL_DROPDOWN_CLICKED, wxCommandEventHandler(SceneTool::OnToolbarDropdownEvent), NULL, this);
 
    // Refresh Mesh and Material Choices
    refreshChoices();
@@ -230,7 +231,7 @@ bool SceneTool::onMouseLeftDown(int x, int y)
       if (mSelectedObject != hit)
       {
          if (hit)
-            selectEntity(hit);
+            selectEntity(hit, true);
       }
    }
 
@@ -300,6 +301,7 @@ void SceneTool::OnMenuEvent(wxCommandEvent& evt)
    if (evt.GetId() == ADD_ENTITY_BUTTON)
       openAddEntityMenu();
 
+   // TODO: These shouldn't be hardcoded, it should be dynamic.
    if (evt.GetId() == ADD_FEATURE_DLAA)
    {
       Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("DLAA"));
@@ -369,6 +371,9 @@ void SceneTool::OnAddEntityMenuEvent(wxCommandEvent& evt)
 
 void SceneTool::OnTreeEvent( wxTreeEvent& evt )
 {
+   if (mRefreshing)
+      return;
+
    if (evt.GetId() == ENTITY_LIST)
    {
       EntityTreeItemData* data = dynamic_cast<EntityTreeItemData*>(mScenePanel->entityList->GetItemData(evt.GetItem()));
@@ -419,6 +424,7 @@ void SceneTool::OnTreeMenu( wxTreeEvent& evt )
          menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnEntityMenuEvent), NULL, this);
          menu->Append(0, wxT("Delete Entity"));
 
+         // TODO: This shouldn't be hardcoded, it should be dynamic.
          wxMenu* compMenu = new wxMenu;
          compMenu->Append(1, wxT("AnimationComponent"));
          compMenu->Append(2, wxT("ControllerComponent"));
@@ -464,6 +470,7 @@ void SceneTool::OnEntityMenuEvent(wxCommandEvent& evt)
    }
 
    // Add New Component
+   // TODO: This shouldn't be hardcoded, it should be dynamic.
    if (evt.GetId() > 0)
    {
       Scene::BaseComponent* newComponent = NULL;
@@ -524,6 +531,21 @@ void SceneTool::OnEntityPropChanged(wxPropertyGridEvent& evt)
    wxVariant val = evt.GetPropertyValue();
    wxString strVal = val.GetString();
 
+   // Special Name Handling.
+   if (name == "Name" && mSelectedEntity)
+   {
+      mSelectedEntity->assignUniqueName(strVal);
+      refreshEntityList();
+      return;
+   }
+   else if (name == "InternalName" && mSelectedComponent)
+   {
+      mSelectedComponent->setInternalName(strVal);
+      refreshEntityList();
+      return;
+   }
+
+   // Special Field Handling by Name
    if (name == "MeshAsset")
    {
       long intVal = val.GetInteger();
@@ -539,7 +561,7 @@ void SceneTool::OnEntityPropChanged(wxPropertyGridEvent& evt)
       strVal = val.GetBool() ? "true" : "false";
    }
 
-   // Check field type.
+   // Special Field Handling by Type
    U32 type = mSelectedObject->getDataFieldType(Plugins::Link.StringTableLink->insert(name), NULL);
    if (type == Plugins::Link.Con.TypeColorF)
    {
@@ -548,6 +570,8 @@ void SceneTool::OnEntityPropChanged(wxPropertyGridEvent& evt)
       strVal.Printf("%f %f %f 1.0", color.Red() / 255.0f, color.Green() / 255.0f, color.Blue() / 255.0f);
    }
 
+   // Assign the value and refresh the entity. 
+   // Note: No need to refresh a selected component, better to refresh the whole entity.
    mSelectedObject->setDataField(Plugins::Link.StringTableLink->insert(name), NULL, strVal);
    mSelectedEntity->refresh();
 }
@@ -575,10 +599,13 @@ void SceneTool::refreshEntityList()
    if (!mProjectManager->isProjectLoaded())
       return;
 
+   mRefreshing = true;
+
    // Clear list.
    mScenePanel->entityList->DeleteAllItems();
    mEntityListRoot = mScenePanel->entityList->AddRoot("ROOT");
 
+   wxTreeItemId selectItem = mEntityListRoot;
    SimGroup* sceneGroup = Plugins::Link.Scene.getEntityGroup();
    if ( sceneGroup != NULL )
    {
@@ -587,15 +614,18 @@ void SceneTool::refreshEntityList()
          Scene::SceneEntity* entity = dynamic_cast<Scene::SceneEntity*>(sceneGroup->at(n));
          if ( !entity ) continue;
          wxTreeItemId entityItem = mScenePanel->entityList->AppendItem(mEntityListRoot, entity->getName(), 0, -1, new EntityTreeItemData(entity));
+         if (mSelectedEntity == entity)
+            selectItem = entityItem;
 
          // Iterate components
          for(S32 n = 0; n < entity->mComponents.size(); ++n)
          {
             Scene::BaseComponent* component = entity->mComponents[n];
+            if (!component) continue;
 
             wxString compName(component->getClassName());
             const char* internalName = component->getInternalName();
-            if ( internalName )
+            if (internalName)
             {
                compName = internalName;
                compName.Append(" (");
@@ -603,11 +633,19 @@ void SceneTool::refreshEntityList()
                compName.Append(")");
             }
 
-            if ( component )
-               mScenePanel->entityList->AppendItem(entityItem, compName, 1, -1, new EntityTreeItemData(component));
+            wxTreeItemId componentItem = mScenePanel->entityList->AppendItem(entityItem, compName, 1, -1, new EntityTreeItemData(component));
+            if (mSelectedComponent == component)
+               selectItem = componentItem;
          }
       }
    }
+
+   // Retain selection.
+   if (selectItem != mEntityListRoot)
+      mScenePanel->entityList->SelectItem(selectItem);
+
+   mScenePanel->entityList->Refresh();
+   mRefreshing = false;
 }
 
 void SceneTool::refreshFeatureList()
@@ -615,10 +653,13 @@ void SceneTool::refreshFeatureList()
    if (!mProjectManager->isProjectLoaded())
       return;
 
+   mRefreshing = true;
+
    // Clear list.
    mScenePanel->featureList->DeleteAllItems();
    mEntityListRoot = mScenePanel->featureList->AddRoot("ROOT");
 
+   wxTreeItemId selectItem = mFeatureListRoot;
    SimGroup* featureGroup = Plugins::Link.Scene.getFeatureGroup();
    if (featureGroup != NULL)
    {
@@ -626,9 +667,18 @@ void SceneTool::refreshFeatureList()
       {
          Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(featureGroup->at(n));
          if (!feature) continue;
-         wxTreeItemId entityItem = mScenePanel->featureList->AppendItem(mFeatureListRoot, feature->mName, 0, -1, new FeatureTreeItemData(feature));
+         wxTreeItemId featureItem = mScenePanel->featureList->AppendItem(mFeatureListRoot, feature->mName, 0, -1, new FeatureTreeItemData(feature));
+         if (mSelectedFeature == feature)
+            selectItem = featureItem;
       }
    }
+
+   // Retain selection.
+   if (selectItem != mFeatureListRoot)
+      mScenePanel->featureList->SelectItem(selectItem);
+
+   mScenePanel->featureList->Refresh();
+   mRefreshing = false;
 }
 
 void SceneTool::refreshChoices()
@@ -636,6 +686,7 @@ void SceneTool::refreshChoices()
    if (!mProjectManager->isProjectLoaded())
       return;
 
+   mRefreshing = true;
    mMaterialChoices.Clear();
    mMeshChoices.Clear();
    mEntityTemplateChoices.Clear();
@@ -664,8 +715,9 @@ void SceneTool::refreshChoices()
       // Entity Templates
       if (dStrcmp(pAssetDefinition->mAssetType, "EntityTemplateAsset") == 0)
          mEntityTemplateChoices.Add(pAssetDefinition->mAssetId, mMeshChoices.GetCount());
-      
    }
+
+   mRefreshing = false;
 }
 
 static S32 QSORT_CALLBACK compareEntries(const void* a, const void* b)
@@ -678,6 +730,21 @@ static S32 QSORT_CALLBACK compareEntries(const void* a, const void* b)
 void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* obj)
 {
    propertyGrid->Clear();
+
+   Scene::SceneEntity* entity = dynamic_cast<Scene::SceneEntity*>(obj);
+   if (entity)
+   {
+      propertyGrid->Append(new wxPropertyCategory("SceneEntity"));
+      propertyGrid->Append(new wxStringProperty("Name", "Name", entity->getName()));
+   }
+
+   Scene::BaseComponent* component = dynamic_cast<Scene::BaseComponent*>(obj);
+   if (component)
+   {
+      const char* internalName = component->getInternalName();
+      propertyGrid->Append(new wxPropertyCategory("BaseComponent"));
+      propertyGrid->Append(new wxStringProperty("InternalName", "InternalName", internalName));
+   }
 
    // Add static fields.
    wxString fieldGroup("");
@@ -763,25 +830,73 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
    }
 }
 
-void SceneTool::selectEntity(Scene::SceneEntity* entity)
+void SceneTool::selectEntity(Scene::SceneEntity* entity, bool updateTree)
 {
    mSelectedObject = entity;
    mSelectedEntity = entity; 
    mSelectedComponent = NULL;
 
+   // Update the gizmo.
    mGizmo.selectEntity(entity);
 
+   // Update the tree selection.
+   if (updateTree)
+   {
+      wxTreeItemIdValue cookie;
+      wxTreeItemId item = mScenePanel->entityList->GetFirstChild(mEntityListRoot, cookie);
+      wxTreeItemId child;
+      while (item.IsOk())
+      {
+         EntityTreeItemData* data = dynamic_cast<EntityTreeItemData*>(mScenePanel->entityList->GetItemData(item));
+         if (data)
+         {
+            Scene::SceneEntity* dataEntity = dynamic_cast<Scene::SceneEntity*>(data->objPtr);
+            if (dataEntity == entity)
+            {
+               mScenePanel->entityList->SelectItem(item);
+               break;
+            }
+         }
+         item = mScenePanel->entityList->GetNextChild(mEntityListRoot, cookie);
+      }
+   }
+
+   // Property Grid
    loadObjectProperties(mScenePanel->propertyGrid, entity);
 }
 
-void SceneTool::selectComponent(Scene::BaseComponent* component)
+void SceneTool::selectComponent(Scene::BaseComponent* component, bool updateTree)
 {
    mSelectedObject = component;
    mSelectedEntity = component->mOwnerEntity;
    mSelectedComponent = component;
 
+   // Update the gizmo.
    mGizmo.selectComponent(component);
 
+   // Update the tree selection.
+   if (updateTree)
+   {
+      wxTreeItemIdValue cookie;
+      wxTreeItemId item = mScenePanel->entityList->GetFirstChild(mEntityListRoot, cookie);
+      wxTreeItemId child;
+      while (item.IsOk())
+      {
+         EntityTreeItemData* data = dynamic_cast<EntityTreeItemData*>(mScenePanel->entityList->GetItemData(item));
+         if (data)
+         {
+            Scene::BaseComponent* dataComponent = dynamic_cast<Scene::BaseComponent*>(data->objPtr);
+            if (dataComponent == component)
+            {
+               mScenePanel->entityList->SelectItem(item);
+               break;
+            }
+         }
+         item = mScenePanel->entityList->GetNextChild(mEntityListRoot, cookie);
+      }
+   }
+
+   // Property Grid
    loadObjectProperties(mScenePanel->propertyGrid, component);
 }
 

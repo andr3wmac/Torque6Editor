@@ -93,6 +93,7 @@ class SceneTool : public wxEvtHandler, public EditorTool
       wxPGChoices mMaterialChoices;
       wxPGChoices mEntityTemplateChoices;
 
+      bool mRefreshing;
       Gizmo mGizmo;
 
       TextureObject* mLightIcon;
@@ -105,8 +106,8 @@ class SceneTool : public wxEvtHandler, public EditorTool
       void refreshFeatureList();
       void refreshChoices();
       void loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* obj);
-      void selectEntity(Scene::SceneEntity* entity);
-      void selectComponent(Scene::BaseComponent* component);
+      void selectEntity(Scene::SceneEntity* entity, bool updateTree = false);
+      void selectComponent(Scene::BaseComponent* componenty, bool updateTree = false);
       void openAddEntityMenu();
 
       void OnMenuEvent(wxCommandEvent& evt);
