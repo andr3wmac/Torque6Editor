@@ -64,25 +64,20 @@ WX_DEFINE_ARRAY_PTR( wxWizardPageSimple*, WizardPages );
 #define SCENE_OPEN 1015
 #define SCENE_SAVE 1016
 #define ADD_ENTITY_BUTTON 1017
-#define ENTITY_LIST 1018
-#define ADD_FEATURE_BUTTON 1019
-#define FEATURE_LIST 1020
-#define ADD_FEATURE_DLAA 1021
-#define ADD_FEATURE_SSAO 1022
-#define ADD_FEATURE_HDR 1023
-#define ADD_FEATURE_SKYBOX 1024
-#define ADD_FEATURE_DIRLIGHT 1025
-#define ADD_FEATURE_SKYLIGHT 1026
-#define TRANSLATE_SNAP_NONE 1027
-#define TRANSLATE_SNAP_1 1028
-#define TRANSLATE_SNAP_2 1029
-#define TRANSLATE_SNAP_3 1030
-#define TRANSLATE_SNAP_4 1031
-#define MATERIAL_SAVE 1032
-#define ASSET_LIST 1033
-#define MENU_IMPORT_MESH 1034
-#define MENU_IMPORT_TEXTURE 1035
-#define MENU_NEW_MATERIAL 1036
+#define ADD_COMPONENT_BUTTON 1018
+#define ENTITY_LIST 1019
+#define ADD_FEATURE_BUTTON 1020
+#define FEATURE_LIST 1021
+#define TRANSLATE_SNAP_NONE 1022
+#define TRANSLATE_SNAP_1 1023
+#define TRANSLATE_SNAP_2 1024
+#define TRANSLATE_SNAP_3 1025
+#define TRANSLATE_SNAP_4 1026
+#define MATERIAL_SAVE 1027
+#define ASSET_LIST 1028
+#define MENU_IMPORT_MESH 1029
+#define MENU_IMPORT_TEXTURE 1030
+#define MENU_NEW_MATERIAL 1031
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainFrame
@@ -185,27 +180,21 @@ class ScenePanel : public wxPanel
 		wxButton* m_button4;
 		wxNotebook* m_notebook2;
 		wxPanel* m_panel11;
-		wxBitmapButton* m_bpButton1;
-		wxBitmapButton* m_bpButton2;
 		wxSearchCtrl* m_searchCtrl1;
 		wxPanel* m_panel12;
 		wxBitmapButton* m_bpButton11;
 	
 	public:
+		wxBitmapButton* addEntityButton;
+		wxBitmapButton* addComponentButton;
 		wxTreeCtrl* entityList;
 		wxPropertyGrid* propertyGrid;
 		wxTreeCtrl* featureList;
 		wxPropertyGrid* featurePropGrid;
-		wxMenu* addFeatureMenu;
 		wxMenu* translateMenu;
 		
 		ScenePanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
 		~ScenePanel();
-		
-		void m_panel12OnContextMenu( wxMouseEvent &event )
-		{
-			m_panel12->PopupMenu( addFeatureMenu, event.GetPosition() );
-		}
 		
 		void ScenePanelOnContextMenu( wxMouseEvent &event )
 		{

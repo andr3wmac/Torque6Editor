@@ -26,7 +26,7 @@
         <property name="ui_table">UI</property>
         <property name="use_enum">0</property>
         <property name="use_microsoft_bom">0</property>
-        <object class="Frame" expanded="1">
+        <object class="Frame" expanded="0">
             <property name="aui_managed">1</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -88,7 +88,7 @@
             <event name="OnSetFocus"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxMenuBar" expanded="1">
+            <object class="wxMenuBar" expanded="0">
                 <property name="bg"></property>
                 <property name="context_help"></property>
                 <property name="context_menu">1</property>
@@ -133,7 +133,7 @@
                 <event name="OnSetFocus"></event>
                 <event name="OnSize"></event>
                 <event name="OnUpdateUI"></event>
-                <object class="wxMenu" expanded="1">
+                <object class="wxMenu" expanded="0">
                     <property name="label">File</property>
                     <property name="name">m_menu1</property>
                     <property name="permission">protected</property>
@@ -206,11 +206,11 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="1">
+                <object class="wxMenu" expanded="0">
                     <property name="label">Camera</property>
                     <property name="name">m_menu7</property>
                     <property name="permission">protected</property>
-                    <object class="wxMenuItem" expanded="1">
+                    <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
@@ -225,11 +225,11 @@
                         <event name="OnMenuSelection"></event>
                         <event name="OnUpdateUI"></event>
                     </object>
-                    <object class="separator" expanded="1">
+                    <object class="separator" expanded="0">
                         <property name="name">m_separator4</property>
                         <property name="permission">none</property>
                     </object>
-                    <object class="wxMenuItem" expanded="1">
+                    <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
@@ -244,7 +244,7 @@
                         <event name="OnMenuSelection"></event>
                         <event name="OnUpdateUI"></event>
                     </object>
-                    <object class="wxMenuItem" expanded="1">
+                    <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
@@ -259,7 +259,7 @@
                         <event name="OnMenuSelection"></event>
                         <event name="OnUpdateUI"></event>
                     </object>
-                    <object class="wxMenuItem" expanded="1">
+                    <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
@@ -275,7 +275,7 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="1">
+                <object class="wxMenu" expanded="0">
                     <property name="label">Tools</property>
                     <property name="name">m_menu2</property>
                     <property name="permission">protected</property>
@@ -2324,11 +2324,11 @@
                                                     <property name="minimize_button">0</property>
                                                     <property name="minimum_size"></property>
                                                     <property name="moveable">1</property>
-                                                    <property name="name">m_bpButton1</property>
+                                                    <property name="name">addEntityButton</property>
                                                     <property name="pane_border">1</property>
                                                     <property name="pane_position"></property>
                                                     <property name="pane_size"></property>
-                                                    <property name="permission">protected</property>
+                                                    <property name="permission">public</property>
                                                     <property name="pin_button">1</property>
                                                     <property name="pos"></property>
                                                     <property name="resize">Resizable</property>
@@ -2408,7 +2408,7 @@
                                                     <property name="gripper">0</property>
                                                     <property name="hidden">0</property>
                                                     <property name="hover"></property>
-                                                    <property name="id">wxID_ANY</property>
+                                                    <property name="id">ADD_COMPONENT_BUTTON</property>
                                                     <property name="label">MyButton</property>
                                                     <property name="max_size"></property>
                                                     <property name="maximize_button">0</property>
@@ -2417,11 +2417,11 @@
                                                     <property name="minimize_button">0</property>
                                                     <property name="minimum_size"></property>
                                                     <property name="moveable">1</property>
-                                                    <property name="name">m_bpButton2</property>
+                                                    <property name="name">addComponentButton</property>
                                                     <property name="pane_border">1</property>
                                                     <property name="pane_position"></property>
                                                     <property name="pane_size"></property>
-                                                    <property name="permission">protected</property>
+                                                    <property name="permission">public</property>
                                                     <property name="pin_button">1</property>
                                                     <property name="pos"></property>
                                                     <property name="resize">Resizable</property>
@@ -3124,101 +3124,6 @@
                                             <event name="OnSize"></event>
                                             <event name="OnUpdateUI"></event>
                                         </object>
-                                    </object>
-                                </object>
-                                <object class="wxMenu" expanded="0">
-                                    <property name="label">MyMenu</property>
-                                    <property name="name">addFeatureMenu</property>
-                                    <property name="permission">public</property>
-                                    <object class="wxMenuItem" expanded="0">
-                                        <property name="bitmap"></property>
-                                        <property name="checked">0</property>
-                                        <property name="enabled">1</property>
-                                        <property name="help"></property>
-                                        <property name="id">ADD_FEATURE_DLAA</property>
-                                        <property name="kind">wxITEM_NORMAL</property>
-                                        <property name="label">DLAA</property>
-                                        <property name="name">m_menuItem14</property>
-                                        <property name="permission">none</property>
-                                        <property name="shortcut"></property>
-                                        <property name="unchecked_bitmap"></property>
-                                        <event name="OnMenuSelection"></event>
-                                        <event name="OnUpdateUI"></event>
-                                    </object>
-                                    <object class="wxMenuItem" expanded="0">
-                                        <property name="bitmap"></property>
-                                        <property name="checked">0</property>
-                                        <property name="enabled">1</property>
-                                        <property name="help"></property>
-                                        <property name="id">ADD_FEATURE_SSAO</property>
-                                        <property name="kind">wxITEM_NORMAL</property>
-                                        <property name="label">SSAO</property>
-                                        <property name="name">m_menuItem15</property>
-                                        <property name="permission">none</property>
-                                        <property name="shortcut"></property>
-                                        <property name="unchecked_bitmap"></property>
-                                        <event name="OnMenuSelection"></event>
-                                        <event name="OnUpdateUI"></event>
-                                    </object>
-                                    <object class="wxMenuItem" expanded="0">
-                                        <property name="bitmap"></property>
-                                        <property name="checked">0</property>
-                                        <property name="enabled">1</property>
-                                        <property name="help"></property>
-                                        <property name="id">ADD_FEATURE_HDR</property>
-                                        <property name="kind">wxITEM_NORMAL</property>
-                                        <property name="label">HDR</property>
-                                        <property name="name">m_menuItem16</property>
-                                        <property name="permission">none</property>
-                                        <property name="shortcut"></property>
-                                        <property name="unchecked_bitmap"></property>
-                                        <event name="OnMenuSelection"></event>
-                                        <event name="OnUpdateUI"></event>
-                                    </object>
-                                    <object class="wxMenuItem" expanded="0">
-                                        <property name="bitmap"></property>
-                                        <property name="checked">0</property>
-                                        <property name="enabled">1</property>
-                                        <property name="help"></property>
-                                        <property name="id">ADD_FEATURE_SKYBOX</property>
-                                        <property name="kind">wxITEM_NORMAL</property>
-                                        <property name="label">Simple Skybox</property>
-                                        <property name="name">m_menuItem17</property>
-                                        <property name="permission">none</property>
-                                        <property name="shortcut"></property>
-                                        <property name="unchecked_bitmap"></property>
-                                        <event name="OnMenuSelection"></event>
-                                        <event name="OnUpdateUI"></event>
-                                    </object>
-                                    <object class="wxMenuItem" expanded="0">
-                                        <property name="bitmap"></property>
-                                        <property name="checked">0</property>
-                                        <property name="enabled">1</property>
-                                        <property name="help"></property>
-                                        <property name="id">ADD_FEATURE_DIRLIGHT</property>
-                                        <property name="kind">wxITEM_NORMAL</property>
-                                        <property name="label">Directional Light</property>
-                                        <property name="name">m_menuItem18</property>
-                                        <property name="permission">none</property>
-                                        <property name="shortcut"></property>
-                                        <property name="unchecked_bitmap"></property>
-                                        <event name="OnMenuSelection"></event>
-                                        <event name="OnUpdateUI"></event>
-                                    </object>
-                                    <object class="wxMenuItem" expanded="0">
-                                        <property name="bitmap"></property>
-                                        <property name="checked">0</property>
-                                        <property name="enabled">1</property>
-                                        <property name="help"></property>
-                                        <property name="id">ADD_FEATURE_SKYLIGHT</property>
-                                        <property name="kind">wxITEM_NORMAL</property>
-                                        <property name="label">Sky Light</property>
-                                        <property name="name">m_menuItem28</property>
-                                        <property name="permission">none</property>
-                                        <property name="shortcut"></property>
-                                        <property name="unchecked_bitmap"></property>
-                                        <event name="OnMenuSelection"></event>
-                                        <event name="OnUpdateUI"></event>
                                     </object>
                                 </object>
                             </object>

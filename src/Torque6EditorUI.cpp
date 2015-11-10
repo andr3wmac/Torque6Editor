@@ -266,13 +266,13 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	wxBoxSizer* bSizer6;
 	bSizer6 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_bpButton1 = new wxBitmapButton( m_panel11, ADD_ENTITY_BUTTON, wxBitmap( wxT("images/entityIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	bSizer6->Add( m_bpButton1, 0, wxALL, 2 );
+	addEntityButton = new wxBitmapButton( m_panel11, ADD_ENTITY_BUTTON, wxBitmap( wxT("images/entityIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	bSizer6->Add( addEntityButton, 0, wxALL, 2 );
 	
-	m_bpButton2 = new wxBitmapButton( m_panel11, wxID_ANY, wxBitmap( wxT("images/componentIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_bpButton2->Enable( false );
+	addComponentButton = new wxBitmapButton( m_panel11, ADD_COMPONENT_BUTTON, wxBitmap( wxT("images/componentIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	addComponentButton->Enable( false );
 	
-	bSizer6->Add( m_bpButton2, 0, wxALL, 2 );
+	bSizer6->Add( addComponentButton, 0, wxALL, 2 );
 	
 	m_searchCtrl1 = new wxSearchCtrl( m_panel11, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	#ifndef __WXMAC__
@@ -320,33 +320,6 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	m_panel12->SetSizer( bSizer51 );
 	m_panel12->Layout();
 	bSizer51->Fit( m_panel12 );
-	addFeatureMenu = new wxMenu();
-	wxMenuItem* m_menuItem14;
-	m_menuItem14 = new wxMenuItem( addFeatureMenu, ADD_FEATURE_DLAA, wxString( wxT("DLAA") ) , wxEmptyString, wxITEM_NORMAL );
-	addFeatureMenu->Append( m_menuItem14 );
-	
-	wxMenuItem* m_menuItem15;
-	m_menuItem15 = new wxMenuItem( addFeatureMenu, ADD_FEATURE_SSAO, wxString( wxT("SSAO") ) , wxEmptyString, wxITEM_NORMAL );
-	addFeatureMenu->Append( m_menuItem15 );
-	
-	wxMenuItem* m_menuItem16;
-	m_menuItem16 = new wxMenuItem( addFeatureMenu, ADD_FEATURE_HDR, wxString( wxT("HDR") ) , wxEmptyString, wxITEM_NORMAL );
-	addFeatureMenu->Append( m_menuItem16 );
-	
-	wxMenuItem* m_menuItem17;
-	m_menuItem17 = new wxMenuItem( addFeatureMenu, ADD_FEATURE_SKYBOX, wxString( wxT("Simple Skybox") ) , wxEmptyString, wxITEM_NORMAL );
-	addFeatureMenu->Append( m_menuItem17 );
-	
-	wxMenuItem* m_menuItem18;
-	m_menuItem18 = new wxMenuItem( addFeatureMenu, ADD_FEATURE_DIRLIGHT, wxString( wxT("Directional Light") ) , wxEmptyString, wxITEM_NORMAL );
-	addFeatureMenu->Append( m_menuItem18 );
-	
-	wxMenuItem* m_menuItem28;
-	m_menuItem28 = new wxMenuItem( addFeatureMenu, ADD_FEATURE_SKYLIGHT, wxString( wxT("Sky Light") ) , wxEmptyString, wxITEM_NORMAL );
-	addFeatureMenu->Append( m_menuItem28 );
-	
-	m_panel12->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ScenePanel::m_panel12OnContextMenu ), NULL, this ); 
-	
 	m_notebook2->AddPage( m_panel12, wxT("Features"), false );
 	
 	bSizer3->Add( m_notebook2, 1, wxEXPAND | wxALL, 5 );
@@ -381,7 +354,6 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 
 ScenePanel::~ScenePanel()
 {
-	delete addFeatureMenu; 
 	delete translateMenu; 
 }
 

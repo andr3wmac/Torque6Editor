@@ -55,6 +55,7 @@ SceneTool::SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiMa
      mSelectedFeature(NULL),
      mMenuEntity(NULL),
      mMenuComponent(NULL),
+     mMenuFeature(NULL),
      mLightIcon(NULL),
      mRefreshing(false)
 {
@@ -121,9 +122,6 @@ void SceneTool::initTool()
    mScenePanel->featureList->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(SceneTool::OnTreeEvent), NULL, this);
    mScenePanel->featureList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneTool::OnTreeMenu), NULL, this);
    mScenePanel->featurePropGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnFeaturePropChanged), NULL, this);
-
-   // Feature Menu Events
-   mScenePanel->addFeatureMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnMenuEvent), NULL, this);
 
    mEntityListRoot = mScenePanel->entityList->AddRoot("ROOT");
    mFeatureListRoot = mScenePanel->featureList->AddRoot("ROOT");
@@ -296,53 +294,13 @@ void SceneTool::OnMenuEvent(wxCommandEvent& evt)
    }
 
    if (evt.GetId() == ADD_FEATURE_BUTTON)
-      mFrame->PopupMenu(mScenePanel->addFeatureMenu, wxDefaultPosition);
+      openAddFeatureMenu();
 
    if (evt.GetId() == ADD_ENTITY_BUTTON)
       openAddEntityMenu();
 
-   // TODO: These shouldn't be hardcoded, it should be dynamic.
-   if (evt.GetId() == ADD_FEATURE_DLAA)
-   {
-      Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("DLAA"));
-      feature->registerObject();
-      Plugins::Link.Scene.addFeature(feature);
-   }
-
-   if (evt.GetId() == ADD_FEATURE_SSAO)
-   {
-      Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("SSAO"));
-      feature->registerObject();
-      Plugins::Link.Scene.addFeature(feature);
-   }
-
-   if (evt.GetId() == ADD_FEATURE_HDR)
-   {
-      Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("HDR"));
-      feature->registerObject();
-      Plugins::Link.Scene.addFeature(feature);
-   }
-
-   if (evt.GetId() == ADD_FEATURE_SKYBOX)
-   {
-      Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("SimpleSkybox"));
-      feature->registerObject();
-      Plugins::Link.Scene.addFeature(feature);
-   }
-
-   if (evt.GetId() == ADD_FEATURE_DIRLIGHT)
-   {
-      Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("DirectionalLight"));
-      feature->registerObject();
-      Plugins::Link.Scene.addFeature(feature);
-   }
-
-   if (evt.GetId() == ADD_FEATURE_SKYLIGHT)
-   {
-      Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject("SkyLight"));
-      feature->registerObject();
-      Plugins::Link.Scene.addFeature(feature);
-   }
+   if (evt.GetId() == ADD_COMPONENT_BUTTON)
+      openAddComponentMenu();
 
    refreshEntityList();
    refreshFeatureList();
@@ -366,6 +324,49 @@ void SceneTool::OnAddEntityMenuEvent(wxCommandEvent& evt)
       newEntity->registerObject("NewSceneEntity");
       Plugins::Link.Scene.addEntity(newEntity, "NewSceneEntity");
       refreshEntityList();
+   }
+}
+
+void SceneTool::openAddComponentMenu()
+{
+   wxMenu* menu = new wxMenu;
+
+   refreshClassLists();
+   for (unsigned int i = 0; i < mComponentClassList.size(); ++i)
+      menu->Append(i, mComponentClassList[i]);
+
+   menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnAddComponentMenuEvent), NULL, this);
+   mFrame->PopupMenu(menu, wxDefaultPosition);
+   delete menu;
+}
+
+void SceneTool::OnAddComponentMenuEvent(wxCommandEvent& evt)
+{
+   addComponent(mSelectedEntity, mComponentClassList[evt.GetId()]);
+}
+
+void SceneTool::openAddFeatureMenu()
+{
+   wxMenu* menu = new wxMenu;
+
+   refreshClassLists();
+
+   for (unsigned int i = 0; i < mFeatureClassList.size(); ++i)
+      menu->Append(i, mFeatureClassList[i]);
+
+   menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnAddFeatureMenuEvent), NULL, this);
+   mFrame->PopupMenu(menu, wxDefaultPosition);
+   delete menu;
+}
+
+void SceneTool::OnAddFeatureMenuEvent(wxCommandEvent& evt)
+{
+   Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject(mFeatureClassList[evt.GetId()]));
+   if (feature)
+   {
+      feature->registerObject();
+      Plugins::Link.Scene.addFeature(feature);
+      refreshFeatureList();
    }
 }
 
@@ -424,14 +425,11 @@ void SceneTool::OnTreeMenu( wxTreeEvent& evt )
          menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnEntityMenuEvent), NULL, this);
          menu->Append(0, wxT("Delete Entity"));
 
-         // TODO: This shouldn't be hardcoded, it should be dynamic.
+         // Find all components in console namespace list then make a menu.
          wxMenu* compMenu = new wxMenu;
-         compMenu->Append(1, wxT("AnimationComponent"));
-         compMenu->Append(2, wxT("ControllerComponent"));
-         compMenu->Append(3, wxT("LightComponent"));
-         compMenu->Append(4, wxT("MeshComponent"));
-         compMenu->Append(5, wxT("PhysicsComponent"));
-         compMenu->Append(6, wxT("TextComponent"));
+         refreshClassLists();
+         for (unsigned int i = 0; i < mComponentClassList.size(); ++i)
+            compMenu->Append(1 + i, mComponentClassList[i]);
          menu->AppendSubMenu(compMenu, wxT("Add Component"));
 
          mFrame->PopupMenu(menu, wxDefaultPosition);
@@ -456,6 +454,28 @@ void SceneTool::OnTreeMenu( wxTreeEvent& evt )
          return;
       }
    }
+
+   if (evt.GetId() == FEATURE_LIST)
+   {
+      FeatureTreeItemData* data = dynamic_cast<FeatureTreeItemData*>(mScenePanel->featureList->GetItemData(evt.GetItem()));
+      if (data)
+      {
+         Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(data->objPtr);
+         if (feature)
+         {
+            mMenuFeature = feature;
+
+            wxMenu* menu = new wxMenu;
+            menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnFeatureMenuEvent), NULL, this);
+            menu->Append(0, wxT("Delete Feature"));
+
+            mFrame->PopupMenu(menu, wxDefaultPosition);
+            delete menu;
+
+            mMenuFeature = NULL;
+         }
+      }
+   }
 } 
 
 void SceneTool::OnEntityMenuEvent(wxCommandEvent& evt)
@@ -463,50 +483,21 @@ void SceneTool::OnEntityMenuEvent(wxCommandEvent& evt)
    // Delete Entity
    if (evt.GetId() == 0)
    {
-      Plugins::Link.Scene.removeEntity(mMenuEntity);
-      mMenuEntity = NULL;
+      if (mSelectedEntity == mMenuEntity)
+      {
+         mSelectedEntity = NULL;
+         mSelectedComponent = NULL;
+         mScenePanel->addComponentButton->Enable(false);
+      }
+
+      Plugins::Link.Scene.deleteEntity(mMenuEntity);
       refreshEntityList();
       return;
    }
 
    // Add New Component
-   // TODO: This shouldn't be hardcoded, it should be dynamic.
-   if (evt.GetId() > 0)
-   {
-      Scene::BaseComponent* newComponent = NULL;
-
-      switch (evt.GetId())
-      {
-         case 1:
-            newComponent = new Scene::AnimationComponent();
-            break;
-
-         case 2:
-            newComponent = new Scene::ControllerComponent();
-            break;
-
-         case 3:
-            newComponent = new Scene::LightComponent();
-            break;
-
-         case 4:
-            newComponent = new Scene::MeshComponent();
-            break;
-
-         case 5:
-            newComponent = new Scene::PhysicsComponent();
-            break;
-
-         case 6:
-            newComponent = new Scene::TextComponent();
-            break;
-      }
-
-      newComponent->registerObject();
-      mMenuEntity->addComponent(newComponent);
-      mMenuEntity->refresh();
-      refreshEntityList();
-   }
+   if (evt.GetId() >= 1)
+      addComponent(mMenuEntity, mComponentClassList[evt.GetId() - 1]);
 }
 
 void SceneTool::OnComponentMenuEvent(wxCommandEvent& evt)
@@ -522,6 +513,17 @@ void SceneTool::OnComponentMenuEvent(wxCommandEvent& evt)
          refreshEntityList();
          return;
       }
+   }
+}
+
+void SceneTool::OnFeatureMenuEvent(wxCommandEvent& evt)
+{
+   // Delete Entity
+   if (evt.GetId() == 0)
+   {
+      Plugins::Link.Scene.deleteFeature(mMenuFeature);
+      refreshFeatureList();
+      return;
    }
 }
 
@@ -690,7 +692,7 @@ void SceneTool::refreshChoices()
    mMaterialChoices.Clear();
    mMeshChoices.Clear();
    mEntityTemplateChoices.Clear();
-
+   
    Vector<const AssetDefinition*> assetDefinitions = Plugins::Link.AssetDatabaseLink.getDeclaredAssets();
 
    // Iterate sorted asset definitions.
@@ -718,6 +720,31 @@ void SceneTool::refreshChoices()
    }
 
    mRefreshing = false;
+}
+
+void SceneTool::refreshClassLists()
+{
+   mComponentClassList.clear();
+   mFeatureClassList.clear();
+
+   for (Namespace *walk = Plugins::Link.Con.getNamespaceList(); walk; walk = walk->mNext)
+   {
+      if (walk->mParent == NULL)
+         continue;
+
+      if (dStrcmp(walk->mParent->mName, "BaseComponent") == 0)
+         mComponentClassList.push_back(walk->mName);
+
+      if (dStrcmp(walk->mParent->mName, "SceneFeature") == 0 ||
+          dStrcmp(walk->mParent->mName, "RenderFeature") == 0 ||
+          dStrcmp(walk->mParent->mName, "PostRenderFeature") == 0)
+      {
+         if (dStrcmp(walk->mName, "RenderFeature") == 0 || dStrcmp(walk->mName, "PostRenderFeature") == 0)
+            continue;
+
+         mFeatureClassList.push_back(walk->mName);
+      }
+   }
 }
 
 static S32 QSORT_CALLBACK compareEntries(const void* a, const void* b)
@@ -788,7 +815,11 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
             propertyGrid->Append(new wxColourProperty(f->pFieldname, f->pFieldname, color));
          }
          else if (f->type == Plugins::Link.Con.TypeBool)
-            propertyGrid->Append(new wxBoolProperty(f->pFieldname, f->pFieldname, val));
+         {
+            bool boolVal;
+            Plugins::Link.Con.setData(Plugins::Link.Con.TypeBool, &boolVal, 0, 1, &val, NULL, 0);
+            propertyGrid->Append(new wxBoolProperty(f->pFieldname, f->pFieldname, boolVal));
+         }
          else
             propertyGrid->Append(new wxStringProperty(f->pFieldname, f->pFieldname, val));
       }
@@ -835,6 +866,7 @@ void SceneTool::selectEntity(Scene::SceneEntity* entity, bool updateTree)
    mSelectedObject = entity;
    mSelectedEntity = entity; 
    mSelectedComponent = NULL;
+   mScenePanel->addComponentButton->Enable(true);
 
    // Update the gizmo.
    mGizmo.selectEntity(entity);
@@ -863,6 +895,19 @@ void SceneTool::selectEntity(Scene::SceneEntity* entity, bool updateTree)
 
    // Property Grid
    loadObjectProperties(mScenePanel->propertyGrid, entity);
+}
+
+void SceneTool::addComponent(Scene::SceneEntity* entity, StringTableEntry componentClassName)
+{
+   Scene::BaseComponent* newComponent = dynamic_cast<Scene::BaseComponent*>(Plugins::Link.Con.createObject(componentClassName));
+   if (newComponent)
+   {
+      newComponent->registerObject();
+      entity->addComponent(newComponent);
+      entity->refresh();
+      refreshEntityList();
+      selectComponent(newComponent, true);
+   }
 }
 
 void SceneTool::selectComponent(Scene::BaseComponent* component, bool updateTree)

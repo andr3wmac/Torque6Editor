@@ -84,6 +84,10 @@ class SceneTool : public wxEvtHandler, public EditorTool
 
       Scene::SceneEntity*     mMenuEntity;
       Scene::BaseComponent*   mMenuComponent;
+      Scene::SceneFeature*    mMenuFeature;
+
+      Vector<StringTableEntry> mComponentClassList;
+      Vector<StringTableEntry> mFeatureClassList;
 
       wxMenu* mTranslateMenu;
       wxMenu* mRotateMenu;
@@ -102,13 +106,17 @@ class SceneTool : public wxEvtHandler, public EditorTool
       SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
       ~SceneTool();
 
+      void refreshClassLists();
       void refreshEntityList();
       void refreshFeatureList();
       void refreshChoices();
       void loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* obj);
       void selectEntity(Scene::SceneEntity* entity, bool updateTree = false);
+      void addComponent(Scene::SceneEntity* entity, StringTableEntry componentClassName);
       void selectComponent(Scene::BaseComponent* componenty, bool updateTree = false);
       void openAddEntityMenu();
+      void openAddComponentMenu();
+      void openAddFeatureMenu();
 
       void OnMenuEvent(wxCommandEvent& evt);
       void OnTreeEvent( wxTreeEvent& evt );
@@ -120,8 +128,11 @@ class SceneTool : public wxEvtHandler, public EditorTool
       void OnRotateMenuEvent(wxCommandEvent& evt);
       void OnScaleMenuEvent(wxCommandEvent& evt);
       void OnAddEntityMenuEvent(wxCommandEvent& evt);
+      void OnAddComponentMenuEvent(wxCommandEvent& evt);
+      void OnAddFeatureMenuEvent(wxCommandEvent& evt);
       void OnEntityMenuEvent(wxCommandEvent& evt);
       void OnComponentMenuEvent(wxCommandEvent& evt);
+      void OnFeatureMenuEvent(wxCommandEvent& evt);
 
       virtual void initTool();
       virtual void openTool();
