@@ -46,38 +46,39 @@ WX_DEFINE_ARRAY_PTR( wxWizardPageSimple*, WizardPages );
 
 ///////////////////////////////////////////////////////////////////////////
 
-#define MENU_CAMERA_SLOW 1000
-#define MENU_CAMERA_NORMAL 1001
-#define MENU_CAMERA_FAST 1002
-#define MENU_PROJECT 1003
-#define MENU_CONSOLE 1004
-#define MENU_SCENE 1005
-#define MENU_SCRIPTS 1006
-#define MENU_MATERIALS 1007
-#define MENU_PROFILER 1008
-#define MENU_WEBSITE 1009
-#define MENU_GITHUB 1010
-#define MENU_FORUMS 1011
-#define MENU_ABOUT 1012
-#define PROFILER_START 1013
-#define SCENE_NEW 1014
-#define SCENE_OPEN 1015
-#define SCENE_SAVE 1016
-#define ADD_ENTITY_BUTTON 1017
-#define ADD_COMPONENT_BUTTON 1018
-#define ENTITY_LIST 1019
-#define ADD_FEATURE_BUTTON 1020
-#define FEATURE_LIST 1021
-#define TRANSLATE_SNAP_NONE 1022
-#define TRANSLATE_SNAP_1 1023
-#define TRANSLATE_SNAP_2 1024
-#define TRANSLATE_SNAP_3 1025
-#define TRANSLATE_SNAP_4 1026
-#define MATERIAL_SAVE 1027
-#define ASSET_LIST 1028
-#define MENU_IMPORT_MESH 1029
-#define MENU_IMPORT_TEXTURE 1030
-#define MENU_NEW_MATERIAL 1031
+#define MENU_EXIT 1000
+#define MENU_CAMERA_SLOW 1001
+#define MENU_CAMERA_NORMAL 1002
+#define MENU_CAMERA_FAST 1003
+#define MENU_PROJECT 1004
+#define MENU_CONSOLE 1005
+#define MENU_SCENE 1006
+#define MENU_SCRIPTS 1007
+#define MENU_MATERIALS 1008
+#define MENU_PROFILER 1009
+#define MENU_WEBSITE 1010
+#define MENU_GITHUB 1011
+#define MENU_FORUMS 1012
+#define MENU_ABOUT 1013
+#define PROFILER_START 1014
+#define SCENE_NEW 1015
+#define SCENE_OPEN 1016
+#define SCENE_SAVE 1017
+#define ADD_ENTITY_BUTTON 1018
+#define ADD_COMPONENT_BUTTON 1019
+#define ENTITY_LIST 1020
+#define ADD_FEATURE_BUTTON 1021
+#define FEATURE_LIST 1022
+#define TRANSLATE_SNAP_NONE 1023
+#define TRANSLATE_SNAP_1 1024
+#define TRANSLATE_SNAP_2 1025
+#define TRANSLATE_SNAP_3 1026
+#define TRANSLATE_SNAP_4 1027
+#define MATERIAL_SAVE 1028
+#define ASSET_LIST 1029
+#define MENU_IMPORT_MESH 1030
+#define MENU_IMPORT_TEXTURE 1031
+#define MENU_NEW_MATERIAL 1032
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainFrame
@@ -94,7 +95,6 @@ class MainFrame : public wxFrame
 	
 	public:
 		wxMenuBar* mainMenuBar;
-		wxMenuItem* m_menuItem1;
 		wxToolBar* mainToolbar;
 		wxPanel* mainPanel;
 		

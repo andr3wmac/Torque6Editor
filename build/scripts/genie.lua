@@ -22,14 +22,18 @@ solution "Torque6Editor"
     }
     location (PROJECT_DIR)
 
-    -- Torque6 App
+    -- Torque 6 App
     dofile ("../../engine/build/scripts/Torque6App.lua")
     Torque6App()
 
-    -- Torque6 Editor ( Optional )
+    -- Torque 6 Editor ( Optional )
     dofile ("Torque6Editor.lua")
     Torque6Editor()
     startproject "Torque6Editor"
+
+    -- Torque 6 Launcher ( Optional )
+    dofile ("Torque6Launcher.lua")
+    Torque6Launcher()
 
     -- Torque6 DLL
     dofile ("../../engine/build/scripts/Torque6.lua")

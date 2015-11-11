@@ -5,7 +5,7 @@
 // PLEASE DO "NOT" EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
-#include "src/Torque6EditorUI.h"
+#include "editor/Torque6EditorUI.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -17,23 +17,8 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	
 	mainMenuBar = new wxMenuBar( 0 );
 	m_menu1 = new wxMenu();
-	m_menuItem1 = new wxMenuItem( m_menu1, wxID_OPEN, wxString( wxT("Open Project") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menu1->Append( m_menuItem1 );
-	
-	wxMenuItem* m_menuItem2;
-	m_menuItem2 = new wxMenuItem( m_menu1, wxID_ANY, wxString( wxT("Save Project") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menu1->Append( m_menuItem2 );
-	
-	m_menu1->AppendSeparator();
-	
-	wxMenuItem* m_menuItem3;
-	m_menuItem3 = new wxMenuItem( m_menu1, wxID_CLOSE, wxString( wxT("Close Project") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menu1->Append( m_menuItem3 );
-	
-	m_menu1->AppendSeparator();
-	
 	wxMenuItem* m_menuItem4;
-	m_menuItem4 = new wxMenuItem( m_menu1, wxID_ANY, wxString( wxT("Exit") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuItem4 = new wxMenuItem( m_menu1, MENU_EXIT, wxString( wxT("Exit") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menu1->Append( m_menuItem4 );
 	
 	mainMenuBar->Append( m_menu1, wxT("File") ); 

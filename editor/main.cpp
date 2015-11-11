@@ -69,6 +69,25 @@ bool Torque6Editor::OnInit()
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->initTool();
 
+   // Specified project.
+   if (argc == 3)
+   {
+      wxString command = argv[1];
+      if (command == "-project")
+      {
+         wxString path = argv[2];
+         mProjectManager.openProject(path);
+         mManager->Update();
+      }
+   }
+   else {
+      wxDirDialog openFolder(mFrame, wxT("Select Project Folder"), wxGetCwd());
+      if (openFolder.ShowModal() == wxID_OK)
+         mProjectManager.openProject(openFolder.GetPath());
+
+      mManager->Update();
+   }
+
 	return true;
 }
 
@@ -82,35 +101,23 @@ Torque6Editor::~Torque6Editor()
    }
 
    // Dialogs
-   mAboutDialog->Destroy();
+   //mAboutDialog->Destroy();
 
    mProjectManager.closeProject();
 }
 
 void Torque6Editor::OnMenuEvent(wxCommandEvent& evt)
 {
-   if (evt.GetId() == wxID_OPEN)
-   {
-      wxDirDialog openFolder(mFrame, wxT("Select Project Folder"), wxGetCwd());
-      if (openFolder.ShowModal() == wxID_OK)
-         mProjectManager.openProject(openFolder.GetPath());
-
-      mManager->Update();
-   }
-
-   if (evt.GetId() == wxID_CLOSE)
-   {
-      mProjectManager.closeProject();
-      mManager->Update();
-   }
-
-   if (evt.GetId() == MENU_ABOUT)
-   {
-      mAboutDialog->ShowModal();
-   }
-
    switch (evt.GetId())
    {
+      case MENU_EXIT:
+         mFrame->Close();
+         break;
+
+      case MENU_ABOUT:
+         mAboutDialog->ShowModal();
+         break;
+
       case MENU_CAMERA_SLOW:
          mProjectManager.mCameraSpeed = 0.1f;
          break;

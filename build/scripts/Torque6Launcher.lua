@@ -1,6 +1,6 @@
-function Torque6Editor()
-    project "Torque6Editor"
-        targetname "Torque6Editor"
+function Torque6Launcher()
+    project "Torque6Launcher"
+        targetname "Torque6Launcher"
         language "C++"
         kind "WindowedApp"
         debugdir (EDITOR_DIR)
@@ -16,8 +16,8 @@ function Torque6Editor()
         }
 
         files {
-            path.join(EDITOR_DIR, "editor/**.cpp"),
-            path.join(EDITOR_DIR, "editor/**.h"),
+            path.join(EDITOR_DIR, "launcher/**.cpp"),
+            path.join(EDITOR_DIR, "launcher/**.h"),
         }
 
         links {
@@ -35,7 +35,7 @@ function Torque6Editor()
             defines     { "TORQUE_ENABLE_PROFILER" }
 
         configuration "Debug"
-            targetname "Torque6Editor_DEBUG"
+            targetname "Torque6Launcher_DEBUG"
             defines     { "TORQUE_DEBUG", "TORQUE_ENABLE_PROFILER" }
             flags       { "Symbols" }
 
@@ -84,6 +84,7 @@ function Torque6Editor()
                     "wxmsw31u_core",
                     "wxmsw31u_propgrid",
                     "wxmsw31u_stc",
+                    "wxmsw31u_webview",
                     "wxbase31u",
                     "wxbase31u_net",
                     "wxscintilla",
@@ -101,6 +102,7 @@ function Torque6Editor()
                     "wxmsw31ud_core",
                     "wxmsw31ud_propgrid",
                     "wxmsw31ud_stc",
+                    "wxmsw31ud_webview",
                     "wxbase31ud",
                     "wxbase31ud_net",
                     "wxscintillad",
