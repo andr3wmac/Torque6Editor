@@ -27,8 +27,8 @@
 #include "../project/projectManager.h"
 #endif
 
-#ifndef _SCENEENTITY_H_
-#include <3d/entity/entity.h>
+#ifndef _SCENE_OBJECT_H_
+#include <3d/scene/object/object.h>
 #endif
 
 class Gizmo
@@ -57,7 +57,7 @@ class Gizmo
    public:
       ProjectManager*         mProjectManager;
       SimObject*              mSelectedObject;
-      Scene::SceneEntity*     mSelectedEntity;
+      Scene::SceneObject*     mSelectedEntity;
       Scene::BaseComponent*   mSelectedComponent;
 
       F32 mTranslateSnap;
@@ -67,7 +67,7 @@ class Gizmo
       Gizmo();
       ~Gizmo();
 
-      void selectEntity(Scene::SceneEntity* entity);
+      void selectEntity(Scene::SceneObject* entity);
       void selectComponent(Scene::BaseComponent* component);
       void render();
 

@@ -42,7 +42,7 @@ class MainFrame : public wxFrame
 		wxPanel* projectsPanel;
 		wxBoxSizer* projectSizer;
 		
-		MainFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Torque 6 Launcher"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 685,479 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		MainFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Torque 6 Launcher"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 800,600 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		
 		~MainFrame();
 	

@@ -39,7 +39,7 @@
 #include "../Torque6EditorUI.h"
 
 #include "projectManager.h"
-#include "3d/entity/components/meshComponent.h"
+#include "3d/scene/object/components/meshComponent.h"
 
 class TextDropTarget : public wxTextDropTarget
 {
@@ -452,36 +452,36 @@ bool TextDropTarget::OnDropText(wxCoord x, wxCoord y, const wxString& text)
       tokenizer.GetNextToken();
       wxString assetID = tokenizer.GetNextToken();
 
-      // EntityTemplateAsset gets added straight to the scene.
-      if (assetType == "EntityTemplateAsset")
+      // ObjectTemplateAsset gets added straight to the scene.
+      if (assetType == "ObjectTemplateAsset")
       {
-         Scene::SceneEntity* newEntity = new Scene::SceneEntity();
-         newEntity->setTemplateAsset(assetID);
-         newEntity->registerObject("NewSceneEntity");
+         Scene::SceneObject* newObject = new Scene::SceneObject();
+         newObject->setTemplateAsset(assetID);
+         newObject->registerObject("NewSceneObject");
 
          Point3F worldRay = Plugins::Link.Rendering.screenToWorld(Point2I(x, y));
          Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
-         newEntity->mPosition.set(editorPos + (worldRay * 10.0f));
+         newObject->mPosition.set(editorPos + (worldRay * 10.0f));
 
-         Plugins::Link.Scene.addEntity(newEntity, "NewSceneEntity");
+         Plugins::Link.Scene.addObject(newObject, "NewSceneObject");
       }
 
       // MeshAsset
       if (assetType == "MeshAsset")
       {
-         Scene::SceneEntity* newEntity = new Scene::SceneEntity();
+         Scene::SceneObject* newObject = new Scene::SceneObject();
 
          Scene::MeshComponent* meshComponent = new Scene::MeshComponent();
          meshComponent->registerObject("NewMeshComponent");
          meshComponent->setMesh(assetID.c_str());
-         newEntity->addComponent(meshComponent);
-         newEntity->registerObject("NewSceneEntity");
+         newObject->addComponent(meshComponent);
+         newObject->registerObject("NewSceneObject");
 
          Point3F worldRay = Plugins::Link.Rendering.screenToWorld(Point2I(x, y));
          Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
-         newEntity->mPosition.set(editorPos + (worldRay * 10.0f));
+         newObject->mPosition.set(editorPos + (worldRay * 10.0f));
 
-         Plugins::Link.Scene.addEntity(newEntity, "NewSceneEntity");
+         Plugins::Link.Scene.addObject(newObject, "NewSceneObject");
       }
 
       // Inform the tools the scene has changed.

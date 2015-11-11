@@ -35,8 +35,8 @@
 #include <wx/treectrl.h>
 #endif
 
-#ifndef _SCENEENTITY_H_
-#include <3d/entity/entity.h>
+#ifndef _SCENE_OBJECT_H_
+#include <3d/scene/object/object.h>
 #endif
 
 #ifndef _GIZMO_H_
@@ -78,11 +78,11 @@ class SceneTool : public wxEvtHandler, public EditorTool
       wxTreeItemId   mFeatureListRoot;
       
       SimObject*              mSelectedObject;
-      Scene::SceneEntity*     mSelectedEntity;
+      Scene::SceneObject*     mSelectedEntity;
       Scene::BaseComponent*   mSelectedComponent;
       SimObject*              mSelectedFeature;
 
-      Scene::SceneEntity*     mMenuEntity;
+      Scene::SceneObject*     mMenuEntity;
       Scene::BaseComponent*   mMenuComponent;
       Scene::SceneFeature*    mMenuFeature;
 
@@ -95,7 +95,7 @@ class SceneTool : public wxEvtHandler, public EditorTool
 
       wxPGChoices mMeshChoices;
       wxPGChoices mMaterialChoices;
-      wxPGChoices mEntityTemplateChoices;
+      wxPGChoices mObjectTemplateChoices;
 
       bool mRefreshing;
       Gizmo mGizmo;
@@ -111,8 +111,8 @@ class SceneTool : public wxEvtHandler, public EditorTool
       void refreshFeatureList();
       void refreshChoices();
       void loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* obj);
-      void selectEntity(Scene::SceneEntity* entity, bool updateTree = false);
-      void addComponent(Scene::SceneEntity* entity, StringTableEntry componentClassName);
+      void selectEntity(Scene::SceneObject* entity, bool updateTree = false);
+      void addComponent(Scene::SceneObject* entity, StringTableEntry componentClassName);
       void selectComponent(Scene::BaseComponent* componenty, bool updateTree = false);
       void openAddEntityMenu();
       void openAddComponentMenu();

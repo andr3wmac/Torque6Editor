@@ -39,12 +39,12 @@
 #include <bx/bx.h>
 #include <bx/fpumath.h>
 
-#include "3d/entity/components/animationComponent.h"
-#include "3d/entity/components/controllerComponent.h"
-#include "3d/entity/components/lightComponent.h"
-#include "3d/entity/components/meshComponent.h"
-#include "3d/entity/components/physicsComponent.h"
-#include "3d/entity/components/textComponent.h"
+#include "3d/scene/object/components/animationComponent.h"
+#include "3d/scene/object/components/controllerComponent.h"
+#include "3d/scene/object/components/lightComponent.h"
+#include "3d/scene/object/components/meshComponent.h"
+#include "3d/scene/object/components/physicsComponent.h"
+#include "3d/scene/object/components/textComponent.h"
 
 SceneTool::SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
    : Parent(_projectManager, _frame, _manager),
@@ -225,7 +225,7 @@ bool SceneTool::onMouseLeftDown(int x, int y)
 
    if (!mGizmo.onMouseLeftDown(x, y))
    {
-      Scene::SceneEntity* hit = Plugins::Link.Scene.raycast(editorPos, editorPos + (worldRay * 1000.0f));
+      Scene::SceneObject* hit = Plugins::Link.Scene.raycast(editorPos, editorPos + (worldRay * 1000.0f));
       if (mSelectedObject != hit)
       {
          if (hit)
@@ -320,9 +320,9 @@ void SceneTool::OnAddEntityMenuEvent(wxCommandEvent& evt)
 {
    if (evt.GetId() == 0)
    {
-      Scene::SceneEntity* newEntity = new Scene::SceneEntity();
-      newEntity->registerObject("NewSceneEntity");
-      Plugins::Link.Scene.addEntity(newEntity, "NewSceneEntity");
+      Scene::SceneObject* newEntity = new Scene::SceneObject();
+      newEntity->registerObject("NewSceneObject");
+      Plugins::Link.Scene.addObject(newEntity, "NewSceneObject");
       refreshEntityList();
    }
 }
@@ -381,7 +381,7 @@ void SceneTool::OnTreeEvent( wxTreeEvent& evt )
       if (data)
       {
          // Did we select an entity ..
-         Scene::SceneEntity* entity = dynamic_cast<Scene::SceneEntity*>(data->objPtr);
+         Scene::SceneObject* entity = dynamic_cast<Scene::SceneObject*>(data->objPtr);
          if (entity)
          {
             selectEntity(entity);
@@ -416,7 +416,7 @@ void SceneTool::OnTreeMenu( wxTreeEvent& evt )
    {
       EntityTreeItemData* data = dynamic_cast<EntityTreeItemData*>(mScenePanel->entityList->GetItemData(evt.GetItem()));
 
-      Scene::SceneEntity* entity = dynamic_cast<Scene::SceneEntity*>(data->objPtr);
+      Scene::SceneObject* entity = dynamic_cast<Scene::SceneObject*>(data->objPtr);
       if (entity)
       {
          mMenuEntity = entity;
@@ -490,7 +490,7 @@ void SceneTool::OnEntityMenuEvent(wxCommandEvent& evt)
          mScenePanel->addComponentButton->Enable(false);
       }
 
-      Plugins::Link.Scene.deleteEntity(mMenuEntity);
+      Plugins::Link.Scene.deleteObject(mMenuEntity);
       refreshEntityList();
       return;
    }
@@ -505,10 +505,10 @@ void SceneTool::OnComponentMenuEvent(wxCommandEvent& evt)
    // Delete Entity
    if (evt.GetId() == 0)
    {
-      // Sanity check. mOwnerEntity should never be NULL.
-      if (mMenuComponent->mOwnerEntity != NULL)
+      // Sanity check. mOwnerObject should never be NULL.
+      if (mMenuComponent->mOwnerObject != NULL)
       {
-         mMenuComponent->mOwnerEntity->removeComponent(mMenuComponent);
+         mMenuComponent->mOwnerObject->removeComponent(mMenuComponent);
          mMenuComponent = NULL;
          refreshEntityList();
          return;
@@ -613,7 +613,7 @@ void SceneTool::refreshEntityList()
    {
       for(U32 n = 0; n < sceneGroup->size(); ++n)
       {
-         Scene::SceneEntity* entity = dynamic_cast<Scene::SceneEntity*>(sceneGroup->at(n));
+         Scene::SceneObject* entity = dynamic_cast<Scene::SceneObject*>(sceneGroup->at(n));
          if ( !entity ) continue;
          wxTreeItemId entityItem = mScenePanel->entityList->AppendItem(mEntityListRoot, entity->getName(), 0, -1, new EntityTreeItemData(entity));
          if (mSelectedEntity == entity)
@@ -691,7 +691,7 @@ void SceneTool::refreshChoices()
    mRefreshing = true;
    mMaterialChoices.Clear();
    mMeshChoices.Clear();
-   mEntityTemplateChoices.Clear();
+   mObjectTemplateChoices.Clear();
    
    Vector<const AssetDefinition*> assetDefinitions = Plugins::Link.AssetDatabaseLink.getDeclaredAssets();
 
@@ -715,8 +715,8 @@ void SceneTool::refreshChoices()
          mMeshChoices.Add(pAssetDefinition->mAssetId, mMeshChoices.GetCount());
 
       // Entity Templates
-      if (dStrcmp(pAssetDefinition->mAssetType, "EntityTemplateAsset") == 0)
-         mEntityTemplateChoices.Add(pAssetDefinition->mAssetId, mMeshChoices.GetCount());
+      if (dStrcmp(pAssetDefinition->mAssetType, "ObjectTemplateAsset") == 0)
+         mObjectTemplateChoices.Add(pAssetDefinition->mAssetId, mMeshChoices.GetCount());
    }
 
    mRefreshing = false;
@@ -758,10 +758,10 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
 {
    propertyGrid->Clear();
 
-   Scene::SceneEntity* entity = dynamic_cast<Scene::SceneEntity*>(obj);
+   Scene::SceneObject* entity = dynamic_cast<Scene::SceneObject*>(obj);
    if (entity)
    {
-      propertyGrid->Append(new wxPropertyCategory("SceneEntity"));
+      propertyGrid->Append(new wxPropertyCategory("SceneObject"));
       propertyGrid->Append(new wxStringProperty("Name", "Name", entity->getName()));
    }
 
@@ -861,7 +861,7 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
    }
 }
 
-void SceneTool::selectEntity(Scene::SceneEntity* entity, bool updateTree)
+void SceneTool::selectEntity(Scene::SceneObject* entity, bool updateTree)
 {
    mSelectedObject = entity;
    mSelectedEntity = entity; 
@@ -882,7 +882,7 @@ void SceneTool::selectEntity(Scene::SceneEntity* entity, bool updateTree)
          EntityTreeItemData* data = dynamic_cast<EntityTreeItemData*>(mScenePanel->entityList->GetItemData(item));
          if (data)
          {
-            Scene::SceneEntity* dataEntity = dynamic_cast<Scene::SceneEntity*>(data->objPtr);
+            Scene::SceneObject* dataEntity = dynamic_cast<Scene::SceneObject*>(data->objPtr);
             if (dataEntity == entity)
             {
                mScenePanel->entityList->SelectItem(item);
@@ -897,7 +897,7 @@ void SceneTool::selectEntity(Scene::SceneEntity* entity, bool updateTree)
    loadObjectProperties(mScenePanel->propertyGrid, entity);
 }
 
-void SceneTool::addComponent(Scene::SceneEntity* entity, StringTableEntry componentClassName)
+void SceneTool::addComponent(Scene::SceneObject* entity, StringTableEntry componentClassName)
 {
    Scene::BaseComponent* newComponent = dynamic_cast<Scene::BaseComponent*>(Plugins::Link.Con.createObject(componentClassName));
    if (newComponent)
@@ -913,7 +913,7 @@ void SceneTool::addComponent(Scene::SceneEntity* entity, StringTableEntry compon
 void SceneTool::selectComponent(Scene::BaseComponent* component, bool updateTree)
 {
    mSelectedObject = component;
-   mSelectedEntity = component->mOwnerEntity;
+   mSelectedEntity = component->mOwnerObject;
    mSelectedComponent = component;
 
    // Update the gizmo.

@@ -147,7 +147,7 @@ const LanguageInfo g_LanguagePrefs [] = {
      mySTC_FOLD_COMMENT | mySTC_FOLD_COMPACT | mySTC_FOLD_PREPROC},
     // TorqueScript
     {"TorqueScript",
-     "*.cs",
+     "*.tsc",
      wxSTC_LEX_TORQUESCRIPT,
      {{mySTC_TYPE_DEFAULT, NULL},
       {mySTC_TYPE_COMMENT_LINE, NULL},

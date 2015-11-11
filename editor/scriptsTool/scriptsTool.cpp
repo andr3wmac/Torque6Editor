@@ -126,9 +126,9 @@ void ScriptsTool::findAllScripts(wxTreeItemId treeParent, wxString folder)
          dir_cont = projectDir.GetNext(&dirname);
       }
 
-      // Find All .cs Files
+      // Find All .tsc Files
       wxString filename;
-      bool file_cont = projectDir.GetFirst(&filename, "*.cs");
+      bool file_cont = projectDir.GetFirst(&filename, "*.tsc");
       while ( file_cont )
       {
          wxString fullpath(folder);

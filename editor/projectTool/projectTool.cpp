@@ -340,7 +340,7 @@ void ProjectTool::OnPropertyChanged( wxPropertyGridEvent& evt )
 
 const char* ProjectTool::getAssetCategoryName(const char* _name)
 {
-   if (dStrcmp(_name, "EntityTemplateAsset") == 0)
+   if (dStrcmp(_name, "ObjectTemplateAsset") == 0)
       return "Object Templates";
 
    if (dStrcmp(_name, "MaterialAsset") == 0)

@@ -137,9 +137,9 @@ void Torque6Launcher::loadProjects(wxString projectsPath)
       {
          wxString mainCSPath = "";
          mainCSPath.Append(path);
-         mainCSPath.Append("/main.cs");
+         mainCSPath.Append("/main.tsc");
 
-         // If it has a main.cs then we consider it a project.
+         // If it has a main.tsc then we consider it a project.
          if ( wxFileName::FileExists(mainCSPath) )
          {
             // Check if project has a screenshot.

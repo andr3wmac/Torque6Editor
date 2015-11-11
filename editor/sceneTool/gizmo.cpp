@@ -138,7 +138,7 @@ Gizmo::~Gizmo()
    //
 }
 
-void Gizmo::selectEntity(Scene::SceneEntity* entity)
+void Gizmo::selectEntity(Scene::SceneObject* entity)
 {
    mSelectedObject      = entity;
    mSelectedEntity      = entity;
@@ -151,7 +151,7 @@ void Gizmo::selectEntity(Scene::SceneEntity* entity)
 void Gizmo::selectComponent(Scene::BaseComponent* component)
 {
    mSelectedObject      = component;
-   mSelectedEntity      = component->mOwnerEntity;
+   mSelectedEntity      = component->mOwnerObject;
    mSelectedComponent   = component;
    mSelectedPosition    = component->getPosition();
    mSelectedRotation    = component->getRotation();

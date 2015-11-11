@@ -35,8 +35,8 @@
 #include <wx/treectrl.h>
 #endif
 
-#ifndef _SCENEENTITY_H_
-#include <3d/entity/entity.h>
+#ifndef _SCENE_OBJECT_H_
+#include <3d/scene/object/object.h>
 #endif
 
 struct AssetCategory
