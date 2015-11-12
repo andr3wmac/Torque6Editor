@@ -111,7 +111,6 @@ Point3F getPointOnZPlane(F32 z, Point3F p1, Point3F p2)
 Gizmo::Gizmo()
    :  mProjectManager(NULL),
       mSelectedObject(NULL),
-      mSelectedEntity(NULL),
       mSelectedComponent(NULL),
       mSelectRed(false),
       mSelectGreen(false),
@@ -138,20 +137,18 @@ Gizmo::~Gizmo()
    //
 }
 
-void Gizmo::selectEntity(Scene::SceneObject* entity)
+void Gizmo::selectObject(Scene::SceneObject* Object)
 {
-   mSelectedObject      = entity;
-   mSelectedEntity      = entity;
+   mSelectedObject      = Object;
    mSelectedComponent   = NULL;
-   mSelectedPosition    = entity->mPosition;
-   mSelectedRotation    = entity->mRotation;
-   mSelectedScale       = entity->mScale;
+   mSelectedPosition    = Object->mPosition;
+   mSelectedRotation    = Object->mRotation;
+   mSelectedScale       = Object->mScale;
 }
 
 void Gizmo::selectComponent(Scene::BaseComponent* component)
 {
-   mSelectedObject      = component;
-   mSelectedEntity      = component->mOwnerObject;
+   mSelectedObject      = component->mOwnerObject;
    mSelectedComponent   = component;
    mSelectedPosition    = component->getPosition();
    mSelectedRotation    = component->getRotation();
@@ -160,28 +157,28 @@ void Gizmo::selectComponent(Scene::BaseComponent* component)
 
 void Gizmo::render()
 {
-   if (mProjectManager == NULL || mSelectedEntity == NULL)
+   if (mProjectManager == NULL || mSelectedObject == NULL)
       return;
 
    Point3F position = Point3F::Zero;
    Point3F rotation = Point3F::Zero;
 
-   // Selected Entity
-   if (mSelectedEntity != NULL && mSelectedComponent == NULL)
+   // Selected Object
+   if (mSelectedObject != NULL && mSelectedComponent == NULL)
    {
-      position = mSelectedEntity->mPosition;
-      rotation = mSelectedEntity->mRotation;
+      position = mSelectedObject->mPosition;
+      rotation = mSelectedObject->mRotation;
    }
 
    // Selected Component
-   if (mSelectedEntity != NULL && mSelectedComponent != NULL)
+   if (mSelectedObject != NULL && mSelectedComponent != NULL)
    {
       position = mSelectedComponent->getPosition();
       rotation = mSelectedComponent->getRotation();
    }
 
    Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
-   Point3F camToEntity = mSelectedEntity->mPosition - editorPos;
+   Point3F camToObject = mSelectedObject->mPosition - editorPos;
 
    // Highlight selected axis
    ColorI redColor   = mSelectRed   ? ColorI(255, 0, 0, 255) : ColorI(128, 0, 0, 255);
@@ -191,7 +188,7 @@ void Gizmo::render()
    // Translate
    if (mProjectManager->mEditorMode == 0)
    {
-      F32 size = camToEntity.len() / 4.0f;
+      F32 size = camToObject.len() / 4.0f;
       F32 length = size / 10.0f;
 
       Plugins::Link.Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, position, position + Point3F(size, 0.0f, 0.0f), redColor, NULL);
@@ -217,7 +214,7 @@ void Gizmo::render()
    // Rotate
    if (mProjectManager->mEditorMode == 1)
    {
-      F32 size = camToEntity.len() / 6.0f;
+      F32 size = camToObject.len() / 6.0f;
 
       // X Axis
       F32 xTransform[16];
@@ -244,7 +241,7 @@ void Gizmo::render()
          rotation.x, rotation.y, rotation.z,
          position.x, position.y, position.z);
 
-      F32 size = camToEntity.len() / 4.0f;
+      F32 size = camToObject.len() / 4.0f;
       Plugins::Link.Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), Point3F(size, 0.0f, 0.0f), redColor, transform);
       Plugins::Link.Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), Point3F(0, size, 0.0f), greenColor, transform);
       Plugins::Link.Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), Point3F(0.0f, 0.0f, size), blueColor, transform);
@@ -262,11 +259,11 @@ bool Gizmo::onMouseLeftDown(int x, int y)
    Point3F worldRay = Plugins::Link.Rendering.screenToWorld(Point2I(x, y));
    Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
 
-   if (mSelectedEntity != NULL && mSelectedComponent == NULL)
-      position = mSelectedEntity->mPosition;
+   if (mSelectedObject != NULL && mSelectedComponent == NULL)
+      position = mSelectedObject->mPosition;
 
    // Selected Component
-   if (mSelectedEntity != NULL && mSelectedComponent != NULL)
+   if (mSelectedObject != NULL && mSelectedComponent != NULL)
       position = mSelectedComponent->getPosition();
 
    if (mSelectRed)
@@ -312,17 +309,17 @@ bool Gizmo::onMouseLeftUp(int x, int y)
 
 bool Gizmo::onMouseMove(int x, int y)
 {
-   if (mSelectedEntity == NULL)
+   if (mSelectedObject == NULL)
       return false;
 
    Point3F position = Point3F::Zero;
 
-   // Selected Entity
-   if (mSelectedEntity != NULL && mSelectedComponent == NULL)
-      position = mSelectedEntity->mPosition;
+   // Selected Object
+   if (mSelectedObject != NULL && mSelectedComponent == NULL)
+      position = mSelectedObject->mPosition;
 
    // Selected Component
-   if (mSelectedEntity != NULL && mSelectedComponent != NULL)
+   if (mSelectedObject != NULL && mSelectedComponent != NULL)
       position = mSelectedComponent->getPosition();
 
    // Determine the worldspace points we're closest to.
@@ -357,8 +354,8 @@ bool Gizmo::onMouseMove(int x, int y)
    mSelectBlue = false;
 
    // Determine if the mouse is close enough to be within the gizmo.
-   Point3F camToEntity = position - editorPos;
-   F32 size = camToEntity.len() / 4.0f;
+   Point3F camToObject = position - editorPos;
+   F32 size = camToObject.len() / 4.0f;
    F32 dist = getMax((position - mSelectRedPoint).len(), (position - mSelectGreenPoint).len());
        dist = getMax(dist, (position - mSelectBluePoint).len());
    if (dist > size)
@@ -367,7 +364,7 @@ bool Gizmo::onMouseMove(int x, int y)
    // Translate
    if (mProjectManager->mEditorMode == 0)
    {
-      Point2I entityPointScreen = Plugins::Link.Rendering.worldToScreen(position);
+      Point2I ObjectPointScreen = Plugins::Link.Rendering.worldToScreen(position);
       Point2I redPointScreen = Plugins::Link.Rendering.worldToScreen(mSelectRedPoint);
       Point2I greenPointScreen = Plugins::Link.Rendering.worldToScreen(mSelectGreenPoint);
       Point2I bluePointScreen = Plugins::Link.Rendering.worldToScreen(mSelectBluePoint);
@@ -398,7 +395,7 @@ bool Gizmo::onMouseMove(int x, int y)
    // Scale
    if (mProjectManager->mEditorMode == 2)
    {
-      Point2I entityPointScreen = Plugins::Link.Rendering.worldToScreen(position);
+      Point2I ObjectPointScreen = Plugins::Link.Rendering.worldToScreen(position);
       Point2I redPointScreen = Plugins::Link.Rendering.worldToScreen(mSelectRedPoint);
       Point2I greenPointScreen = Plugins::Link.Rendering.worldToScreen(mSelectGreenPoint);
       Point2I bluePointScreen = Plugins::Link.Rendering.worldToScreen(mSelectBluePoint);
@@ -447,18 +444,18 @@ void Gizmo::dragTranslate(int x, int y)
    if (mTranslateSnap > 0.0f)
       newPosition = snap(mSelectedPosition, mTranslateSnap);
 
-   // Selected Entity
-   if (mSelectedEntity != NULL && mSelectedComponent == NULL)
+   // Selected Object
+   if (mSelectedObject != NULL && mSelectedComponent == NULL)
    {
-      mSelectedEntity->mPosition = newPosition;
-      mSelectedEntity->refresh();
+      mSelectedObject->mPosition = newPosition;
+      mSelectedObject->refresh();
    }
       
    // Selected Component
-   if (mSelectedEntity != NULL && mSelectedComponent != NULL)
+   if (mSelectedObject != NULL && mSelectedComponent != NULL)
    {
       mSelectedComponent->setPosition(newPosition);
-      mSelectedEntity->refresh();
+      mSelectedObject->refresh();
    }
 }
 
@@ -470,21 +467,21 @@ void Gizmo::dragRotate(int x, int y)
 
    if (mDragRed)
    {
-      Point3F xPoint = getPointOnXPlane(mSelectedEntity->mPosition.x, editorPos, editorPos + (worldRay * 1000.0f));
+      Point3F xPoint = getPointOnXPlane(mSelectedObject->mPosition.x, editorPos, editorPos + (worldRay * 1000.0f));
       dragAngle = mAtan(xPoint.z, xPoint.y) - mDownAngle;
       mSelectedRotation.x += dragAngle;
    }
 
    if (mDragGreen)
    {
-      Point3F yPoint = getPointOnYPlane(mSelectedEntity->mPosition.y, editorPos, editorPos + (worldRay * 1000.0f));
+      Point3F yPoint = getPointOnYPlane(mSelectedObject->mPosition.y, editorPos, editorPos + (worldRay * 1000.0f));
       dragAngle = mAtan(yPoint.z, yPoint.x) - mDownAngle;
       mSelectedRotation.y += dragAngle;
    }
 
    if (mDragBlue)
    {
-      Point3F zPoint = getPointOnZPlane(mSelectedEntity->mPosition.z, editorPos, editorPos + (worldRay * 1000.0f));
+      Point3F zPoint = getPointOnZPlane(mSelectedObject->mPosition.z, editorPos, editorPos + (worldRay * 1000.0f));
       dragAngle = mAtan(zPoint.y, zPoint.x) - mDownAngle;
       mSelectedRotation.z += dragAngle;
    }
@@ -495,18 +492,18 @@ void Gizmo::dragRotate(int x, int y)
    if (mRotateSnap > 0.0f)
       newRotation = snap(mSelectedRotation, mRotateSnap);
 
-   // Selected Entity
-   if (mSelectedEntity != NULL && mSelectedComponent == NULL)
+   // Selected Object
+   if (mSelectedObject != NULL && mSelectedComponent == NULL)
    {
-      mSelectedEntity->mRotation = newRotation;
-      mSelectedEntity->refresh();
+      mSelectedObject->mRotation = newRotation;
+      mSelectedObject->refresh();
    }
 
    // Selected Component
-   if (mSelectedEntity != NULL && mSelectedComponent != NULL)
+   if (mSelectedObject != NULL && mSelectedComponent != NULL)
    {
       mSelectedComponent->setRotation(newRotation);
-      mSelectedEntity->refresh();
+      mSelectedObject->refresh();
    }
 
    mDownAngle += dragAngle;
@@ -533,19 +530,19 @@ void Gizmo::dragScale(int x, int y)
 
    // Snapping
    if (mScaleSnap > 0.0f)
-      mSelectedEntity->mScale = snap(mSelectedScale, mScaleSnap);
+      mSelectedObject->mScale = snap(mSelectedScale, mScaleSnap);
    
-   // Selected Entity
-   if (mSelectedEntity != NULL && mSelectedComponent == NULL)
+   // Selected Object
+   if (mSelectedObject != NULL && mSelectedComponent == NULL)
    {
-      mSelectedEntity->mScale = newScale;
-      mSelectedEntity->refresh();
+      mSelectedObject->mScale = newScale;
+      mSelectedObject->refresh();
    }
 
    // Selected Component
-   if (mSelectedEntity != NULL && mSelectedComponent != NULL)
+   if (mSelectedObject != NULL && mSelectedComponent != NULL)
    {
       mSelectedComponent->setScale(newScale);
-      mSelectedEntity->refresh();
+      mSelectedObject->refresh();
    }
 }

@@ -39,6 +39,7 @@
 #include "../Torque6EditorUI.h"
 
 #include "projectManager.h"
+#include "module/moduleManager.h"
 #include "3d/scene/object/components/meshComponent.h"
 
 class TextDropTarget : public wxTextDropTarget
@@ -435,6 +436,27 @@ void EditorCamera::onMouseDraggedEvent(const GuiEvent &event)
    //editorList[activeEditorIndex]->onMouseDraggedEvent(event);
 }
 
+void _addObjectTemplateAsset(wxString assetID, Point3F position)
+{
+   Scene::SceneObject* newObject = new Scene::SceneObject();
+   newObject->setTemplateAsset(assetID);
+   newObject->mPosition.set(position);
+   Plugins::Link.Scene.addObject(newObject, "NewSceneObject");
+   newObject->registerObject();
+}
+
+void _addMeshAsset(wxString assetID, Point3F position)
+{
+   Scene::SceneObject* newObject = new Scene::SceneObject();
+   Scene::MeshComponent* meshComponent = new Scene::MeshComponent();
+   meshComponent->setMesh(assetID.c_str());
+   newObject->addComponent(meshComponent);
+   newObject->mPosition.set(position);
+   Plugins::Link.Scene.addObject(newObject, "NewSceneObject");
+   newObject->registerObject();
+   meshComponent->registerObject();
+}
+
 bool TextDropTarget::OnDropText(wxCoord x, wxCoord y, const wxString& text)
 {
    // Debug:
@@ -455,33 +477,17 @@ bool TextDropTarget::OnDropText(wxCoord x, wxCoord y, const wxString& text)
       // ObjectTemplateAsset gets added straight to the scene.
       if (assetType == "ObjectTemplateAsset")
       {
-         Scene::SceneObject* newObject = new Scene::SceneObject();
-         newObject->setTemplateAsset(assetID);
-         newObject->registerObject("NewSceneObject");
-
          Point3F worldRay = Plugins::Link.Rendering.screenToWorld(Point2I(x, y));
          Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
-         newObject->mPosition.set(editorPos + (worldRay * 10.0f));
-
-         Plugins::Link.Scene.addObject(newObject, "NewSceneObject");
+         _addObjectTemplateAsset(assetID, editorPos + (worldRay * 10.0f));
       }
 
       // MeshAsset
       if (assetType == "MeshAsset")
       {
-         Scene::SceneObject* newObject = new Scene::SceneObject();
-
-         Scene::MeshComponent* meshComponent = new Scene::MeshComponent();
-         meshComponent->registerObject("NewMeshComponent");
-         meshComponent->setMesh(assetID.c_str());
-         newObject->addComponent(meshComponent);
-         newObject->registerObject("NewSceneObject");
-
          Point3F worldRay = Plugins::Link.Rendering.screenToWorld(Point2I(x, y));
          Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
-         newObject->mPosition.set(editorPos + (worldRay * 10.0f));
-
-         Plugins::Link.Scene.addObject(newObject, "NewSceneObject");
+         _addMeshAsset(assetID, editorPos + (worldRay * 10.0f));
       }
 
       // Inform the tools the scene has changed.
@@ -490,4 +496,103 @@ bool TextDropTarget::OnDropText(wxCoord x, wxCoord y, const wxString& text)
    }
 
    return true;
+}
+
+void ProjectManager::addObjectTemplateAsset(wxString assetID, Point3F position)
+{
+   _addObjectTemplateAsset(assetID, position);
+}
+
+void ProjectManager::addMeshAsset(wxString assetID, Point3F position)
+{
+   _addMeshAsset(assetID, position);
+}
+
+void ProjectManager::refreshModuleList()
+{
+   mModuleList.clear();
+   Vector<const AssetDefinition*> assetDefinitions = Plugins::Link.AssetDatabaseLink.getDeclaredAssets();
+
+   // Fetch all loaded module definitions.
+   ModuleManager::typeConstModuleDefinitionVector loadedModules;
+   Plugins::Link.ModuleDatabaseLink->findModules(true, loadedModules);
+
+   // Iterate found loaded module definitions.
+   for (ModuleManager::typeConstModuleDefinitionVector::const_iterator loadedModuleItr = loadedModules.begin(); loadedModuleItr != loadedModules.end(); ++loadedModuleItr)
+   {
+      // Fetch module definition.
+      const ModuleDefinition* module = *loadedModuleItr;
+
+      // Add to module list.
+      ModuleInfo newModule;
+      newModule.moduleID = module->getModuleId();
+      newModule.moduleVersion = module->getVersionId();
+      mModuleList.push_back(newModule);
+   }
+
+   // Iterate asset definitions.
+   for (Vector<const AssetDefinition*>::iterator assetItr = assetDefinitions.begin(); assetItr != assetDefinitions.end(); ++assetItr)
+   {
+      // Fetch asset definition.
+      const AssetDefinition* pAssetDefinition = *assetItr;
+
+      char buf[256];
+      dStrcpy(buf, pAssetDefinition->mAssetId);
+      const char* moduleName = dStrtok(buf, ":");
+      const char* assetName = dStrtok(NULL, ":");
+
+      // Try to find module
+      bool foundModule = false;
+      for (Vector<ModuleInfo>::iterator modulesItr = mModuleList.begin(); modulesItr != mModuleList.end(); ++modulesItr)
+      {
+         const char* moduleID = pAssetDefinition->mpModuleDefinition->getModuleId();
+         if (dStrcmp(modulesItr->moduleID, moduleID) == 0)
+         {
+            // Try to find category
+            bool foundCategory = false;
+            for (Vector<AssetCategoryInfo>::iterator categoriesItr = modulesItr->assets.begin(); categoriesItr != modulesItr->assets.end(); ++categoriesItr)
+            {
+               const char* moduleID = pAssetDefinition->mpModuleDefinition->getModuleId();
+               if (dStrcmp(categoriesItr->categoryName, pAssetDefinition->mAssetType) == 0)
+               {
+                  categoriesItr->assets.push_back(pAssetDefinition);
+                  foundCategory = true;
+                  break;
+               }
+            }
+
+            // Can't find module? Create one.
+            if (!foundCategory)
+            {
+               AssetCategoryInfo newCategory;
+               newCategory.categoryName = pAssetDefinition->mAssetType;
+               newCategory.assets.push_back(pAssetDefinition);
+               modulesItr->assets.push_back(newCategory);
+            }
+
+            foundModule = true;
+            break;
+         }
+      }
+
+      // Can't find module? Create one.
+      if (!foundModule)
+      {
+         ModuleInfo newModule;
+         newModule.moduleID = pAssetDefinition->mpModuleDefinition->getModuleId();
+         newModule.moduleVersion = pAssetDefinition->mpModuleDefinition->getVersionId();
+
+         AssetCategoryInfo newCategory;
+         newCategory.categoryName = pAssetDefinition->mAssetType;
+         newCategory.assets.push_back(pAssetDefinition);
+         newModule.assets.push_back(newCategory);
+         mModuleList.push_back(newModule);
+      }
+   }
+}
+
+Vector<ModuleInfo>* ProjectManager::getModuleList()
+{
+   refreshModuleList();
+   return &mModuleList;
 }

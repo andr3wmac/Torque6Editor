@@ -60,22 +60,22 @@ void ProjectTool::initTool()
 {
    mProjectPanel = new ProjectPanel(mFrame, wxID_ANY);
 
-   // Entity Icons
+   // Object Icons
    mAssetIconList->Add(wxBitmap("images/moduleIcon.png", wxBITMAP_TYPE_PNG));
    mAssetIconList->Add(wxBitmap("images/iconFolderGrey.png", wxBITMAP_TYPE_PNG));
    mAssetIconList->Add(wxBitmap("images/assetIcon.png", wxBITMAP_TYPE_PNG));
    mProjectPanel->assetList->AssignImageList(mAssetIconList);
 
-   // Entity Events
+   // Object Events
    mProjectPanel->assetList->Connect(wxID_ANY, wxEVT_TREE_BEGIN_DRAG, wxTreeEventHandler(ProjectTool::OnTreeDrag), NULL, this);
    mProjectPanel->assetList->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(ProjectTool::OnTreeEvent), NULL, this);
    mProjectPanel->assetList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(ProjectTool::OnTreeMenu), NULL, this);
    mProjectPanel->assetPropGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(ProjectTool::OnPropertyChanged), NULL, this);
    
-   // Entity Menu Events
+   // Object Menu Events
    mProjectPanel->moduleMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(ProjectTool::OnMenuEvent), NULL, this);
 
-   // Entity List
+   // Object List
    mAssetListRoot = mProjectPanel->assetList->AddRoot("ROOT");
 
    mManager->AddPane(mProjectPanel, wxAuiPaneInfo().Caption("Project")
@@ -163,7 +163,7 @@ void ProjectTool::OnTreeMenu( wxTreeEvent& evt )
       ModuleTreeItemData* module_data = dynamic_cast<ModuleTreeItemData*>(mProjectPanel->assetList->GetItemData(evt.GetItem()));
       if (module_data)
       {
-         Module mod = module_data->obj;
+         ModuleInfo mod = module_data->obj;
          mSelectedModule = Plugins::Link.ModuleDatabaseLink->findLoadedModule(mod.moduleID);
          if (mSelectedModule != NULL)
             mFrame->PopupMenu(mProjectPanel->moduleMenu, wxDefaultPosition);
@@ -373,94 +373,32 @@ void ProjectTool::refreshAssetList()
    mProjectPanel->assetList->DeleteAllItems();
    mAssetListRoot = mProjectPanel->assetList->AddRoot("ROOT");
 
-   Vector<const AssetDefinition*> assetDefinitions = Plugins::Link.AssetDatabaseLink.getDeclaredAssets();
-   Vector<Module> modules;
+   Vector<ModuleInfo>* modules = mProjectManager->getModuleList();
 
-   // Fetch all loaded module definitions.
-   ModuleManager::typeConstModuleDefinitionVector loadedModules;
-   Plugins::Link.ModuleDatabaseLink->findModules(true, loadedModules);
-
-   // Iterate found loaded module definitions.
-   for (ModuleManager::typeConstModuleDefinitionVector::const_iterator loadedModuleItr = loadedModules.begin(); loadedModuleItr != loadedModules.end(); ++loadedModuleItr)
+   const char* currentModuleID = "";
+   wxTreeItemId currentModuleTreeID = mAssetListRoot;
+   for (Vector<ModuleInfo>::iterator modulesItr = modules->begin(); modulesItr != modules->end(); ++modulesItr)
    {
-      // Fetch module definition.
-      const ModuleDefinition* module = *loadedModuleItr;
-
-      // Add to module list.
-      Module newModule;
-      newModule.moduleID = module->getModuleId();
-      newModule.moduleVersion = module->getVersionId();
-      newModule.treeItemID = mProjectPanel->assetList->AppendItem(mAssetListRoot, newModule.moduleID, 0, -1, new ModuleTreeItemData(newModule));
-      modules.push_back(newModule);
-   }
-
-   // Iterate sorted asset definitions.
-   for (Vector<const AssetDefinition*>::iterator assetItr = assetDefinitions.begin(); assetItr != assetDefinitions.end(); ++assetItr)
-   {
-      // Fetch asset definition.
-      const AssetDefinition* pAssetDefinition = *assetItr;
-
-      char buf[256];
-      dStrcpy(buf, pAssetDefinition->mAssetId);
-      const char* moduleName = dStrtok(buf, ":");
-      const char* assetName = dStrtok(NULL, ":");
-
-      // Try to find module
-      bool foundModule = false;
-      for (Vector<Module>::iterator modulesItr = modules.begin(); modulesItr != modules.end(); ++modulesItr)
+      if (dStrcmp(modulesItr->moduleID, currentModuleID) != 0)
       {
-         const char* moduleID = pAssetDefinition->mpModuleDefinition->getModuleId();
-         if (dStrcmp(modulesItr->moduleID, moduleID) == 0)
-         {
-            // Try to find category
-            bool foundCategory = false;
-            for (Vector<AssetCategory>::iterator categoriesItr = modulesItr->assets.begin(); categoriesItr != modulesItr->assets.end(); ++categoriesItr)
-            {
-               const char* moduleID = pAssetDefinition->mpModuleDefinition->getModuleId();
-               if (dStrcmp(categoriesItr->categoryName, pAssetDefinition->mAssetType) == 0)
-               {
-                  categoriesItr->assets.push_back(pAssetDefinition);
-                  mProjectPanel->assetList->AppendItem(categoriesItr->treeItemID, assetName, 2, -1, new AssetTreeItemData(pAssetDefinition));
-                  foundCategory = true;
-                  break;
-               }
-            }
-
-            // Can't find module? Create one.
-            if (!foundCategory)
-            {
-               AssetCategory newCategory;
-               newCategory.categoryName = pAssetDefinition->mAssetType;
-               newCategory.treeItemID = mProjectPanel->assetList->AppendItem(modulesItr->treeItemID, getAssetCategoryName(pAssetDefinition->mAssetType), 1, -1, new AssetCategoryTreeItemData(newCategory));
-
-               mProjectPanel->assetList->AppendItem(newCategory.treeItemID, assetName, 2, -1, new AssetTreeItemData(pAssetDefinition));
-
-               newCategory.assets.push_back(pAssetDefinition);
-               modulesItr->assets.push_back(newCategory);
-            }
-
-            foundModule = true;
-            break;
-         }
+         currentModuleID = modulesItr->moduleID;
+         currentModuleTreeID = mProjectPanel->assetList->AppendItem(mAssetListRoot, modulesItr->moduleID, 0, -1, new ModuleTreeItemData(*modulesItr));
       }
-
-      // Can't find module? Create one.
-      if (!foundModule)
+      
+      for (Vector<AssetCategoryInfo>::iterator assetCatItr = modulesItr->assets.begin(); assetCatItr != modulesItr->assets.end(); ++assetCatItr)
       {
-         Module newModule;
-         newModule.moduleID = pAssetDefinition->mpModuleDefinition->getModuleId();
-         newModule.moduleVersion = pAssetDefinition->mpModuleDefinition->getVersionId();
+         wxTreeItemId categoryTreeID = mProjectPanel->assetList->AppendItem(currentModuleTreeID, assetCatItr->categoryName, 1, -1, new AssetCategoryTreeItemData(*assetCatItr));
 
-         AssetCategory newCategory;
-         newCategory.categoryName = pAssetDefinition->mAssetType;
-         
-         newModule.treeItemID = mProjectPanel->assetList->AppendItem(mAssetListRoot, newModule.moduleID, 0, -1, new ModuleTreeItemData(newModule));
-         newCategory.treeItemID = mProjectPanel->assetList->AppendItem(newModule.treeItemID, getAssetCategoryName(pAssetDefinition->mAssetType), 1, -1, new AssetCategoryTreeItemData(newCategory));
-         mProjectPanel->assetList->AppendItem(newCategory.treeItemID, assetName, 2, -1, new AssetTreeItemData(pAssetDefinition));
-
-         newCategory.assets.push_back(pAssetDefinition);
-         newModule.assets.push_back(newCategory);
-         modules.push_back(newModule);
+         for (Vector<const AssetDefinition*>::iterator assetItr = assetCatItr->assets.begin(); assetItr != assetCatItr->assets.end(); ++assetItr)
+         {
+            // Fetch asset definition.
+            const AssetDefinition* pAssetDefinition = *assetItr;
+            char buf[256];
+            dStrcpy(buf, pAssetDefinition->mAssetId);
+            const char* moduleName = dStrtok(buf, ":");
+            const char* assetName = dStrtok(NULL, ":");
+            mProjectPanel->assetList->AppendItem(categoryTreeID, assetName, 2, -1, new AssetTreeItemData(pAssetDefinition));
+         }
       }
    }
 

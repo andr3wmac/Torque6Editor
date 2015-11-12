@@ -58,6 +58,19 @@ class EditorCamera : public Scene::SceneCamera
       DECLARE_PLUGIN_CONOBJECT(EditorCamera);
 };
 
+struct AssetCategoryInfo
+{
+   const char* categoryName;
+   Vector<const AssetDefinition*> assets;
+};
+
+struct ModuleInfo
+{
+   const char* moduleID;
+   U32 moduleVersion;
+   Vector<AssetCategoryInfo> assets;
+};
+
 class EditorTool
 {
    public:
@@ -112,6 +125,7 @@ class ProjectManager : public wxEvtHandler, public Rendering::Renderable
       F32               mCameraSpeed;
 
       S32               mEditorMode;
+      Vector<ModuleInfo> mModuleList;
 
       Graphics::ViewTableEntry* mRenderLayer4View;
       Graphics::ViewTableEntry* mEditorOverlayView;
@@ -119,6 +133,10 @@ class ProjectManager : public wxEvtHandler, public Rendering::Renderable
       bool openProject(wxString projectPath);
       void closeProject();
       void runProject();
+      void addObjectTemplateAsset(wxString assetID, Point3F position);
+      void addMeshAsset(wxString assetID, Point3F position);
+      void refreshModuleList();
+      Vector<ModuleInfo>* getModuleList();
 
       virtual void preRender();
       virtual void render();

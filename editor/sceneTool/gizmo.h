@@ -56,8 +56,7 @@ class Gizmo
 
    public:
       ProjectManager*         mProjectManager;
-      SimObject*              mSelectedObject;
-      Scene::SceneObject*     mSelectedEntity;
+      Scene::SceneObject*     mSelectedObject;
       Scene::BaseComponent*   mSelectedComponent;
 
       F32 mTranslateSnap;
@@ -67,7 +66,7 @@ class Gizmo
       Gizmo();
       ~Gizmo();
 
-      void selectEntity(Scene::SceneObject* entity);
+      void selectObject(Scene::SceneObject* obj);
       void selectComponent(Scene::BaseComponent* component);
       void render();
 

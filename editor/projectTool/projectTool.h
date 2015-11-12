@@ -39,27 +39,12 @@
 #include <3d/scene/object/object.h>
 #endif
 
-struct AssetCategory
-{
-   const char* categoryName;
-   Vector<const AssetDefinition*> assets;
-   wxTreeItemId treeItemID;
-};
-
-struct Module
-{
-   const char* moduleID;
-   U32 moduleVersion;
-   Vector<AssetCategory> assets;
-   wxTreeItemId treeItemID;
-};
-
 class ModuleTreeItemData : public wxTreeItemData
 {
 public:
-   Module obj;
+   ModuleInfo obj;
 
-   ModuleTreeItemData(Module _obj)
+   ModuleTreeItemData(ModuleInfo _obj)
       : obj(_obj)
    {
    }
@@ -68,9 +53,9 @@ public:
 class AssetCategoryTreeItemData : public wxTreeItemData
 {
 public:
-   AssetCategory obj;
+   AssetCategoryInfo obj;
    
-   AssetCategoryTreeItemData(AssetCategory _obj)
+   AssetCategoryTreeItemData(AssetCategoryInfo _obj)
       :  obj(_obj)
    {
    }

@@ -43,12 +43,12 @@
 #include "gizmo.h"
 #endif
 
-class EntityTreeItemData : public wxTreeItemData
+class ObjectTreeItemData : public wxTreeItemData
 {
 public:
    SimObject* objPtr;
    
-   EntityTreeItemData(SimObject* _objPtr)
+   ObjectTreeItemData(SimObject* _objPtr)
       :  objPtr(_objPtr)
    {
    }
@@ -71,18 +71,17 @@ class SceneTool : public wxEvtHandler, public EditorTool
 
    protected:
       ScenePanel*    mScenePanel;
-      wxImageList*   mEntityIconList;
-      wxTreeItemId   mEntityListRoot;
+      wxImageList*   mObjectIconList;
+      wxTreeItemId   mObjectListRoot;
 
       wxImageList*   mFeatureIconList;
       wxTreeItemId   mFeatureListRoot;
       
-      SimObject*              mSelectedObject;
-      Scene::SceneObject*     mSelectedEntity;
+      Scene::SceneObject*     mSelectedObject;
       Scene::BaseComponent*   mSelectedComponent;
       SimObject*              mSelectedFeature;
 
-      Scene::SceneObject*     mMenuEntity;
+      Scene::SceneObject*     mMenuObject;
       Scene::BaseComponent*   mMenuComponent;
       Scene::SceneFeature*    mMenuFeature;
 
@@ -107,30 +106,30 @@ class SceneTool : public wxEvtHandler, public EditorTool
       ~SceneTool();
 
       void refreshClassLists();
-      void refreshEntityList();
+      void refreshObjectList();
       void refreshFeatureList();
       void refreshChoices();
       void loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* obj);
-      void selectEntity(Scene::SceneObject* entity, bool updateTree = false);
-      void addComponent(Scene::SceneObject* entity, StringTableEntry componentClassName);
+      void selectObject(Scene::SceneObject* obj, bool updateTree = false);
+      void addComponent(Scene::SceneObject* obj, StringTableEntry componentClassName);
       void selectComponent(Scene::BaseComponent* componenty, bool updateTree = false);
-      void openAddEntityMenu();
+      void openAddObjectMenu();
       void openAddComponentMenu();
       void openAddFeatureMenu();
 
       void OnMenuEvent(wxCommandEvent& evt);
       void OnTreeEvent( wxTreeEvent& evt );
       void OnTreeMenu( wxTreeEvent& evt );
-      void OnEntityPropChanged(wxPropertyGridEvent& evt);
+      void OnObjectPropChanged(wxPropertyGridEvent& evt);
       void OnFeaturePropChanged( wxPropertyGridEvent& evt );
       void OnToolbarDropdownEvent(wxCommandEvent& evt);
       void OnTranslateMenuEvent(wxCommandEvent& evt);
       void OnRotateMenuEvent(wxCommandEvent& evt);
       void OnScaleMenuEvent(wxCommandEvent& evt);
-      void OnAddEntityMenuEvent(wxCommandEvent& evt);
+      void OnAddObjectMenuEvent(wxCommandEvent& evt);
       void OnAddComponentMenuEvent(wxCommandEvent& evt);
       void OnAddFeatureMenuEvent(wxCommandEvent& evt);
-      void OnEntityMenuEvent(wxCommandEvent& evt);
+      void OnObjectMenuEvent(wxCommandEvent& evt);
       void OnComponentMenuEvent(wxCommandEvent& evt);
       void OnFeatureMenuEvent(wxCommandEvent& evt);
 

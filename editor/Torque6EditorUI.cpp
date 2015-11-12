@@ -251,8 +251,8 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	wxBoxSizer* bSizer6;
 	bSizer6 = new wxBoxSizer( wxHORIZONTAL );
 	
-	addEntityButton = new wxBitmapButton( m_panel11, ADD_ENTITY_BUTTON, wxBitmap( wxT("images/entityIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	bSizer6->Add( addEntityButton, 0, wxALL, 2 );
+	addObjectButton = new wxBitmapButton( m_panel11, ADD_OBJECT_BUTTON, wxBitmap( wxT("images/objectIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	bSizer6->Add( addObjectButton, 0, wxALL, 2 );
 	
 	addComponentButton = new wxBitmapButton( m_panel11, ADD_COMPONENT_BUTTON, wxBitmap( wxT("images/componentIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	addComponentButton->Enable( false );
@@ -271,8 +271,8 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	bSizer5->Add( bSizer6, 0, wxEXPAND, 0 );
 	
-	entityList = new wxTreeCtrl( m_panel11, ENTITY_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
-	bSizer5->Add( entityList, 1, wxALL|wxEXPAND, 1 );
+	objectList = new wxTreeCtrl( m_panel11, OBJECT_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
+	bSizer5->Add( objectList, 1, wxALL|wxEXPAND, 1 );
 	
 	propertyGrid = new wxPropertyGrid(m_panel11, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE);
 	bSizer5->Add( propertyGrid, 1, wxALL|wxEXPAND, 2 );

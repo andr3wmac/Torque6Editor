@@ -64,9 +64,9 @@ WX_DEFINE_ARRAY_PTR( wxWizardPageSimple*, WizardPages );
 #define SCENE_NEW 1015
 #define SCENE_OPEN 1016
 #define SCENE_SAVE 1017
-#define ADD_ENTITY_BUTTON 1018
+#define ADD_OBJECT_BUTTON 1018
 #define ADD_COMPONENT_BUTTON 1019
-#define ENTITY_LIST 1020
+#define OBJECT_LIST 1020
 #define ADD_FEATURE_BUTTON 1021
 #define FEATURE_LIST 1022
 #define TRANSLATE_SNAP_NONE 1023
@@ -185,9 +185,9 @@ class ScenePanel : public wxPanel
 		wxBitmapButton* m_bpButton11;
 	
 	public:
-		wxBitmapButton* addEntityButton;
+		wxBitmapButton* addObjectButton;
 		wxBitmapButton* addComponentButton;
-		wxTreeCtrl* entityList;
+		wxTreeCtrl* objectList;
 		wxPropertyGrid* propertyGrid;
 		wxTreeCtrl* featureList;
 		wxPropertyGrid* featurePropGrid;
