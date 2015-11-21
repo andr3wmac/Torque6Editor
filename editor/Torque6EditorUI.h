@@ -55,7 +55,7 @@ WX_DEFINE_ARRAY_PTR( wxWizardPageSimple*, WizardPages );
 #define MENU_SCENE 1006
 #define MENU_SCRIPTS 1007
 #define MENU_MATERIALS 1008
-#define MENU_PROFILER 1009
+#define MENU_REMOTERY 1009
 #define MENU_WEBSITE 1010
 #define MENU_GITHUB 1011
 #define MENU_FORUMS 1012
@@ -91,6 +91,7 @@ class MainFrame : public wxFrame
 		wxMenu* m_menu1;
 		wxMenu* m_menu7;
 		wxMenu* m_menu2;
+		wxMenu* m_menu71;
 		wxMenu* m_menu6;
 	
 	public:

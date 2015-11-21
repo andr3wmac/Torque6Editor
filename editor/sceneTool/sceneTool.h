@@ -79,7 +79,7 @@ class SceneTool : public wxEvtHandler, public EditorTool
       
       Scene::SceneObject*     mSelectedObject;
       Scene::BaseComponent*   mSelectedComponent;
-      SimObject*              mSelectedFeature;
+      Scene::SceneFeature*    mSelectedFeature;
 
       Scene::SceneObject*     mMenuObject;
       Scene::BaseComponent*   mMenuComponent;

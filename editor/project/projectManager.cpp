@@ -373,12 +373,14 @@ void ProjectManager::OnKeyUp(wxKeyEvent& evt)
 
 void ProjectManager::preRender()
 {
-   Plugins::Link.bgfx.setViewRect(mEditorOverlayView->id, 0, 0, *Plugins::Link.Rendering.canvasWidth, *Plugins::Link.Rendering.canvasHeight);
-   Plugins::Link.bgfx.setViewTransform(mEditorOverlayView->id, Plugins::Link.Rendering.viewMatrix, Plugins::Link.Rendering.projectionMatrix, BGFX_VIEW_STEREO, NULL);
+
 }
 
 void ProjectManager::render()
 {
+   Plugins::Link.bgfx.setViewRect(mEditorOverlayView->id, 0, 0, *Plugins::Link.Rendering.canvasWidth, *Plugins::Link.Rendering.canvasHeight);
+   Plugins::Link.bgfx.setViewTransform(mEditorOverlayView->id, Plugins::Link.Rendering.viewMatrix, Plugins::Link.Rendering.projectionMatrix, BGFX_VIEW_STEREO, NULL);
+
    for(unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->renderTool();
 }

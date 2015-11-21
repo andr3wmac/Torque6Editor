@@ -10,6 +10,7 @@ function Torque6Launcher()
             SRC_DIR,
             EDITOR_DIR,
             path.join(LIB_DIR, "assimp/include"),
+            path.join(LIB_DIR, "bgfx/3rdparty"),
             path.join(LIB_DIR, "bgfx/include"),
             path.join(LIB_DIR, "bgfx/common"),
             path.join(LIB_DIR, "openal/win32"),

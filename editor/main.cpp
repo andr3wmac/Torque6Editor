@@ -142,10 +142,6 @@ void Torque6Editor::OnMenuEvent(wxCommandEvent& evt)
          EditorTool::smEditorTools[2]->openTool();
          break;
 
-      case MENU_PROFILER:
-         EditorTool::smEditorTools[3]->openTool();
-         break;
-
       case MENU_SCENE:
          EditorTool::smEditorTools[4]->openTool();
          break;
@@ -153,6 +149,10 @@ void Torque6Editor::OnMenuEvent(wxCommandEvent& evt)
       case MENU_SCRIPTS:
          EditorTool::smEditorTools[5]->openTool();
          break;
+
+		case MENU_REMOTERY:
+			wxLaunchDefaultBrowser("file:///C:/Users/Andrew/Documents/Projects/Torque6Editor/profiler/index.html");
+			break;
 
       case MENU_WEBSITE:
          wxLaunchDefaultBrowser("http://www.torque6.com");

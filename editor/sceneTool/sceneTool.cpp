@@ -443,7 +443,7 @@ void SceneTool::OnTreeEvent( wxTreeEvent& evt )
       ObjectTreeItemData* data = dynamic_cast<ObjectTreeItemData*>(mScenePanel->objectList->GetItemData(evt.GetItem()));
       if (data)
       {
-         // Did we select an Object ..
+         // Did we select an object?
          Scene::SceneObject* Object = dynamic_cast<Scene::SceneObject*>(data->objPtr);
          if (Object)
          {
@@ -451,7 +451,7 @@ void SceneTool::OnTreeEvent( wxTreeEvent& evt )
             return;
          }
 
-         // .. or a component?
+         // or a component?
          Scene::BaseComponent* component = dynamic_cast<Scene::BaseComponent*>(data->objPtr);
          if (component)
          {
@@ -466,9 +466,14 @@ void SceneTool::OnTreeEvent( wxTreeEvent& evt )
       FeatureTreeItemData* data = dynamic_cast<FeatureTreeItemData*>(mScenePanel->featureList->GetItemData(evt.GetItem()));
       if (data)
       {
-         mSelectedFeature = data->objPtr;
-         loadObjectProperties(mScenePanel->featurePropGrid, data->objPtr);
-         return;
+         // Did we select a feature?
+         Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(data->objPtr);
+         if (feature)
+         {
+            mSelectedFeature = feature;
+            loadObjectProperties(mScenePanel->featurePropGrid, feature);
+            return;
+         }
       }
    }
 }
@@ -657,6 +662,7 @@ void SceneTool::OnFeaturePropChanged(wxPropertyGridEvent& evt)
    }
 
    mSelectedFeature->setDataField(Plugins::Link.StringTableLink->insert(name), NULL, strVal);
+   mSelectedFeature->refresh();
 }
 
 void SceneTool::refreshObjectList()

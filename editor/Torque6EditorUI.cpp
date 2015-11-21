@@ -65,11 +65,14 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	m_menuItem9 = new wxMenuItem( m_menu2, MENU_MATERIALS, wxString( wxT("Materials") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menu2->Append( m_menuItem9 );
 	
-	wxMenuItem* m_menuItem10;
-	m_menuItem10 = new wxMenuItem( m_menu2, MENU_PROFILER, wxString( wxT("Profiler") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menu2->Append( m_menuItem10 );
-	
 	mainMenuBar->Append( m_menu2, wxT("Tools") ); 
+	
+	m_menu71 = new wxMenu();
+	wxMenuItem* m_menuItem24;
+	m_menuItem24 = new wxMenuItem( m_menu71, MENU_REMOTERY, wxString( wxT("Remotery Profiler") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu71->Append( m_menuItem24 );
+	
+	mainMenuBar->Append( m_menu71, wxT("Debug") ); 
 	
 	m_menu6 = new wxMenu();
 	wxMenuItem* m_menuItem26;
