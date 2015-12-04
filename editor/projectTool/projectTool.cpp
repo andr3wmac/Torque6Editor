@@ -318,7 +318,7 @@ void ProjectTool::OnPropertyChanged( wxPropertyGridEvent& evt )
    if (name.StartsWith("TextureAsset"))
    {
       long intVal = val.GetInteger();
-      strVal = mTextureAssetChoices.GetLabel(intVal);
+      //strVal = mTextureAssetChoices.GetLabel(intVal);
    }
 
    // Set Value.
@@ -364,7 +364,6 @@ const char* ProjectTool::getAssetCategoryName(const char* _name)
 void ProjectTool::refresh()
 {
    refreshAssetList();
-   refreshChoices();
 }
 
 void ProjectTool::refreshAssetList()
@@ -404,28 +403,6 @@ void ProjectTool::refreshAssetList()
 
    // Sort Modules by Name
    mProjectPanel->assetList->SortChildren(mAssetListRoot);
-}
-
-void ProjectTool::refreshChoices()
-{
-   if (!mProjectManager->isProjectLoaded())
-      return;
-
-   mTextureAssetChoices.Clear();
-   mTextureAssetChoices.Add("", 0);
-
-   Vector<const AssetDefinition*> assetDefinitions = Plugins::Link.AssetDatabaseLink.getDeclaredAssets();
-
-   // Iterate sorted asset definitions.
-   for (Vector<const AssetDefinition*>::iterator assetItr = assetDefinitions.begin(); assetItr != assetDefinitions.end(); ++assetItr)
-   {
-      // Fetch asset definition.
-      const AssetDefinition* pAssetDefinition = *assetItr;
-
-      // Populate TextureAsset choices menu.
-      if (dStrcmp(pAssetDefinition->mAssetType, "TextureAsset") == 0)
-         mTextureAssetChoices.Add(pAssetDefinition->mAssetId, mTextureAssetChoices.GetCount());
-   }
 }
 
 static S32 QSORT_CALLBACK compareEntries(const void* a, const void* b)
@@ -510,7 +487,7 @@ void ProjectTool::loadAssetDefinitionProperties(wxPropertyGrid* propertyGrid, co
       else if (isMaterialAsset && dStrncmp(entry->slotName, "TextureFile", 11) == 0)
          continue;
       else if (dStrncmp(entry->slotName, "TextureAsset", 12) == 0)
-         propertyGrid->Append(new wxEnumProperty(entry->slotName, wxPG_LABEL, mTextureAssetChoices));
+         propertyGrid->Append(new wxEnumProperty(entry->slotName, wxPG_LABEL, *mProjectManager->getTextureAssetChoices()));
       else if (dStrncmp(entry->slotName, "TextureFile", 11) == 0)
          propertyGrid->Append(new wxFileProperty(entry->slotName, wxPG_LABEL, entry->value));
       else
@@ -532,7 +509,7 @@ void ProjectTool::loadAssetDefinitionProperties(wxPropertyGrid* propertyGrid, co
          // Texture Asset?
          dSprintf(fieldName, 32, "TextureAsset%d", n);
          const char* textureAssetId = mSelectedMaterialAsset->getDataField(Plugins::Link.StringTableLink->insert(fieldName), NULL);
-         propertyGrid->AppendIn(texturesCategory, new wxEditEnumProperty(wxString(fieldName), wxPG_LABEL, mTextureAssetChoices, textureAssetId));
+         propertyGrid->AppendIn(texturesCategory, new wxEditEnumProperty(wxString(fieldName), wxPG_LABEL, *mProjectManager->getTextureAssetChoices(), textureAssetId));
 
          // Texture File?
          dSprintf(fieldName, 32, "TextureFile%d", n);

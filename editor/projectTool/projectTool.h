@@ -87,7 +87,6 @@ class ProjectTool : public wxEvtHandler, public EditorTool
       const AssetDefinition*  mSelectedAssetDef;
       AssetBase*              mSelectedAsset;
       MaterialAsset*          mSelectedMaterialAsset;
-      wxPGChoices             mTextureAssetChoices;
 
    public:
       ProjectTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
@@ -97,7 +96,6 @@ class ProjectTool : public wxEvtHandler, public EditorTool
 
       void refresh();
       void refreshAssetList();
-      void refreshChoices();
 
       void OnTreeDrag(wxTreeEvent& evt);
       void OnTreeEvent(wxTreeEvent& evt);

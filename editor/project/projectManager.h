@@ -35,6 +35,10 @@
 #include "3d/scene/camera.h"
 #endif
 
+#ifndef _WX_PROPGRID_PROPERTY_H_
+#include "wx/propgrid/property.h"
+#endif
+
 typedef int (*initFunc)(int argc, const char **argv, HWND windowHWND);
 typedef void (*shutdownFunc)();
 
@@ -124,8 +128,9 @@ class ProjectManager : public wxEvtHandler, public Rendering::Renderable
       Point3F           mCameraPanVelocity;
       F32               mCameraSpeed;
 
-      S32               mEditorMode;
-      Vector<ModuleInfo> mModuleList;
+      S32                  mEditorMode;
+      Vector<ModuleInfo>   mModuleList;
+      wxPGChoices          mTextureAssetChoices;
 
       Graphics::ViewTableEntry* mRenderLayer4View;
       Graphics::ViewTableEntry* mEditorOverlayView;
@@ -135,8 +140,11 @@ class ProjectManager : public wxEvtHandler, public Rendering::Renderable
       void runProject();
       void addObjectTemplateAsset(wxString assetID, Point3F position);
       void addMeshAsset(wxString assetID, Point3F position);
+
+      void refreshChoices();
       void refreshModuleList();
       Vector<ModuleInfo>* getModuleList();
+      wxPGChoices* getTextureAssetChoices();
 
       virtual void preRender();
       virtual void render();

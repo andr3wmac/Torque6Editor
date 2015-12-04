@@ -875,6 +875,10 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
 
          if (dStrcmp(f->pFieldname, "MeshAsset") == 0)
             propertyGrid->Append(new wxEnumProperty("MeshAsset", wxPG_LABEL, mMeshChoices));
+         else if (f->flag.test(AbstractClassRep::ACRFieldFlags::TextureAssetField))
+         {
+            propertyGrid->Append(new wxEditEnumProperty(f->pFieldname, wxPG_LABEL, *mProjectManager->getTextureAssetChoices(), val));
+         }
          else if (f->type == Plugins::Link.Con.TypeColorF)
          {
             ColorF colorVal;

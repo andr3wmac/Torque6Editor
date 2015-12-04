@@ -342,6 +342,7 @@ void ProjectManager::OnKeyDown(wxKeyEvent& evt)
    KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
    Plugins::Link.Engine.keyDown(torqueKey);
 }
+
 void ProjectManager::OnKeyUp(wxKeyEvent& evt)
 {
    if (!mProjectLoaded)
@@ -510,6 +511,28 @@ void ProjectManager::addMeshAsset(wxString assetID, Point3F position)
    _addMeshAsset(assetID, position);
 }
 
+void ProjectManager::refreshChoices()
+{
+   if (!isProjectLoaded())
+      return;
+
+   mTextureAssetChoices.Clear();
+   mTextureAssetChoices.Add("", 0);
+
+   Vector<const AssetDefinition*> assetDefinitions = Plugins::Link.AssetDatabaseLink.getDeclaredAssets();
+
+   // Iterate sorted asset definitions.
+   for (Vector<const AssetDefinition*>::iterator assetItr = assetDefinitions.begin(); assetItr != assetDefinitions.end(); ++assetItr)
+   {
+      // Fetch asset definition.
+      const AssetDefinition* pAssetDefinition = *assetItr;
+
+      // Populate TextureAsset choices menu.
+      if (dStrcmp(pAssetDefinition->mAssetType, "TextureAsset") == 0)
+         mTextureAssetChoices.Add(pAssetDefinition->mAssetId, mTextureAssetChoices.GetCount());
+   }
+}
+
 void ProjectManager::refreshModuleList()
 {
    mModuleList.clear();
@@ -597,4 +620,10 @@ Vector<ModuleInfo>* ProjectManager::getModuleList()
 {
    refreshModuleList();
    return &mModuleList;
+}
+
+wxPGChoices* ProjectManager::getTextureAssetChoices()
+{
+   refreshChoices();
+   return &mTextureAssetChoices;
 }
