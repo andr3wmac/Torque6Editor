@@ -63,3 +63,4 @@ solution "Torque6Editor"
     torque6Plugin("Sky")
     torque6Plugin("Terrain")
     torque6Plugin("Particles")
+    torque6Plugin("CSG")
