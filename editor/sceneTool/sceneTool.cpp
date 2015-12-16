@@ -601,6 +601,10 @@ void SceneTool::OnObjectPropChanged(wxPropertyGridEvent& evt)
    wxVariant val = evt.GetPropertyValue();
    wxString strVal = val.GetString();
 
+   SimObject* selected = mSelectedObject;
+   if (mSelectedComponent != NULL)
+      selected = mSelectedComponent;
+
    // Special Name Handling.
    if (name == "Name" && mSelectedObject)
    {
@@ -632,7 +636,7 @@ void SceneTool::OnObjectPropChanged(wxPropertyGridEvent& evt)
    }
 
    // Special Field Handling by Type
-   U32 type = mSelectedObject->getDataFieldType(Plugins::Link.StringTableLink->insert(name), NULL);
+   U32 type = selected->getDataFieldType(Plugins::Link.StringTableLink->insert(name), NULL);
    if (type == Plugins::Link.Con.TypeColorF)
    {
       wxColour color;
@@ -642,7 +646,7 @@ void SceneTool::OnObjectPropChanged(wxPropertyGridEvent& evt)
 
    // Assign the value and refresh the Object. 
    // Note: No need to refresh a selected component, better to refresh the whole Object.
-   mSelectedObject->setDataField(Plugins::Link.StringTableLink->insert(name), NULL, strVal);
+   selected->setDataField(Plugins::Link.StringTableLink->insert(name), NULL, strVal);
    mSelectedObject->refresh();
 }
 
