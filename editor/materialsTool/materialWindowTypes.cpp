@@ -39,13 +39,13 @@ void MaterialWindow::addConnection(const char* output, U32 outputIndex, const ch
    connectionList.push_back(newConnection);
 }
 
-Node* MaterialWindow::addDeferredNode(Scene::BaseNode* node)
+Node* MaterialWindow::addOpaqueNode(Scene::BaseNode* node)
 {
    Node newNode;
-   newNode.name = getUniqueNodeName("Deferred");
+   newNode.name = getUniqueNodeName("Opaque");
    newNode.x = -mWindowX + mLastMousePoint.x;
    newNode.y = -mWindowY + mLastMousePoint.y;
-   newNode.type = "Deferred";
+   newNode.type = "Opaque";
    newNode.width = 180.0f;
    newNode.height = 170.0f;
    newNode.addInput("Base Color");
@@ -57,7 +57,7 @@ Node* MaterialWindow::addDeferredNode(Scene::BaseNode* node)
 
    if (node != NULL)
    {
-      Scene::DeferredNode* def_node = dynamic_cast<Scene::DeferredNode*>(node);
+      Scene::OpaqueNode* def_node = dynamic_cast<Scene::OpaqueNode*>(node);
       if (def_node)
          newNode.alphaThreshold = def_node->mAlphaThreshold;
    }
@@ -301,10 +301,10 @@ void MaterialWindow::addNode(Scene::MaterialTemplate* matTemplate, const char* t
    bool createMaterialNode = (matNode == NULL);
 
    // Outputs
-   if ( dStrcmp(type, "Deferred") == 0 ) 
+   if ( dStrcmp(type, "Opaque") == 0 ) 
    {
-      if ( createMaterialNode ) matNode = new Scene::DeferredNode();
-      newNode = addDeferredNode(matNode);
+      if ( createMaterialNode ) matNode = new Scene::OpaqueNode();
+      newNode = addOpaqueNode(matNode);
    }
 
    // Inputs
@@ -400,8 +400,8 @@ void MaterialWindow::addNodeConnection(Node* node)
    if ( node->materialNode == NULL )
       return;
 
-   // Deferred
-   Scene::DeferredNode* def_node = dynamic_cast<Scene::DeferredNode*>(node->materialNode);
+   // Opaque
+   Scene::OpaqueNode* def_node = dynamic_cast<Scene::OpaqueNode*>(node->materialNode);
    if ( def_node )
    {
       addConnection(def_node->mColorSrc, 0, node->name, 0);
@@ -463,8 +463,8 @@ void MaterialWindow::saveConnection(Connection* connection)
    if ( inputNode->materialNode == NULL )
       return;
 
-   // Deferred
-   Scene::DeferredNode* def_node = dynamic_cast<Scene::DeferredNode*>(inputNode->materialNode);
+   // Opaque
+   Scene::OpaqueNode* def_node = dynamic_cast<Scene::OpaqueNode*>(inputNode->materialNode);
    if ( def_node )
    {
       if ( connection->inputIndex == 0 )
@@ -527,8 +527,8 @@ void MaterialWindow::saveConnection(Connection* connection)
 
 void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
 {
-   // Deferred
-   Scene::DeferredNode* def_node = dynamic_cast<Scene::DeferredNode*>(node->materialNode);
+   // Opaque
+   Scene::OpaqueNode* def_node = dynamic_cast<Scene::OpaqueNode*>(node->materialNode);
    if ( def_node )
    {
       def_node->mColorSrc           = Link.StringTableLink->EmptyString;

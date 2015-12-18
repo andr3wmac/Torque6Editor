@@ -289,8 +289,8 @@ void MaterialsTool::selectNode(MaterialWindow* parent, Node* node)
    grid->Append(new wxStringProperty("Name", "Name", node->name));
    grid->Append(new wxPropertyCategory(node->type));
 
-   // Deferred
-   if (node->type == "Deferred")
+   // Opaque
+   if (node->type == "Opaque")
       grid->Append(new wxFloatProperty("AlphaThreshold", "AlphaThreshold", node->alphaThreshold));
 
    // Texture
@@ -345,7 +345,7 @@ void MaterialsTool::OnPropertyChanged(wxPropertyGridEvent& evt)
          mSelectedNode->materialNode->setInternalName(mSelectedNode->name);
    }
 
-   // Slot is for Deferred
+   // Slot is for Opaque
    if (name == "AlphaThreshold")
       mSelectedNode->alphaThreshold = val.GetDouble();
 

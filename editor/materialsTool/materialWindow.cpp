@@ -296,7 +296,7 @@ void MaterialWindow::OnRightMouseUp(wxMouseEvent &evt)
          menu->AppendSeparator();
       }
 
-      menu->Append(0, wxT("Deferred"));
+      menu->Append(0, wxT("Opaque"));
       menu->Append(1, wxT("Float"));
       menu->Append(2, wxT("Vec2"));
       menu->Append(3, wxT("Vec3"));
@@ -321,7 +321,7 @@ void MaterialWindow::OnMenuEvent( wxCommandEvent& evt )
    switch( evt.GetId() )
    {
       // Add Nodes
-      case 0: addNode(mMaterialAsset->getTemplate(), "Deferred"); break;
+      case 0: addNode(mMaterialAsset->getTemplate(), "Opaque"); break;
       case 1: addNode(mMaterialAsset->getTemplate(), "Float"); break;
       case 2: addNode(mMaterialAsset->getTemplate(), "Vec2"); break;
       case 3: addNode(mMaterialAsset->getTemplate(), "Vec3"); break;

@@ -53,8 +53,8 @@
 #include <sim/simObject.h>
 #endif
 
-#ifndef _DEFERRED_NODE_H_
-#include "3d/material/nodes/deferredNode.h"
+#ifndef _OPAQUE_NODE_H_
+#include "3d/material/nodes/opaqueNode.h"
 #endif
 
 #ifndef _FLOAT_NODE_H_
@@ -135,7 +135,7 @@ class MaterialWindow: public wxScrolledWindow
       Connection* findConnectionFromInput(const char* name, U32 index = -1);
 
       void  addConnection(const char* output, U32 outputIndex, const char* input, U32 inputIndex);
-      Node* addDeferredNode(Scene::BaseNode* node = NULL);
+      Node* addOpaqueNode(Scene::BaseNode* node = NULL);
       Node* addFloatNode(Scene::BaseNode* node = NULL);
       Node* addVec2Node(Scene::BaseNode* node = NULL);
       Node* addVec3Node(Scene::BaseNode* node = NULL);
