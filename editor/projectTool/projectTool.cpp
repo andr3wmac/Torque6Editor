@@ -35,7 +35,6 @@
 #include "../Torque6EditorUI.h"
 
 #include "projectTool.h"
-#include "3d/scene/camera.h"
 #include "module/moduleManager.h"
 #include <bx/bx.h>
 #include <bx/fpumath.h>
@@ -164,7 +163,7 @@ void ProjectTool::OnTreeMenu( wxTreeEvent& evt )
       if (module_data)
       {
          ModuleInfo mod = module_data->obj;
-         mSelectedModule = Plugins::Link.ModuleDatabaseLink->findLoadedModule(mod.moduleID);
+         mSelectedModule = Torque::ModuleDatabaseLink->findLoadedModule(mod.moduleID);
          if (mSelectedModule != NULL)
             mFrame->PopupMenu(mProjectPanel->moduleMenu, wxDefaultPosition);
          return;
@@ -197,15 +196,15 @@ void ProjectTool::OnMenuEvent(wxCommandEvent& evt)
             moduleMeshPath.Append("/");
             moduleMeshPath.Append(meshFile);
 
-            Plugins::Link.Platform.createPath(moduleMeshPath.c_str());
-            Plugins::Link.Platform.pathCopy(meshPath.c_str(), moduleMeshPath.c_str(), false);
+            Torque::Platform.createPath(moduleMeshPath.c_str());
+            Torque::Platform.pathCopy(meshPath.c_str(), moduleMeshPath.c_str(), false);
             meshPath = moduleMeshPath;
          }
 
          // Make path relative to module directory.
          char buf[1024];
-         const char* fullPath = Plugins::Link.Platform.makeFullPathName(meshPath.c_str(), buf, sizeof(buf), NULL);
-         StringTableEntry relativePath = Plugins::Link.Platform.makeRelativePathName(fullPath, importPath);
+         const char* fullPath = Torque::Platform.makeFullPathName(meshPath.c_str(), buf, sizeof(buf), NULL);
+         StringTableEntry relativePath = Torque::Platform.makeRelativePathName(fullPath, importPath);
 
          // Create full import path.
          importPath.Append("/");
@@ -213,8 +212,8 @@ void ProjectTool::OnMenuEvent(wxCommandEvent& evt)
          importPath.Append(".asset.taml");
 
          // Create asset definition.
-         Plugins::Link.Scene.createMeshAsset(assetID.c_str(), relativePath, importPath.c_str());
-         Plugins::Link.AssetDatabaseLink.addDeclaredAsset(mSelectedModule, importPath.c_str());
+         Torque::Scene.createMeshAsset(assetID.c_str(), relativePath, importPath.c_str());
+         Torque::AssetDatabaseLink.addDeclaredAsset(mSelectedModule, importPath.c_str());
          refresh();
       }
 
@@ -244,15 +243,15 @@ void ProjectTool::OnMenuEvent(wxCommandEvent& evt)
             moduleTexturePath.Append("/");
             moduleTexturePath.Append(textureFile);
 
-            Plugins::Link.Platform.createPath(moduleTexturePath.c_str());
-            Plugins::Link.Platform.pathCopy(texturePath.c_str(), moduleTexturePath.c_str(), false);
+            Torque::Platform.createPath(moduleTexturePath.c_str());
+            Torque::Platform.pathCopy(texturePath.c_str(), moduleTexturePath.c_str(), false);
             texturePath = moduleTexturePath;
          }
 
          // Make path relative to module directory.
          char buf[1024];
-         const char* fullPath = Plugins::Link.Platform.makeFullPathName(texturePath.c_str(), buf, sizeof(buf), NULL);
-         StringTableEntry relativePath = Plugins::Link.Platform.makeRelativePathName(fullPath, importPath);
+         const char* fullPath = Torque::Platform.makeFullPathName(texturePath.c_str(), buf, sizeof(buf), NULL);
+         StringTableEntry relativePath = Torque::Platform.makeRelativePathName(fullPath, importPath);
 
          // Create full import path.
          importPath.Append("/");
@@ -260,8 +259,8 @@ void ProjectTool::OnMenuEvent(wxCommandEvent& evt)
          importPath.Append(".asset.taml");
 
          // Create asset definition.
-         Plugins::Link.Scene.createTextureAsset(assetID.c_str(), relativePath, importPath.c_str());
-         Plugins::Link.AssetDatabaseLink.addDeclaredAsset(mSelectedModule, importPath.c_str());
+         Torque::Scene.createTextureAsset(assetID.c_str(), relativePath, importPath.c_str());
+         Torque::AssetDatabaseLink.addDeclaredAsset(mSelectedModule, importPath.c_str());
          refresh();
       }
 
@@ -298,9 +297,9 @@ void ProjectTool::OnMenuEvent(wxCommandEvent& evt)
          templatePath.Append(templateFileName);
 
          // Create material template and then asset.
-         Plugins::Link.Scene.createMaterialTemplate(templatePath.c_str());
-         Plugins::Link.Scene.createMaterialAsset(assetID.c_str(), templateFileName.c_str(), assetPath.c_str());
-         Plugins::Link.AssetDatabaseLink.addDeclaredAsset(mSelectedModule, assetPath.c_str());
+         Torque::Scene.createMaterialTemplate(templatePath.c_str());
+         Torque::Scene.createMaterialAsset(assetID.c_str(), templateFileName.c_str(), assetPath.c_str());
+         Torque::AssetDatabaseLink.addDeclaredAsset(mSelectedModule, assetPath.c_str());
          refresh();
       }
    }
@@ -322,7 +321,7 @@ void ProjectTool::OnPropertyChanged( wxPropertyGridEvent& evt )
    }
 
    // Set Value.
-   mSelectedAsset->setDataField(Plugins::Link.StringTableLink->insert(name), NULL, strVal);
+   mSelectedAsset->setDataField(Torque::StringTableLink->insert(name), NULL, strVal);
 
    // Save the asset
    mSelectedAsset->saveAsset();
@@ -332,7 +331,7 @@ void ProjectTool::OnPropertyChanged( wxPropertyGridEvent& evt )
       mSelectedMaterialAsset->loadTextures();
 
    // Refresh Scene.
-   Plugins::Link.Scene.refresh();
+   Torque::Scene.refresh();
 
    // Reload object properties.
    loadAssetDefinitionProperties(mProjectPanel->assetPropGrid, mSelectedAssetDef);
@@ -417,7 +416,7 @@ void ProjectTool::loadAssetDefinitionProperties(wxPropertyGrid* propertyGrid, co
    propertyGrid->Clear();
 
    // Fetch the asset.
-   AssetBase* asset = Plugins::Link.AssetDatabaseLink.getAssetBase(assetDef->mAssetId);
+   AssetBase* asset = Torque::AssetDatabaseLink.getAssetBase(assetDef->mAssetId);
 
    mSelectedAssetDef = assetDef;
    mSelectedAsset = asset;
@@ -448,7 +447,7 @@ void ProjectTool::loadAssetDefinitionProperties(wxPropertyGrid* propertyGrid, co
 
       for (U32 j = 0; S32(j) < f->elementCount; j++)
       {
-         const char *val = (*f->getDataFn)(asset, Plugins::Link.Con.getData(f->type, (void *)(((const char *)asset) + f->offset), j, f->table, f->flag));
+         const char *val = (*f->getDataFn)(asset, Torque::Con.getData(f->type, (void *)(((const char *)asset) + f->offset), j, f->table, f->flag));
 
          if (!val)
             continue;
@@ -462,7 +461,7 @@ void ProjectTool::loadAssetDefinitionProperties(wxPropertyGrid* propertyGrid, co
             addFieldGroup = false;
          }
 
-         if (f->type == Plugins::Link.Con.TypeBool)
+         if (f->type == Torque::Con.TypeBool)
             propertyGrid->Append(new wxBoolProperty(f->pFieldname, f->pFieldname, val));
          else
             propertyGrid->Append(new wxStringProperty(f->pFieldname, f->pFieldname, val));
@@ -508,12 +507,12 @@ void ProjectTool::loadAssetDefinitionProperties(wxPropertyGrid* propertyGrid, co
 
          // Texture Asset?
          dSprintf(fieldName, 32, "TextureAsset%d", n);
-         const char* textureAssetId = mSelectedMaterialAsset->getDataField(Plugins::Link.StringTableLink->insert(fieldName), NULL);
+         const char* textureAssetId = mSelectedMaterialAsset->getDataField(Torque::StringTableLink->insert(fieldName), NULL);
          propertyGrid->AppendIn(texturesCategory, new wxEditEnumProperty(wxString(fieldName), wxPG_LABEL, *mProjectManager->getTextureAssetChoices(), textureAssetId));
 
          // Texture File?
          dSprintf(fieldName, 32, "TextureFile%d", n);
-         const char* texturePath = mSelectedMaterialAsset->expandAssetFilePath(mSelectedMaterialAsset->getDataField(Plugins::Link.StringTableLink->insert(fieldName), NULL));
+         const char* texturePath = mSelectedMaterialAsset->expandAssetFilePath(mSelectedMaterialAsset->getDataField(Torque::StringTableLink->insert(fieldName), NULL));
          if ( texturePath )
             propertyGrid->AppendIn(texturesCategory, new wxFileProperty(wxString(fieldName), wxPG_LABEL, wxString(texturePath)));
          else

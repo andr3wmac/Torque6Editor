@@ -35,26 +35,23 @@
 #include "../Torque6EditorUI.h"
 
 #include "sceneTool.h"
-#include "3d/scene/camera.h"
 #include <bx/bx.h>
 #include <bx/fpumath.h>
 
-#include "3d/scene/object/components/animationComponent.h"
-#include "3d/scene/object/components/controllerComponent.h"
-#include "3d/scene/object/components/lightComponent.h"
-#include "3d/scene/object/components/meshComponent.h"
-#include "3d/scene/object/components/physicsComponent.h"
-#include "3d/scene/object/components/textComponent.h"
+#include "scene/components/animationComponent.h"
+#include "scene/components/controllerComponent.h"
+#include "scene/components/lighting/lightComponent.h"
+#include "scene/components/meshComponent.h"
+#include "scene/components/physicsComponent.h"
+#include "scene/components/textComponent.h"
 
 SceneTool::SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
    : Parent(_projectManager, _frame, _manager),
      mScenePanel(NULL),
      mSelectedObject(NULL),
      mSelectedComponent(NULL),
-     mSelectedFeature(NULL),
      mMenuObject(NULL),
      mMenuComponent(NULL),
-     mMenuFeature(NULL),
      mLightIcon(NULL),
      mRefreshing(false)
 {
@@ -178,12 +175,12 @@ void SceneTool::renderTool()
    // Draw Light Icons
    if (mLightIcon != NULL)
    {
-      Vector<Rendering::LightData*> lightList = Plugins::Link.Rendering.getLightList();
+      Vector<Rendering::LightData*> lightList = Torque::Rendering.getLightList();
       for (S32 n = 0; n < lightList.size(); ++n)
       {
          Rendering::LightData* light = lightList[n];
 
-         Plugins::Link.Graphics.drawBillboard(mProjectManager->mRenderLayer4View->id,
+         Torque::Graphics.drawBillboard(mProjectManager->mRenderLayer4View->id,
                                               mLightIcon,
                                               light->position,
                                               1.0f, 1.0f,
@@ -196,7 +193,7 @@ void SceneTool::renderTool()
    if (mSelectedObject != NULL && mSelectedComponent == NULL)
    {
       // Bounding Box
-      Plugins::Link.Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, mSelectedObject->mBoundingBox, ColorI(255, 255, 255, 255), NULL);
+      Torque::Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, mSelectedObject->mBoundingBox, ColorI(255, 255, 255, 255), NULL);
 
       // Render Gizmo
       mGizmo.render();
@@ -211,7 +208,7 @@ void SceneTool::renderTool()
       boundingBox.transform(mSelectedObject->mTransformMatrix);
 
       // Bounding Box
-      Plugins::Link.Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, boundingBox, ColorI(0, 255, 0, 255), NULL);
+      Torque::Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, boundingBox, ColorI(0, 255, 0, 255), NULL);
 
       // Render Gizmo
       mGizmo.render();
@@ -220,12 +217,12 @@ void SceneTool::renderTool()
 
 bool SceneTool::onMouseLeftDown(int x, int y)
 {
-   Point3F worldRay = Plugins::Link.Rendering.screenToWorld(Point2I(x, y));
-   Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
+   Point3F worldRay = Torque::Rendering.screenToWorld(Point2I(x, y));
+   Point3F editorPos;// = Torque::Scene.getActiveCamera()->getPosition();
 
    if (!mGizmo.onMouseLeftDown(x, y))
    {
-      Scene::SceneObject* hit = Plugins::Link.Scene.raycast(editorPos, editorPos + (worldRay * 1000.0f));
+      Scene::SceneObject* hit = Torque::Scene.raycast(editorPos, editorPos + (worldRay * 1000.0f));
       if (mSelectedObject != hit)
       {
          if (hit)
@@ -266,7 +263,7 @@ void SceneTool::onProjectLoaded(const wxString& projectName, const wxString& pro
    refreshChoices();
 
    if ( mLightIcon == NULL )
-      mLightIcon = Plugins::Link.Graphics.loadTexture("light.png", TextureHandle::BitmapKeepTexture, BGFX_TEXTURE_NONE, false, false);
+      mLightIcon = Torque::Graphics.loadTexture("light.png", TextureHandle::BitmapKeepTexture, BGFX_TEXTURE_NONE, false, false);
 }
 
 void SceneTool::onProjectClosed()
@@ -277,20 +274,20 @@ void SceneTool::onProjectClosed()
 void SceneTool::OnMenuEvent(wxCommandEvent& evt)
 {
    if (evt.GetId() == SCENE_NEW)
-      Plugins::Link.Scene.clear();
+      Torque::Scene.clear();
 
    if (evt.GetId() == SCENE_OPEN)
    {
       wxFileDialog openFile(mFrame, wxT("Open Scene File"), "", "", "taml files (*.taml)|*.taml", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
       if (openFile.ShowModal() == wxID_OK)
-         Plugins::Link.Scene.load(openFile.GetPath());
+         Torque::Scene.load(openFile.GetPath());
    }
 
    if (evt.GetId() == SCENE_SAVE)
    {
       wxFileDialog saveFile(mFrame, wxT("Save Scene File"), "", "", "taml files (*.taml)|*.taml", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
       if (saveFile.ShowModal() == wxID_OK)
-         Plugins::Link.Scene.save(saveFile.GetPath());
+         Torque::Scene.save(saveFile.GetPath());
    }
 
    if (evt.GetId() == ADD_FEATURE_BUTTON)
@@ -358,7 +355,7 @@ void SceneTool::OnAddObjectMenuEvent(wxCommandEvent& evt)
    {
       Scene::SceneObject* newObject = new Scene::SceneObject();
       newObject->registerObject("NewSceneObject");
-      Plugins::Link.Scene.addObject(newObject, "NewSceneObject");
+      Torque::Scene.addObject(newObject, "NewSceneObject");
       refreshObjectList();
    }
 
@@ -376,7 +373,7 @@ void SceneTool::OnAddObjectMenuEvent(wxCommandEvent& evt)
                const AssetDefinition* pAssetDefinition = *assetItr;
                if (evt.GetId() == menuItemID)
                {
-                  Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
+                  Point3F editorPos;// = Torque::Scene.getActiveCamera()->getPosition();
                   if ( dStrcmp(pAssetDefinition->mAssetType, "ObjectTemplateAsset") == 0 )
                      mProjectManager->addObjectTemplateAsset(pAssetDefinition->mAssetId, editorPos);
                   else if (dStrcmp(pAssetDefinition->mAssetType, "MeshAsset") == 0)
@@ -424,13 +421,7 @@ void SceneTool::openAddFeatureMenu()
 
 void SceneTool::OnAddFeatureMenuEvent(wxCommandEvent& evt)
 {
-   Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(Plugins::Link.Con.createObject(mFeatureClassList[evt.GetId()]));
-   if (feature)
-   {
-      feature->registerObject();
-      Plugins::Link.Scene.addFeature(feature);
-      refreshFeatureList();
-   }
+
 }
 
 void SceneTool::OnTreeEvent( wxTreeEvent& evt )
@@ -456,22 +447,6 @@ void SceneTool::OnTreeEvent( wxTreeEvent& evt )
          if (component)
          {
             selectComponent(component);
-            return;
-         }
-      }
-   }
-
-   if (evt.GetId() == FEATURE_LIST)
-   {
-      FeatureTreeItemData* data = dynamic_cast<FeatureTreeItemData*>(mScenePanel->featureList->GetItemData(evt.GetItem()));
-      if (data)
-      {
-         // Did we select a feature?
-         Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(data->objPtr);
-         if (feature)
-         {
-            mSelectedFeature = feature;
-            loadObjectProperties(mScenePanel->featurePropGrid, feature);
             return;
          }
       }
@@ -522,28 +497,6 @@ void SceneTool::OnTreeMenu( wxTreeEvent& evt )
          return;
       }
    }
-
-   if (evt.GetId() == FEATURE_LIST)
-   {
-      FeatureTreeItemData* data = dynamic_cast<FeatureTreeItemData*>(mScenePanel->featureList->GetItemData(evt.GetItem()));
-      if (data)
-      {
-         Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(data->objPtr);
-         if (feature)
-         {
-            mMenuFeature = feature;
-
-            wxMenu* menu = new wxMenu;
-            menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnFeatureMenuEvent), NULL, this);
-            menu->Append(0, wxT("Delete Feature"));
-
-            mFrame->PopupMenu(menu, wxDefaultPosition);
-            delete menu;
-
-            mMenuFeature = NULL;
-         }
-      }
-   }
 } 
 
 void SceneTool::OnObjectMenuEvent(wxCommandEvent& evt)
@@ -558,7 +511,7 @@ void SceneTool::OnObjectMenuEvent(wxCommandEvent& evt)
          mScenePanel->addComponentButton->Enable(false);
       }
 
-      Plugins::Link.Scene.deleteObject(mMenuObject);
+      Torque::Scene.deleteObject(mMenuObject);
       refreshObjectList();
       return;
    }
@@ -586,13 +539,7 @@ void SceneTool::OnComponentMenuEvent(wxCommandEvent& evt)
 
 void SceneTool::OnFeatureMenuEvent(wxCommandEvent& evt)
 {
-   // Delete Object
-   if (evt.GetId() == 0)
-   {
-      Plugins::Link.Scene.deleteFeature(mMenuFeature);
-      refreshFeatureList();
-      return;
-   }
+
 }
 
 void SceneTool::OnObjectPropChanged(wxPropertyGridEvent& evt)
@@ -636,8 +583,8 @@ void SceneTool::OnObjectPropChanged(wxPropertyGridEvent& evt)
    }
 
    // Special Field Handling by Type
-   U32 type = selected->getDataFieldType(Plugins::Link.StringTableLink->insert(name), NULL);
-   if (type == Plugins::Link.Con.TypeColorF)
+   U32 type = selected->getDataFieldType(Torque::StringTableLink->insert(name), NULL);
+   if (type == Torque::Con.TypeColorF)
    {
       wxColour color;
       color << val;
@@ -646,27 +593,13 @@ void SceneTool::OnObjectPropChanged(wxPropertyGridEvent& evt)
 
    // Assign the value and refresh the Object. 
    // Note: No need to refresh a selected component, better to refresh the whole Object.
-   selected->setDataField(Plugins::Link.StringTableLink->insert(name), NULL, strVal);
+   selected->setDataField(Torque::StringTableLink->insert(name), NULL, strVal);
    mSelectedObject->refresh();
 }
 
 void SceneTool::OnFeaturePropChanged(wxPropertyGridEvent& evt)
 {
-   wxString name = evt.GetPropertyName();
-   wxVariant val = evt.GetPropertyValue();
-   wxString strVal = val.GetString();
 
-   // Check field type.
-   U32 type = mSelectedFeature->getDataFieldType(Plugins::Link.StringTableLink->insert(name), NULL);
-   if (type == Plugins::Link.Con.TypeColorF)
-   {
-      wxColour color;
-      color << val;
-      strVal.Printf("%f %f %f 1.0", color.Red() / 255.0f, color.Green() / 255.0f, color.Blue() / 255.0f);
-   }
-
-   mSelectedFeature->setDataField(Plugins::Link.StringTableLink->insert(name), NULL, strVal);
-   mSelectedFeature->refresh();
 }
 
 void SceneTool::refreshObjectList()
@@ -681,7 +614,7 @@ void SceneTool::refreshObjectList()
    mObjectListRoot = mScenePanel->objectList->AddRoot("ROOT");
 
    wxTreeItemId selectItem = mObjectListRoot;
-   SimGroup* sceneGroup = Plugins::Link.Scene.getSceneGroup();
+   SimGroup* sceneGroup = Torque::Scene.getSceneGroup();
    if ( sceneGroup != NULL )
    {
       for(S32 n = 0; n < sceneGroup->size(); ++n)
@@ -725,35 +658,7 @@ void SceneTool::refreshObjectList()
 
 void SceneTool::refreshFeatureList()
 {
-   if (!mProjectManager->isProjectLoaded())
-      return;
 
-   mRefreshing = true;
-
-   // Clear list.
-   mScenePanel->featureList->DeleteAllItems();
-   mObjectListRoot = mScenePanel->featureList->AddRoot("ROOT");
-
-   wxTreeItemId selectItem = mFeatureListRoot;
-   SimGroup* featureGroup = Plugins::Link.Scene.getSceneGroup();
-   if (featureGroup != NULL)
-   {
-      for (S32 n = 0; n < featureGroup->size(); ++n)
-      {
-         Scene::SceneFeature* feature = dynamic_cast<Scene::SceneFeature*>(featureGroup->at(n));
-         if (!feature) continue;
-         wxTreeItemId featureItem = mScenePanel->featureList->AppendItem(mFeatureListRoot, feature->mName, 0, -1, new FeatureTreeItemData(feature));
-         if (mSelectedFeature == feature)
-            selectItem = featureItem;
-      }
-   }
-
-   // Retain selection.
-   if (selectItem != mFeatureListRoot)
-      mScenePanel->featureList->SelectItem(selectItem);
-
-   mScenePanel->featureList->Refresh();
-   mRefreshing = false;
 }
 
 void SceneTool::refreshChoices()
@@ -766,7 +671,7 @@ void SceneTool::refreshChoices()
    mMeshChoices.Clear();
    mObjectTemplateChoices.Clear();
    
-   Vector<const AssetDefinition*> assetDefinitions = Plugins::Link.AssetDatabaseLink.getDeclaredAssets();
+   Vector<const AssetDefinition*> assetDefinitions = Torque::AssetDatabaseLink.getDeclaredAssets();
 
    // Iterate sorted asset definitions.
    for (Vector<const AssetDefinition*>::iterator assetItr = assetDefinitions.begin(); assetItr != assetDefinitions.end(); ++assetItr)
@@ -800,7 +705,7 @@ void SceneTool::refreshClassLists()
    mComponentClassList.clear();
    mFeatureClassList.clear();
 
-   for (Namespace *walk = Plugins::Link.Con.getNamespaceList(); walk; walk = walk->mNext)
+   for (Namespace *walk = Torque::Con.getNamespaceList(); walk; walk = walk->mNext)
    {
       if (walk->mParent == NULL)
          continue;
@@ -810,9 +715,9 @@ void SceneTool::refreshClassLists()
 
       if (dStrcmp(walk->mParent->mName, "SceneFeature") == 0 ||
           dStrcmp(walk->mParent->mName, "RenderFeature") == 0 ||
-          dStrcmp(walk->mParent->mName, "PostRenderFeature") == 0)
+          dStrcmp(walk->mParent->mName, "RenderPostProcess") == 0)
       {
-         if (dStrcmp(walk->mName, "RenderFeature") == 0 || dStrcmp(walk->mName, "PostRenderFeature") == 0)
+         if (dStrcmp(walk->mName, "RenderFeature") == 0 || dStrcmp(walk->mName, "RenderPostProcess") == 0)
             continue;
 
          mFeatureClassList.push_back(walk->mName);
@@ -866,7 +771,7 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
 
       for (U32 j = 0; S32(j) < f->elementCount; j++)
       {
-         const char *val = (*f->getDataFn)(obj, Plugins::Link.Con.getData(f->type, (void *)(((const char *)obj) + f->offset), j, f->table, f->flag));
+         const char *val = (*f->getDataFn)(obj, Torque::Con.getData(f->type, (void *)(((const char *)obj) + f->offset), j, f->table, f->flag));
 
          if (!val)
             continue;
@@ -883,18 +788,18 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
          {
             propertyGrid->Append(new wxEditEnumProperty(f->pFieldname, wxPG_LABEL, *mProjectManager->getTextureAssetChoices(), val));
          }
-         else if (f->type == Plugins::Link.Con.TypeColorF)
+         else if (f->type == Torque::Con.TypeColorF)
          {
             ColorF colorVal;
-            Plugins::Link.Con.setData(Plugins::Link.Con.TypeColorF, &colorVal, 0, 1, &val, NULL, 0);
+            Torque::Con.setData(Torque::Con.TypeColorF, &colorVal, 0, 1, &val, NULL, 0);
             wxColour color;
             color.Set(colorVal.red * 255, colorVal.green * 255, colorVal.blue * 255, 255);
             propertyGrid->Append(new wxColourProperty(f->pFieldname, f->pFieldname, color));
          }
-         else if (f->type == Plugins::Link.Con.TypeBool)
+         else if (f->type == Torque::Con.TypeBool)
          {
             bool boolVal;
-            Plugins::Link.Con.setData(Plugins::Link.Con.TypeBool, &boolVal, 0, 1, &val, NULL, 0);
+            Torque::Con.setData(Torque::Con.TypeBool, &boolVal, 0, 1, &val, NULL, 0);
             propertyGrid->Append(new wxBoolProperty(f->pFieldname, f->pFieldname, boolVal));
          }
          else
@@ -975,7 +880,7 @@ void SceneTool::selectObject(Scene::SceneObject* obj, bool updateTree)
 
 void SceneTool::addComponent(Scene::SceneObject* Object, StringTableEntry componentClassName)
 {
-   Scene::BaseComponent* newComponent = dynamic_cast<Scene::BaseComponent*>(Plugins::Link.Con.createObject(componentClassName));
+   Scene::BaseComponent* newComponent = dynamic_cast<Scene::BaseComponent*>(Torque::Con.createObject(componentClassName));
    if (newComponent)
    {
       newComponent->registerObject();

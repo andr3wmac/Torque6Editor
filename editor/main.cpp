@@ -119,15 +119,15 @@ void Torque6Editor::OnMenuEvent(wxCommandEvent& evt)
          break;
 
       case MENU_CAMERA_SLOW:
-         mProjectManager.mCameraSpeed = 0.1f;
+         mProjectManager.mEditorCameraSpeed = 0.1f;
          break;
 
       case MENU_CAMERA_NORMAL:
-         mProjectManager.mCameraSpeed = 0.5f;
+         mProjectManager.mEditorCameraSpeed = 0.5f;
          break;
 
       case MENU_CAMERA_FAST:
-         mProjectManager.mCameraSpeed = 1.0f;
+         mProjectManager.mEditorCameraSpeed = 1.0f;
          break;
 
       case MENU_PROJECT:

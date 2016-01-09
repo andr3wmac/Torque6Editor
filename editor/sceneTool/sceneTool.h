@@ -36,7 +36,7 @@
 #endif
 
 #ifndef _SCENE_OBJECT_H_
-#include <3d/scene/object/object.h>
+#include <scene/object.h>
 #endif
 
 #ifndef _GIZMO_H_
@@ -79,11 +79,9 @@ class SceneTool : public wxEvtHandler, public EditorTool
       
       Scene::SceneObject*     mSelectedObject;
       Scene::BaseComponent*   mSelectedComponent;
-      Scene::SceneFeature*    mSelectedFeature;
 
       Scene::SceneObject*     mMenuObject;
       Scene::BaseComponent*   mMenuComponent;
-      Scene::SceneFeature*    mMenuFeature;
 
       Vector<StringTableEntry> mComponentClassList;
       Vector<StringTableEntry> mFeatureClassList;

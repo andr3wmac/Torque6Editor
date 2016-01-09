@@ -22,8 +22,6 @@
 
 #include "materialWindow.h"
 
-using namespace Plugins;
-
 void MaterialWindow::addConnection(const char* output, U32 outputIndex, const char* input, U32 inputIndex)
 {
    if ( output == NULL || input == NULL ) 
@@ -468,17 +466,17 @@ void MaterialWindow::saveConnection(Connection* connection)
    if ( def_node )
    {
       if ( connection->inputIndex == 0 )
-         def_node->mColorSrc = Link.StringTableLink->insert(connection->outputNodeName);
+         def_node->mColorSrc = Torque::StringTableLink->insert(connection->outputNodeName);
       if ( connection->inputIndex == 1 )
-         def_node->mNormalSrc = Link.StringTableLink->insert(connection->outputNodeName);
+         def_node->mNormalSrc = Torque::StringTableLink->insert(connection->outputNodeName);
       if ( connection->inputIndex == 2 )
-         def_node->mMetallicSrc = Link.StringTableLink->insert(connection->outputNodeName);
+         def_node->mMetallicSrc = Torque::StringTableLink->insert(connection->outputNodeName);
       if ( connection->inputIndex == 3 )
-         def_node->mRoughnessSrc = Link.StringTableLink->insert(connection->outputNodeName);
+         def_node->mRoughnessSrc = Torque::StringTableLink->insert(connection->outputNodeName);
       if ( connection->inputIndex == 4 )
-         def_node->mEmissiveSrc = Link.StringTableLink->insert(connection->outputNodeName);
+         def_node->mEmissiveSrc = Torque::StringTableLink->insert(connection->outputNodeName);
       if ( connection->inputIndex == 5 )
-         def_node->mWorldPosOffsetSrc = Link.StringTableLink->insert(connection->outputNodeName);
+         def_node->mWorldPosOffsetSrc = Torque::StringTableLink->insert(connection->outputNodeName);
       return;
    }
 
@@ -487,9 +485,9 @@ void MaterialWindow::saveConnection(Connection* connection)
    if ( mul_node )
    {
       if ( connection->inputIndex == 0 )
-         mul_node->mInputASrc = Link.StringTableLink->insert(connection->outputNodeName);
+         mul_node->mInputASrc = Torque::StringTableLink->insert(connection->outputNodeName);
       if ( connection->inputIndex == 1 )
-         mul_node->mInputBSrc = Link.StringTableLink->insert(connection->outputNodeName);
+         mul_node->mInputBSrc = Torque::StringTableLink->insert(connection->outputNodeName);
       return;
    }
 
@@ -498,11 +496,11 @@ void MaterialWindow::saveConnection(Connection* connection)
    if (lerp_node)
    {
       if (connection->inputIndex == 0)
-         lerp_node->mInputASrc = Link.StringTableLink->insert(connection->outputNodeName);
+         lerp_node->mInputASrc = Torque::StringTableLink->insert(connection->outputNodeName);
       if (connection->inputIndex == 1)
-         lerp_node->mInputBSrc = Link.StringTableLink->insert(connection->outputNodeName);
+         lerp_node->mInputBSrc = Torque::StringTableLink->insert(connection->outputNodeName);
       if (connection->inputIndex == 2)
-         lerp_node->mAmountSrc = Link.StringTableLink->insert(connection->outputNodeName);
+         lerp_node->mAmountSrc = Torque::StringTableLink->insert(connection->outputNodeName);
       return;
    }
 
@@ -511,7 +509,7 @@ void MaterialWindow::saveConnection(Connection* connection)
    if ( sin_node )
    {
       if ( connection->inputIndex == 0 )
-         sin_node->mXSrc = Link.StringTableLink->insert(connection->outputNodeName);
+         sin_node->mXSrc = Torque::StringTableLink->insert(connection->outputNodeName);
       return;
    }
 
@@ -520,7 +518,7 @@ void MaterialWindow::saveConnection(Connection* connection)
    if (cos_node)
    {
       if (connection->inputIndex == 0)
-         cos_node->mXSrc = Link.StringTableLink->insert(connection->outputNodeName);
+         cos_node->mXSrc = Torque::StringTableLink->insert(connection->outputNodeName);
       return;
    }
 }
@@ -531,12 +529,12 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    Scene::OpaqueNode* def_node = dynamic_cast<Scene::OpaqueNode*>(node->materialNode);
    if ( def_node )
    {
-      def_node->mColorSrc           = Link.StringTableLink->EmptyString;
-      def_node->mNormalSrc          = Link.StringTableLink->EmptyString;
-      def_node->mMetallicSrc        = Link.StringTableLink->EmptyString;
-      def_node->mRoughnessSrc       = Link.StringTableLink->EmptyString;
-      def_node->mEmissiveSrc        = Link.StringTableLink->EmptyString;
-      def_node->mWorldPosOffsetSrc  = Link.StringTableLink->EmptyString;
+      def_node->mColorSrc           = Torque::StringTableLink->EmptyString;
+      def_node->mNormalSrc          = Torque::StringTableLink->EmptyString;
+      def_node->mMetallicSrc        = Torque::StringTableLink->EmptyString;
+      def_node->mRoughnessSrc       = Torque::StringTableLink->EmptyString;
+      def_node->mEmissiveSrc        = Torque::StringTableLink->EmptyString;
+      def_node->mWorldPosOffsetSrc  = Torque::StringTableLink->EmptyString;
       def_node->mAlphaThreshold     = node->alphaThreshold;
       return;
    }
@@ -553,8 +551,8 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    Scene::MultiplyNode* mul_node = dynamic_cast<Scene::MultiplyNode*>(node->materialNode);
    if ( mul_node )
    {
-      mul_node->mInputASrc = Link.StringTableLink->EmptyString;
-      mul_node->mInputBSrc = Link.StringTableLink->EmptyString;
+      mul_node->mInputASrc = Torque::StringTableLink->EmptyString;
+      mul_node->mInputBSrc = Torque::StringTableLink->EmptyString;
       return;
    }
 
@@ -562,9 +560,9 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    Scene::LerpNode* lerp_node = dynamic_cast<Scene::LerpNode*>(node->materialNode);
    if (lerp_node)
    {
-      lerp_node->mInputASrc = Link.StringTableLink->EmptyString;
-      lerp_node->mInputBSrc = Link.StringTableLink->EmptyString;
-      lerp_node->mAmountSrc = Link.StringTableLink->EmptyString;
+      lerp_node->mInputASrc = Torque::StringTableLink->EmptyString;
+      lerp_node->mInputBSrc = Torque::StringTableLink->EmptyString;
+      lerp_node->mAmountSrc = Torque::StringTableLink->EmptyString;
       return;
    }
 
@@ -572,7 +570,7 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    Scene::SinNode* sin_node = dynamic_cast<Scene::SinNode*>(node->materialNode);
    if ( sin_node )
    {
-      sin_node->mXSrc = Link.StringTableLink->EmptyString;
+      sin_node->mXSrc = Torque::StringTableLink->EmptyString;
       return;
    }
 
@@ -580,7 +578,7 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    Scene::CosNode* cos_node = dynamic_cast<Scene::CosNode*>(node->materialNode);
    if (cos_node)
    {
-      cos_node->mXSrc = Link.StringTableLink->EmptyString;
+      cos_node->mXSrc = Torque::StringTableLink->EmptyString;
       return;
    }
 

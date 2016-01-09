@@ -129,7 +129,7 @@ void MaterialsTool::OnTreeEvent(wxTreeEvent& evt)
    MaterialsTreeItemData* data = dynamic_cast<MaterialsTreeItemData*>(mMaterialsPanel->m_materialTree->GetItemData(evt.GetItem()));
    if ( data )
    {
-      MaterialAsset* mat = Plugins::Link.Scene.getMaterialAsset(data->assetId);
+      MaterialAsset* mat = Torque::Scene.getMaterialAsset(data->assetId);
       if ( mat )
       {
          // See if we've already opened a tab for this one, if so then set focus to it.
@@ -158,7 +158,7 @@ void MaterialsTool::OnTreeMenu(wxTreeEvent& evt)
    MaterialsTreeItemData* data = dynamic_cast<MaterialsTreeItemData*>(mMaterialsPanel->m_materialTree->GetItemData(evt.GetItem()));
    if (data)
    {
-      MaterialAsset* mat = Plugins::Link.Scene.getMaterialAsset(data->assetId);
+      MaterialAsset* mat = Torque::Scene.getMaterialAsset(data->assetId);
       if (mat)
       {
          wxMenu* menu = new wxMenu;
@@ -170,7 +170,7 @@ void MaterialsTool::OnTreeMenu(wxTreeEvent& evt)
    }
    else {
       wxString moduleName = mMaterialsPanel->m_materialTree->GetItemText(evt.GetItem());
-      mSelectedModule = Plugins::Link.ModuleDatabaseLink->findLoadedModule(moduleName.c_str());
+      mSelectedModule = Torque::ModuleDatabaseLink->findLoadedModule(moduleName.c_str());
 
       if (mSelectedModule != NULL)
       {
@@ -215,9 +215,9 @@ void MaterialsTool::OnModuleMenuEvent(wxCommandEvent& evt)
          templatePath.Append(templateFileName);
 
          // Create material template and then asset.
-         Plugins::Link.Scene.createMaterialTemplate(templatePath.c_str());
-         Plugins::Link.Scene.createMaterialAsset(assetID.c_str(), templateFileName.c_str(), assetPath.c_str());
-         Plugins::Link.AssetDatabaseLink.addDeclaredAsset(mSelectedModule, assetPath.c_str());
+         Torque::Scene.createMaterialTemplate(templatePath.c_str());
+         Torque::Scene.createMaterialAsset(assetID.c_str(), templateFileName.c_str(), assetPath.c_str());
+         Torque::AssetDatabaseLink.addDeclaredAsset(mSelectedModule, assetPath.c_str());
          refreshMaterialList();
       }
    }
@@ -234,7 +234,7 @@ void MaterialsTool::refreshMaterialList()
 
    // Find all material assets.
    AssetQuery assQuery;
-   Plugins::Link.AssetDatabaseLink.findAssetType(&assQuery, "MaterialAsset", false);
+   Torque::AssetDatabaseLink.findAssetType(&assQuery, "MaterialAsset", false);
 
    mMaterialsPanel->m_materialTree[0].GetLabelText();
 

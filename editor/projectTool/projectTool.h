@@ -36,7 +36,7 @@
 #endif
 
 #ifndef _SCENE_OBJECT_H_
-#include <3d/scene/object/object.h>
+#include <scene/object.h>
 #endif
 
 class ModuleTreeItemData : public wxTreeItemData

@@ -40,7 +40,8 @@
 
 #include "projectManager.h"
 #include "module/moduleManager.h"
-#include "3d/scene/object/components/meshComponent.h"
+#include "scene/components/meshComponent.h"
+#include "rendering/renderCamera.h"
 
 class TextDropTarget : public wxTextDropTarget
 {
@@ -61,8 +62,8 @@ ProjectManager::ProjectManager()
       mRenderLayer4View(NULL),
       mEditorMode(0)
 {
-   mCameraPanVelocity = Point3F::Zero;
-   mCameraSpeed = 0.5f;
+   mEditorCameraPanVelocity = Point3F::Zero;
+   mEditorCameraSpeed = 0.5f;
 }
 
 ProjectManager::~ProjectManager()
@@ -136,18 +137,17 @@ bool ProjectManager::openProject(wxString projectPath)
       mProjectPath = projectPath;
       wxDir projectDir(mProjectPath);
       mProjectName = projectDir.GetName();
-      setRendering(true);
 
       // Editor Overlay
-      mRenderLayer4View = Plugins::Link.Graphics.getView("RenderLayer4", 2000);
-      mEditorOverlayView = Plugins::Link.Graphics.getView("EditorOverlay", 6100);
+      mRenderLayer4View = Torque::Graphics.getView("RenderLayer4", 2000);
+      mEditorOverlayView = Torque::Graphics.getView("EditorOverlay", 6100);
 
       // Editor Camera
-      Scene::SceneCamera* activeCam = Plugins::Link.Scene.getActiveCamera();
-      mCamera.copy(activeCam);
-      mCamera.setBindMouse(true, false, true);
-      Plugins::Link.Scene.addCamera("EditorCamera", &mCamera);
-      Plugins::Link.Scene.pushActiveCamera("EditorCamera");
+      //Scene::SceneCamera* activeCam = Torque::Scene.getActiveCamera();
+      //mEditorCamera.copy(activeCam);
+      //mEditorCamera.setBindMouse(true, false, true);
+      //Torque::Scene.addCamera("EditorCamera", &mEditorCamera);
+      //Torque::Scene.pushActiveCamera("EditorCamera");
 
       onProjectLoaded(mProjectName, projectPath);
       return true;
@@ -160,8 +160,6 @@ void ProjectManager::closeProject()
 {
    if (!mProjectLoaded) 
       return;
-
-   setRendering(false);
 
    mProjectLoaded = false;
    mProjectPath = "";
@@ -211,7 +209,7 @@ void ProjectManager::OnIdle(wxIdleEvent& evt)
 {
    if (mProjectLoaded)
    {
-      Plugins::Link.Engine.mainLoop();
+      Torque::Engine.mainLoop();
       evt.RequestMore();
    }
 }
@@ -221,7 +219,7 @@ void ProjectManager::OnSize(wxSizeEvent& evt)
    if (!mProjectLoaded)
       return;
 
-   Plugins::Link.Engine.resizeWindow(evt.GetSize().GetX(), evt.GetSize().GetY());
+   Torque::Engine.resizeWindow(evt.GetSize().GetX(), evt.GetSize().GetY());
 }
 
 void ProjectManager::OnMouseMove(wxMouseEvent& evt)
@@ -232,7 +230,7 @@ void ProjectManager::OnMouseMove(wxMouseEvent& evt)
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
 
-   Plugins::Link.Engine.mouseMove(evt.GetPosition().x, evt.GetPosition().y);
+   Torque::Engine.mouseMove(evt.GetPosition().x, evt.GetPosition().y);
 }
 void ProjectManager::OnMouseLeftDown(wxMouseEvent& evt)
 {
@@ -244,7 +242,7 @@ void ProjectManager::OnMouseLeftDown(wxMouseEvent& evt)
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
 
-   Plugins::Link.Engine.mouseButton(true, true);
+   Torque::Engine.mouseButton(true, true);
 }
 void ProjectManager::OnMouseLeftUp(wxMouseEvent& evt)
 {
@@ -254,7 +252,7 @@ void ProjectManager::OnMouseLeftUp(wxMouseEvent& evt)
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
 
-   Plugins::Link.Engine.mouseButton(false, true);
+   Torque::Engine.mouseButton(false, true);
 }
 void ProjectManager::OnMouseRightDown(wxMouseEvent& evt)
 {
@@ -266,7 +264,7 @@ void ProjectManager::OnMouseRightDown(wxMouseEvent& evt)
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
 
-   Plugins::Link.Engine.mouseButton(true, false);
+   Torque::Engine.mouseButton(true, false);
 }
 void ProjectManager::OnMouseRightUp(wxMouseEvent& evt)
 {
@@ -276,7 +274,7 @@ void ProjectManager::OnMouseRightUp(wxMouseEvent& evt)
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
 
-   Plugins::Link.Engine.mouseButton(false, false);
+   Torque::Engine.mouseButton(false, false);
 }
 
 KeyCodes getTorqueKeyCode(int key)
@@ -322,25 +320,25 @@ void ProjectManager::OnKeyDown(wxKeyEvent& evt)
    switch (evt.GetKeyCode())
    {
       case 87: // W
-         mCameraPanVelocity.y = -1.0 * mCameraSpeed;
+         mEditorCameraPanVelocity.y = -1.0 * mEditorCameraSpeed;
          break;
 
       case 65: // A
-         mCameraPanVelocity.x = 1.0 * mCameraSpeed;
+         mEditorCameraPanVelocity.x = 1.0 * mEditorCameraSpeed;
          break;
 
       case 83: // S
-         mCameraPanVelocity.y = 1.0 * mCameraSpeed;
+         mEditorCameraPanVelocity.y = 1.0 * mEditorCameraSpeed;
          break;
 
       case 68: // D
-         mCameraPanVelocity.x = -1.0 * mCameraSpeed;
+         mEditorCameraPanVelocity.x = -1.0 * mEditorCameraSpeed;
          break;
    }
-   mCamera.setPanVelocity(mCameraPanVelocity);
+   mEditorCamera.setPanVelocity(mEditorCameraPanVelocity);
 
    KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
-   Plugins::Link.Engine.keyDown(torqueKey);
+   Torque::Engine.keyDown(torqueKey);
 }
 
 void ProjectManager::OnKeyUp(wxKeyEvent& evt)
@@ -351,25 +349,35 @@ void ProjectManager::OnKeyUp(wxKeyEvent& evt)
    switch (evt.GetKeyCode())
    {
       case 87: // W
-         mCameraPanVelocity.y = 0.0;
+         mEditorCameraPanVelocity.y = 0.0;
          break;
 
       case 65: // A
-         mCameraPanVelocity.x = 0.0;
+         mEditorCameraPanVelocity.x = 0.0;
          break;
 
       case 83: // S
-         mCameraPanVelocity.y = 0.0;
+         mEditorCameraPanVelocity.y = 0.0;
          break;
 
       case 68: // D
-         mCameraPanVelocity.x = 0.0;
+         mEditorCameraPanVelocity.x = 0.0;
          break;
    }
-   mCamera.setPanVelocity(mCameraPanVelocity);
+   mEditorCamera.setPanVelocity(mEditorCameraPanVelocity);
 
    KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
-   Plugins::Link.Engine.keyUp(torqueKey);
+   Torque::Engine.keyUp(torqueKey);
+}
+
+void ProjectManager::onAddToCamera()
+{
+
+}
+
+void ProjectManager::onRemoveFromCamera()
+{
+
 }
 
 void ProjectManager::preRender()
@@ -379,8 +387,8 @@ void ProjectManager::preRender()
 
 void ProjectManager::render()
 {
-   Plugins::Link.bgfx.setViewRect(mEditorOverlayView->id, 0, 0, *Plugins::Link.Rendering.canvasWidth, *Plugins::Link.Rendering.canvasHeight);
-   Plugins::Link.bgfx.setViewTransform(mEditorOverlayView->id, Plugins::Link.Rendering.viewMatrix, Plugins::Link.Rendering.projectionMatrix, BGFX_VIEW_STEREO, NULL);
+   Torque::bgfx.setViewRect(mEditorOverlayView->id, 0, 0, *Torque::Rendering.canvasWidth, *Torque::Rendering.canvasHeight);
+   Torque::bgfx.setViewTransform(mEditorOverlayView->id, mCamera->viewMatrix, mCamera->projectionMatrix, BGFX_VIEW_STEREO, NULL);
 
    for(unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->renderTool();
@@ -444,7 +452,7 @@ void _addObjectTemplateAsset(wxString assetID, Point3F position)
    Scene::SceneObject* newObject = new Scene::SceneObject();
    newObject->setTemplateAsset(assetID);
    newObject->mPosition.set(position);
-   Plugins::Link.Scene.addObject(newObject, "NewSceneObject");
+   Torque::Scene.addObject(newObject, "NewSceneObject");
    newObject->registerObject();
 }
 
@@ -455,7 +463,7 @@ void _addMeshAsset(wxString assetID, Point3F position)
    meshComponent->setMesh(assetID.c_str());
    newObject->addComponent(meshComponent);
    newObject->mPosition.set(position);
-   Plugins::Link.Scene.addObject(newObject, "NewSceneObject");
+   Torque::Scene.addObject(newObject, "NewSceneObject");
    newObject->registerObject();
    meshComponent->registerObject();
 }
@@ -463,7 +471,7 @@ void _addMeshAsset(wxString assetID, Point3F position)
 bool TextDropTarget::OnDropText(wxCoord x, wxCoord y, const wxString& text)
 {
    // Debug:
-   Plugins::Link.Con.printf("DROP: x: %d y: %d text: %s", x, y, static_cast<const char*>(text));
+   Torque::Con.printf("DROP: x: %d y: %d text: %s", x, y, static_cast<const char*>(text));
 
    // Parse Commands
    wxStringTokenizer tokenizer(text, "->");
@@ -480,17 +488,17 @@ bool TextDropTarget::OnDropText(wxCoord x, wxCoord y, const wxString& text)
       // ObjectTemplateAsset gets added straight to the scene.
       if (assetType == "ObjectTemplateAsset")
       {
-         Point3F worldRay = Plugins::Link.Rendering.screenToWorld(Point2I(x, y));
-         Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
-         _addObjectTemplateAsset(assetID, editorPos + (worldRay * 10.0f));
+         Point3F worldRay = Torque::Rendering.screenToWorld(Point2I(x, y));
+         //Point3F editorPos = Torque::Scene.getActiveCamera()->getPosition();
+         //_addObjectTemplateAsset(assetID, editorPos + (worldRay * 10.0f));
       }
 
       // MeshAsset
       if (assetType == "MeshAsset")
       {
-         Point3F worldRay = Plugins::Link.Rendering.screenToWorld(Point2I(x, y));
-         Point3F editorPos = Plugins::Link.Scene.getActiveCamera()->getPosition();
-         _addMeshAsset(assetID, editorPos + (worldRay * 10.0f));
+         Point3F worldRay = Torque::Rendering.screenToWorld(Point2I(x, y));
+         //Point3F editorPos = Torque::Scene.getActiveCamera()->getPosition();
+         //_addMeshAsset(assetID, editorPos + (worldRay * 10.0f));
       }
 
       // Inform the tools the scene has changed.
@@ -519,7 +527,7 @@ void ProjectManager::refreshChoices()
    mTextureAssetChoices.Clear();
    mTextureAssetChoices.Add("", 0);
 
-   Vector<const AssetDefinition*> assetDefinitions = Plugins::Link.AssetDatabaseLink.getDeclaredAssets();
+   Vector<const AssetDefinition*> assetDefinitions = Torque::AssetDatabaseLink.getDeclaredAssets();
 
    // Iterate sorted asset definitions.
    for (Vector<const AssetDefinition*>::iterator assetItr = assetDefinitions.begin(); assetItr != assetDefinitions.end(); ++assetItr)
@@ -536,11 +544,11 @@ void ProjectManager::refreshChoices()
 void ProjectManager::refreshModuleList()
 {
    mModuleList.clear();
-   Vector<const AssetDefinition*> assetDefinitions = Plugins::Link.AssetDatabaseLink.getDeclaredAssets();
+   Vector<const AssetDefinition*> assetDefinitions = Torque::AssetDatabaseLink.getDeclaredAssets();
 
    // Fetch all loaded module definitions.
    ModuleManager::typeConstModuleDefinitionVector loadedModules;
-   Plugins::Link.ModuleDatabaseLink->findModules(true, loadedModules);
+   Torque::ModuleDatabaseLink->findModules(true, loadedModules);
 
    // Iterate found loaded module definitions.
    for (ModuleManager::typeConstModuleDefinitionVector::const_iterator loadedModuleItr = loadedModules.begin(); loadedModuleItr != loadedModules.end(); ++loadedModuleItr)

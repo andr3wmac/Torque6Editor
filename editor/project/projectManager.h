@@ -31,12 +31,16 @@
 #include "platform/platformLibrary.h"
 #endif
 
-#ifndef _SCENE_CAMERA_H_
-#include "3d/scene/camera.h"
-#endif
-
 #ifndef _WX_PROPGRID_PROPERTY_H_
 #include "wx/propgrid/property.h"
+#endif
+
+#ifndef _RENDER_CAMERA_H_
+#include "rendering/renderCamera.h"
+#endif
+
+#ifndef _CAMERA_COMPONENT_H_
+#include "scene/components/cameraComponent.h"
 #endif
 
 typedef int (*initFunc)(int argc, const char **argv, HWND windowHWND);
@@ -47,10 +51,10 @@ class MainFrame;
 class wxAuiManager;
 
 // Editor Camera
-class EditorCamera : public Scene::SceneCamera
+class EditorCamera : public Scene::CameraComponent
 {
    private:
-      typedef Scene::SceneCamera Parent;
+      typedef Scene::CameraComponent Parent;
 
    public:
       EditorCamera();
@@ -103,7 +107,7 @@ class EditorTool
       static wxVector<EditorTool*> smEditorTools;
 };
 
-class ProjectManager : public wxEvtHandler, public Rendering::Renderable
+class ProjectManager : public wxEvtHandler, public Rendering::RenderHook
 {
    public:
       ProjectManager();
@@ -124,9 +128,9 @@ class ProjectManager : public wxEvtHandler, public Rendering::Renderable
       wxAuiManager*     mManager;
       MainFrame*        mFrame;
       wxWindow*         mWindow;
-      EditorCamera      mCamera;
-      Point3F           mCameraPanVelocity;
-      F32               mCameraSpeed;
+      EditorCamera      mEditorCamera;
+      Point3F           mEditorCameraPanVelocity;
+      F32               mEditorCameraSpeed;
 
       S32                  mEditorMode;
       Vector<ModuleInfo>   mModuleList;
@@ -146,6 +150,8 @@ class ProjectManager : public wxEvtHandler, public Rendering::Renderable
       Vector<ModuleInfo>* getModuleList();
       wxPGChoices* getTextureAssetChoices();
 
+      virtual void onAddToCamera();
+      virtual void onRemoveFromCamera();
       virtual void preRender();
       virtual void render();
       virtual void postRender();

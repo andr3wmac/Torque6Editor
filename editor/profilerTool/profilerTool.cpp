@@ -122,17 +122,17 @@ void ProfilerTool::OnButtonEvent( wxCommandEvent& evt )
 {
    if ( evt.GetId() == PROFILER_START )
    {
-      Plugins::Link.Engine.ProfilerLink->enable(true);
+      Torque::Engine.ProfilerLink->enable(true);
 
       // Run Main Loop
       for(U32 i = 0; i < mFrameCount; i++)
-         Plugins::Link.Engine.mainLoop();
+         Torque::Engine.mainLoop();
 
-      Plugins::Link.Engine.ProfilerLink->enable(false);
-      Plugins::Link.Engine.ProfilerLink->dumpToCache();
-      Plugins::Link.Engine.mainLoop();
+      Torque::Engine.ProfilerLink->enable(false);
+      Torque::Engine.ProfilerLink->dumpToCache();
+      Torque::Engine.mainLoop();
 
-      ProfilerCachedData* data = Plugins::Link.Engine.ProfilerLink->getCachedData();
+      ProfilerCachedData* data = Torque::Engine.ProfilerLink->getCachedData();
       processProfilerCachedData(&data->children[0], NULL);
    }
 }

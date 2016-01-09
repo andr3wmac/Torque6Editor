@@ -54,51 +54,51 @@
 #endif
 
 #ifndef _OPAQUE_NODE_H_
-#include "3d/material/nodes/opaqueNode.h"
+#include "material/nodes/opaqueNode.h"
 #endif
 
 #ifndef _FLOAT_NODE_H_
-#include "3d/material/nodes/floatNode.h"
+#include "material/nodes/floatNode.h"
 #endif
 
 #ifndef _FORWARD_NODE_H_
-#include "3d/material/nodes/forwardNode.h"
+#include "material/nodes/forwardNode.h"
 #endif
 
 #ifndef _MULTIPLY_NODE_H_
-#include "3d/material/nodes/multiplyNode.h"
+#include "material/nodes/multiplyNode.h"
 #endif
 
 #ifndef _LERP_NODE_H_
-#include "3d/material/nodes/lerpNode.h"
+#include "material/nodes/lerpNode.h"
 #endif
 
 #ifndef _SIN_NODE_H_
-#include "3d/material/nodes/sinNode.h"
+#include "material/nodes/sinNode.h"
 #endif
 
 #ifndef _COS_NODE_H_
-#include "3d/material/nodes/cosNode.h"
+#include "material/nodes/cosNode.h"
 #endif
 
 #ifndef _TEXTURE_NODE_H_
-#include "3d/material/nodes/textureNode.h"
+#include "material/nodes/textureNode.h"
 #endif
 
 #ifndef _TIME_NODE_H_
-#include "3d/material/nodes/timeNode.h"
+#include "material/nodes/timeNode.h"
 #endif
 
 #ifndef _VEC2_NODE_H_
-#include "3d/material/nodes/vec2Node.h"
+#include "material/nodes/vec2Node.h"
 #endif
 
 #ifndef _VEC3_NODE_H_
-#include "3d/material/nodes/vec3Node.h"
+#include "material/nodes/vec3Node.h"
 #endif
 
 #ifndef _VEC4_NODE_H_
-#include "3d/material/nodes/vec4Node.h"
+#include "material/nodes/vec4Node.h"
 #endif
 
 class MaterialsTool;
