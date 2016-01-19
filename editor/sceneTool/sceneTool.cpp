@@ -56,7 +56,6 @@ SceneTool::SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiMa
      mRefreshing(false)
 {
    mObjectIconList = new wxImageList(16, 16);
-   mFeatureIconList = new wxImageList( 16, 16 );
 
    // Translate Menu
    mTranslateMenu = new wxMenu;
@@ -111,17 +110,7 @@ void SceneTool::initTool()
    mScenePanel->objectList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneTool::OnTreeMenu), NULL, this);
    mScenePanel->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnObjectPropChanged), NULL, this);
 
-   // Feature Icons.
-   mFeatureIconList->Add(wxBitmap("images/featureIcon.png", wxBITMAP_TYPE_PNG));
-   mScenePanel->featureList->AssignImageList(mFeatureIconList);
-
-   // Feature Events
-   mScenePanel->featureList->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(SceneTool::OnTreeEvent), NULL, this);
-   mScenePanel->featureList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneTool::OnTreeMenu), NULL, this);
-   mScenePanel->featurePropGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnFeaturePropChanged), NULL, this);
-
    mObjectListRoot = mScenePanel->objectList->AddRoot("ROOT");
-   mFeatureListRoot = mScenePanel->featureList->AddRoot("ROOT");
 
    mManager->AddPane(mScenePanel, wxAuiPaneInfo().Caption("Scene")
                                                   .CaptionVisible( true )
@@ -158,7 +147,6 @@ void SceneTool::openTool()
    if (mProjectManager->mProjectLoaded)
    {
       refreshObjectList();
-      refreshFeatureList();
       refreshChoices();
    }
 }
@@ -252,14 +240,12 @@ bool SceneTool::onMouseMove(int x, int y)
 void SceneTool::onSceneChanged()
 {
    refreshObjectList();
-   refreshFeatureList();
    refreshChoices();
 }
 
 void SceneTool::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
    refreshObjectList();
-   refreshFeatureList();
    refreshChoices();
 
    if ( mLightIcon == NULL )
@@ -280,7 +266,7 @@ void SceneTool::OnMenuEvent(wxCommandEvent& evt)
    {
       wxFileDialog openFile(mFrame, wxT("Open Scene File"), "", "", "taml files (*.taml)|*.taml", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
       if (openFile.ShowModal() == wxID_OK)
-         Torque::Scene.load(openFile.GetPath());
+         Torque::Scene.load(openFile.GetPath(), false);
    }
 
    if (evt.GetId() == SCENE_SAVE)
@@ -290,9 +276,6 @@ void SceneTool::OnMenuEvent(wxCommandEvent& evt)
          Torque::Scene.save(saveFile.GetPath());
    }
 
-   if (evt.GetId() == ADD_FEATURE_BUTTON)
-      openAddFeatureMenu();
-
    if (evt.GetId() == ADD_OBJECT_BUTTON)
       openAddObjectMenu();
 
@@ -300,7 +283,6 @@ void SceneTool::OnMenuEvent(wxCommandEvent& evt)
       openAddComponentMenu();
 
    refreshObjectList();
-   refreshFeatureList();
    refreshChoices();
 }
 
@@ -403,25 +385,6 @@ void SceneTool::openAddComponentMenu()
 void SceneTool::OnAddComponentMenuEvent(wxCommandEvent& evt)
 {
    addComponent(mSelectedObject, mComponentClassList[evt.GetId()]);
-}
-
-void SceneTool::openAddFeatureMenu()
-{
-   wxMenu* menu = new wxMenu;
-
-   refreshClassLists();
-
-   for (S32 i = 0; i < mFeatureClassList.size(); ++i)
-      menu->Append(i, mFeatureClassList[i]);
-
-   menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnAddFeatureMenuEvent), NULL, this);
-   mFrame->PopupMenu(menu, wxDefaultPosition);
-   delete menu;
-}
-
-void SceneTool::OnAddFeatureMenuEvent(wxCommandEvent& evt)
-{
-
 }
 
 void SceneTool::OnTreeEvent( wxTreeEvent& evt )
@@ -537,11 +500,6 @@ void SceneTool::OnComponentMenuEvent(wxCommandEvent& evt)
    }
 }
 
-void SceneTool::OnFeatureMenuEvent(wxCommandEvent& evt)
-{
-
-}
-
 void SceneTool::OnObjectPropChanged(wxPropertyGridEvent& evt)
 {
    wxString name = evt.GetPropertyName();
@@ -595,11 +553,6 @@ void SceneTool::OnObjectPropChanged(wxPropertyGridEvent& evt)
    // Note: No need to refresh a selected component, better to refresh the whole Object.
    selected->setDataField(Torque::StringTableLink->insert(name), NULL, strVal);
    mSelectedObject->refresh();
-}
-
-void SceneTool::OnFeaturePropChanged(wxPropertyGridEvent& evt)
-{
-
 }
 
 void SceneTool::refreshObjectList()
@@ -656,11 +609,6 @@ void SceneTool::refreshObjectList()
    mRefreshing = false;
 }
 
-void SceneTool::refreshFeatureList()
-{
-
-}
-
 void SceneTool::refreshChoices()
 {
    if (!mProjectManager->isProjectLoaded())
@@ -703,7 +651,6 @@ void SceneTool::refreshChoices()
 void SceneTool::refreshClassLists()
 {
    mComponentClassList.clear();
-   mFeatureClassList.clear();
 
    for (Namespace *walk = Torque::Con.getNamespaceList(); walk; walk = walk->mNext)
    {
@@ -712,16 +659,6 @@ void SceneTool::refreshClassLists()
 
       if (dStrcmp(walk->mParent->mName, "BaseComponent") == 0)
          mComponentClassList.push_back(walk->mName);
-
-      if (dStrcmp(walk->mParent->mName, "SceneFeature") == 0 ||
-          dStrcmp(walk->mParent->mName, "RenderFeature") == 0 ||
-          dStrcmp(walk->mParent->mName, "RenderPostProcess") == 0)
-      {
-         if (dStrcmp(walk->mName, "RenderFeature") == 0 || dStrcmp(walk->mName, "RenderPostProcess") == 0)
-            continue;
-
-         mFeatureClassList.push_back(walk->mName);
-      }
    }
 }
 

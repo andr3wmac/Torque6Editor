@@ -59,10 +59,6 @@ class EditorCamera : public Scene::CameraComponent
    public:
       EditorCamera();
 
-      void onMouseMoveEvent(const GuiEvent &event);
-      void onMouseDownEvent(const GuiEvent &event);
-      void onMouseDraggedEvent(const GuiEvent &event);
-
       DECLARE_PLUGIN_CONOBJECT(EditorCamera);
 };
 

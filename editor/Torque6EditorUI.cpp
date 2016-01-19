@@ -285,30 +285,6 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	m_panel11->Layout();
 	bSizer5->Fit( m_panel11 );
 	m_notebook2->AddPage( m_panel11, wxT("Objects"), true );
-	m_panel12 = new wxPanel( m_notebook2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* bSizer51;
-	bSizer51 = new wxBoxSizer( wxVERTICAL );
-	
-	wxBoxSizer* bSizer61;
-	bSizer61 = new wxBoxSizer( wxHORIZONTAL );
-	
-	m_bpButton11 = new wxBitmapButton( m_panel12, ADD_FEATURE_BUTTON, wxBitmap( wxT("images/featureIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	bSizer61->Add( m_bpButton11, 0, wxALL, 2 );
-	
-	
-	bSizer51->Add( bSizer61, 0, wxEXPAND, 0 );
-	
-	featureList = new wxTreeCtrl( m_panel12, FEATURE_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
-	bSizer51->Add( featureList, 1, wxALL|wxEXPAND, 1 );
-	
-	featurePropGrid = new wxPropertyGrid(m_panel12, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE);
-	bSizer51->Add( featurePropGrid, 1, wxALL|wxEXPAND, 2 );
-	
-	
-	m_panel12->SetSizer( bSizer51 );
-	m_panel12->Layout();
-	bSizer51->Fit( m_panel12 );
-	m_notebook2->AddPage( m_panel12, wxT("Features"), false );
 	
 	bSizer3->Add( m_notebook2, 1, wxEXPAND | wxALL, 5 );
 	

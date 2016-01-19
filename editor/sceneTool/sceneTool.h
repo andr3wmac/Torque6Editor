@@ -54,17 +54,6 @@ public:
    }
 };
 
-class FeatureTreeItemData : public wxTreeItemData
-{
-public:
-   SimObject* objPtr;
-
-   FeatureTreeItemData(SimObject* _objPtr)
-      : objPtr(_objPtr)
-   {
-   }
-};
-
 class SceneTool : public wxEvtHandler, public EditorTool
 {
    typedef EditorTool Parent;
@@ -73,9 +62,6 @@ class SceneTool : public wxEvtHandler, public EditorTool
       ScenePanel*    mScenePanel;
       wxImageList*   mObjectIconList;
       wxTreeItemId   mObjectListRoot;
-
-      wxImageList*   mFeatureIconList;
-      wxTreeItemId   mFeatureListRoot;
       
       Scene::SceneObject*     mSelectedObject;
       Scene::BaseComponent*   mSelectedComponent;
@@ -84,7 +70,6 @@ class SceneTool : public wxEvtHandler, public EditorTool
       Scene::BaseComponent*   mMenuComponent;
 
       Vector<StringTableEntry> mComponentClassList;
-      Vector<StringTableEntry> mFeatureClassList;
 
       wxMenu* mTranslateMenu;
       wxMenu* mRotateMenu;
@@ -105,7 +90,6 @@ class SceneTool : public wxEvtHandler, public EditorTool
 
       void refreshClassLists();
       void refreshObjectList();
-      void refreshFeatureList();
       void refreshChoices();
       void loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* obj);
       void selectObject(Scene::SceneObject* obj, bool updateTree = false);
@@ -113,23 +97,19 @@ class SceneTool : public wxEvtHandler, public EditorTool
       void selectComponent(Scene::BaseComponent* componenty, bool updateTree = false);
       void openAddObjectMenu();
       void openAddComponentMenu();
-      void openAddFeatureMenu();
 
       void OnMenuEvent(wxCommandEvent& evt);
       void OnTreeEvent( wxTreeEvent& evt );
       void OnTreeMenu( wxTreeEvent& evt );
       void OnObjectPropChanged(wxPropertyGridEvent& evt);
-      void OnFeaturePropChanged( wxPropertyGridEvent& evt );
       void OnToolbarDropdownEvent(wxCommandEvent& evt);
       void OnTranslateMenuEvent(wxCommandEvent& evt);
       void OnRotateMenuEvent(wxCommandEvent& evt);
       void OnScaleMenuEvent(wxCommandEvent& evt);
       void OnAddObjectMenuEvent(wxCommandEvent& evt);
       void OnAddComponentMenuEvent(wxCommandEvent& evt);
-      void OnAddFeatureMenuEvent(wxCommandEvent& evt);
       void OnObjectMenuEvent(wxCommandEvent& evt);
       void OnComponentMenuEvent(wxCommandEvent& evt);
-      void OnFeatureMenuEvent(wxCommandEvent& evt);
 
       virtual void initTool();
       virtual void openTool();

@@ -335,7 +335,7 @@ void ProjectManager::OnKeyDown(wxKeyEvent& evt)
          mEditorCameraPanVelocity.x = -1.0 * mEditorCameraSpeed;
          break;
    }
-   mEditorCamera.setPanVelocity(mEditorCameraPanVelocity);
+   //mEditorCamera.setPanVelocity(mEditorCameraPanVelocity);
 
    KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
    Torque::Engine.keyDown(torqueKey);
@@ -364,7 +364,7 @@ void ProjectManager::OnKeyUp(wxKeyEvent& evt)
          mEditorCameraPanVelocity.x = 0.0;
          break;
    }
-   mEditorCamera.setPanVelocity(mEditorCameraPanVelocity);
+   //mEditorCamera.setPanVelocity(mEditorCameraPanVelocity);
 
    KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
    Torque::Engine.keyUp(torqueKey);
@@ -430,21 +430,6 @@ IMPLEMENT_PLUGIN_CONOBJECT(EditorCamera);
 EditorCamera::EditorCamera()
 {
 
-}
-
-void EditorCamera::onMouseMoveEvent(const GuiEvent &event)
-{
-   //editorList[activeEditorIndex]->onMouseMoveEvent(event);
-}
-
-void EditorCamera::onMouseDownEvent(const GuiEvent &event)
-{
-   //editorList[activeEditorIndex]->onMouseDownEvent(event);
-}
-
-void EditorCamera::onMouseDraggedEvent(const GuiEvent &event)
-{
-   //editorList[activeEditorIndex]->onMouseDraggedEvent(event);
 }
 
 void _addObjectTemplateAsset(wxString assetID, Point3F position)

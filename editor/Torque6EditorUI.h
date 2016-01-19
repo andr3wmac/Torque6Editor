@@ -67,18 +67,16 @@ WX_DEFINE_ARRAY_PTR( wxWizardPageSimple*, WizardPages );
 #define ADD_OBJECT_BUTTON 1018
 #define ADD_COMPONENT_BUTTON 1019
 #define OBJECT_LIST 1020
-#define ADD_FEATURE_BUTTON 1021
-#define FEATURE_LIST 1022
-#define TRANSLATE_SNAP_NONE 1023
-#define TRANSLATE_SNAP_1 1024
-#define TRANSLATE_SNAP_2 1025
-#define TRANSLATE_SNAP_3 1026
-#define TRANSLATE_SNAP_4 1027
-#define MATERIAL_SAVE 1028
-#define ASSET_LIST 1029
-#define MENU_IMPORT_MESH 1030
-#define MENU_IMPORT_TEXTURE 1031
-#define MENU_NEW_MATERIAL 1032
+#define TRANSLATE_SNAP_NONE 1021
+#define TRANSLATE_SNAP_1 1022
+#define TRANSLATE_SNAP_2 1023
+#define TRANSLATE_SNAP_3 1024
+#define TRANSLATE_SNAP_4 1025
+#define MATERIAL_SAVE 1026
+#define ASSET_LIST 1027
+#define MENU_IMPORT_MESH 1028
+#define MENU_IMPORT_TEXTURE 1029
+#define MENU_NEW_MATERIAL 1030
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainFrame
@@ -182,16 +180,12 @@ class ScenePanel : public wxPanel
 		wxNotebook* m_notebook2;
 		wxPanel* m_panel11;
 		wxSearchCtrl* m_searchCtrl1;
-		wxPanel* m_panel12;
-		wxBitmapButton* m_bpButton11;
 	
 	public:
 		wxBitmapButton* addObjectButton;
 		wxBitmapButton* addComponentButton;
 		wxTreeCtrl* objectList;
 		wxPropertyGrid* propertyGrid;
-		wxTreeCtrl* featureList;
-		wxPropertyGrid* featurePropGrid;
 		wxMenu* translateMenu;
 		
 		ScenePanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
