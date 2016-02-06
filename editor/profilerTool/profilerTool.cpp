@@ -125,7 +125,7 @@ void ProfilerTool::OnButtonEvent( wxCommandEvent& evt )
       Torque::Engine.ProfilerLink->enable(true);
 
       // Run Main Loop
-      for(U32 i = 0; i < mFrameCount; i++)
+      for(S32 i = 0; i < mFrameCount; i++)
          Torque::Engine.mainLoop();
 
       Torque::Engine.ProfilerLink->enable(false);

@@ -462,7 +462,7 @@ void ProjectTool::loadAssetDefinitionProperties(wxPropertyGrid* propertyGrid, co
          }
 
          if (f->type == Torque::Con.TypeBool)
-            propertyGrid->Append(new wxBoolProperty(f->pFieldname, f->pFieldname, val));
+            propertyGrid->Append(new wxBoolProperty(f->pFieldname, f->pFieldname, dAtob(val)));
          else
             propertyGrid->Append(new wxStringProperty(f->pFieldname, f->pFieldname, val));
       }

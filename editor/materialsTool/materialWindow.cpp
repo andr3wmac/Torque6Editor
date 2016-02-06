@@ -417,7 +417,7 @@ void MaterialWindow::drawConnection(wxGCDC& gdc, wxGraphicsContext* context, Con
       end = mLastMousePoint;
    else {
       Node* endNode = findNode(conn->inputNodeName);
-      if ( !endNode || conn->inputIndex >= endNode->inputs.size() ) 
+      if ( !endNode || conn->inputIndex >= (U32)endNode->inputs.size() ) 
          return;
       end = endNode->inputs[conn->inputIndex].lastPosition;
    }
@@ -426,7 +426,7 @@ void MaterialWindow::drawConnection(wxGCDC& gdc, wxGraphicsContext* context, Con
       start = mLastMousePoint;
    else {
       Node* startNode = findNode(conn->outputNodeName);
-      if ( !startNode || conn->outputIndex >= startNode->outputs.size() ) 
+      if ( !startNode || conn->outputIndex >= (U32)startNode->outputs.size() )
          return;
       start = startNode->outputs[conn->outputIndex].lastPosition;
    }

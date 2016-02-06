@@ -243,7 +243,7 @@ void MaterialsTool::refreshMaterialList()
    char buf[256];
    wxTreeItemId itemParent = mMaterialTreeRoot;
    Vector<wxTreeItemId> itemCategories;
-   for ( U32 n = 0; n < assQuery.size(); n++)
+   for ( S32 n = 0; n < assQuery.size(); n++)
    {
       StringTableEntry assetID = assQuery[n];
       dStrcpy(buf, assetID);
@@ -252,7 +252,7 @@ void MaterialsTool::refreshMaterialList()
       if ( dStrcmp(last_mod_name, mod_name) != 0 )
       {
          bool foundCategory = false;
-         for (U32 i = 0; i < itemCategories.size(); ++i)
+         for (S32 i = 0; i < itemCategories.size(); ++i)
          {
             if (mMaterialsPanel->m_materialTree->GetItemText(itemCategories[i]) == wxString(mod_name))
             {
