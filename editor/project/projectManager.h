@@ -146,11 +146,9 @@ class ProjectManager : public wxEvtHandler, public Rendering::RenderHook
       Vector<ModuleInfo>* getModuleList();
       wxPGChoices* getTextureAssetChoices();
 
-      virtual void onAddToCamera();
-      virtual void onRemoveFromCamera();
-      virtual void preRender();
-      virtual void render();
-      virtual void postRender();
+      virtual void preRender(Rendering::RenderCamera* camera);
+      virtual void render(Rendering::RenderCamera* camera);
+      virtual void postRender(Rendering::RenderCamera* camera);
 
       virtual void OnToolbarEvent(wxCommandEvent& evt);
       virtual void OnIdle(wxIdleEvent& evt);

@@ -370,31 +370,21 @@ void ProjectManager::OnKeyUp(wxKeyEvent& evt)
    Torque::Engine.keyUp(torqueKey);
 }
 
-void ProjectManager::onAddToCamera()
+void ProjectManager::preRender(Rendering::RenderCamera* camera)
 {
 
 }
 
-void ProjectManager::onRemoveFromCamera()
-{
-
-}
-
-void ProjectManager::preRender()
-{
-
-}
-
-void ProjectManager::render()
+void ProjectManager::render(Rendering::RenderCamera* camera)
 {
    Torque::bgfx.setViewRect(mEditorOverlayView->id, 0, 0, *Torque::Rendering.canvasWidth, *Torque::Rendering.canvasHeight);
-   Torque::bgfx.setViewTransform(mEditorOverlayView->id, mCamera->viewMatrix, mCamera->projectionMatrix, BGFX_VIEW_STEREO, NULL);
+   Torque::bgfx.setViewTransform(mEditorOverlayView->id, camera->viewMatrix, camera->projectionMatrix, BGFX_VIEW_STEREO, NULL);
 
    for(unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->renderTool();
 }
 
-void ProjectManager::postRender()
+void ProjectManager::postRender(Rendering::RenderCamera* camera)
 {
 
 }
