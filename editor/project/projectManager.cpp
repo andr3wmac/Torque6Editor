@@ -139,8 +139,8 @@ bool ProjectManager::openProject(wxString projectPath)
       mProjectName = projectDir.GetName();
 
       // Editor Overlay
-      mRenderLayer4View = Torque::Graphics.getView("RenderLayer4", 2000);
-      mEditorOverlayView = Torque::Graphics.getView("EditorOverlay", 6100);
+      mRenderLayer4View = Torque::Graphics.getView("RenderLayer4", 2000, NULL);
+      mEditorOverlayView = Torque::Graphics.getView("EditorOverlay", 6100, NULL);
 
       // Editor Camera
       //Scene::SceneCamera* activeCam = Torque::Scene.getActiveCamera();
