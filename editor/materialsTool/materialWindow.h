@@ -54,51 +54,51 @@
 #endif
 
 #ifndef _OPAQUE_NODE_H_
-#include "material/nodes/opaqueNode.h"
+#include "materials/nodes/opaqueNode.h"
 #endif
 
 #ifndef _FLOAT_NODE_H_
-#include "material/nodes/floatNode.h"
+#include "materials/nodes/floatNode.h"
 #endif
 
 #ifndef _FORWARD_NODE_H_
-#include "material/nodes/forwardNode.h"
+#include "materials/nodes/forwardNode.h"
 #endif
 
 #ifndef _MULTIPLY_NODE_H_
-#include "material/nodes/multiplyNode.h"
+#include "materials/nodes/multiplyNode.h"
 #endif
 
 #ifndef _LERP_NODE_H_
-#include "material/nodes/lerpNode.h"
+#include "materials/nodes/lerpNode.h"
 #endif
 
 #ifndef _SIN_NODE_H_
-#include "material/nodes/sinNode.h"
+#include "materials/nodes/sinNode.h"
 #endif
 
 #ifndef _COS_NODE_H_
-#include "material/nodes/cosNode.h"
+#include "materials/nodes/cosNode.h"
 #endif
 
 #ifndef _TEXTURE_NODE_H_
-#include "material/nodes/textureNode.h"
+#include "materials/nodes/textureNode.h"
 #endif
 
 #ifndef _TIME_NODE_H_
-#include "material/nodes/timeNode.h"
+#include "materials/nodes/timeNode.h"
 #endif
 
 #ifndef _VEC2_NODE_H_
-#include "material/nodes/vec2Node.h"
+#include "materials/nodes/vec2Node.h"
 #endif
 
 #ifndef _VEC3_NODE_H_
-#include "material/nodes/vec3Node.h"
+#include "materials/nodes/vec3Node.h"
 #endif
 
 #ifndef _VEC4_NODE_H_
-#include "material/nodes/vec4Node.h"
+#include "materials/nodes/vec4Node.h"
 #endif
 
 class MaterialsTool;
@@ -135,22 +135,22 @@ class MaterialWindow: public wxScrolledWindow
       Connection* findConnectionFromInput(const char* name, U32 index = -1);
 
       void  addConnection(const char* output, U32 outputIndex, const char* input, U32 inputIndex);
-      Node* addOpaqueNode(Scene::BaseNode* node = NULL);
-      Node* addFloatNode(Scene::BaseNode* node = NULL);
-      Node* addVec2Node(Scene::BaseNode* node = NULL);
-      Node* addVec3Node(Scene::BaseNode* node = NULL);
-      Node* addVec4Node(Scene::BaseNode* node = NULL);
-      Node* addTextureNode(Scene::BaseNode* node = NULL);
-      Node* addTimeNode(Scene::BaseNode* node = NULL);
-      Node* addCosNode(Scene::BaseNode* node = NULL);
-      Node* addSinNode(Scene::BaseNode* node = NULL);
-      Node* addMultiplyNode(Scene::BaseNode* node = NULL);
-      Node* addLerpNode(Scene::BaseNode* node = NULL);
-      void  addNode(Scene::MaterialTemplate* matTemplate, const char* type, Scene::BaseNode* node = NULL);
+      Node* addOpaqueNode(Materials::BaseNode* node = NULL);
+      Node* addFloatNode(Materials::BaseNode* node = NULL);
+      Node* addVec2Node(Materials::BaseNode* node = NULL);
+      Node* addVec3Node(Materials::BaseNode* node = NULL);
+      Node* addVec4Node(Materials::BaseNode* node = NULL);
+      Node* addTextureNode(Materials::BaseNode* node = NULL);
+      Node* addTimeNode(Materials::BaseNode* node = NULL);
+      Node* addCosNode(Materials::BaseNode* node = NULL);
+      Node* addSinNode(Materials::BaseNode* node = NULL);
+      Node* addMultiplyNode(Materials::BaseNode* node = NULL);
+      Node* addLerpNode(Materials::BaseNode* node = NULL);
+      void  addNode(Materials::MaterialTemplate* matTemplate, const char* type, Materials::BaseNode* node = NULL);
       void  addNodeConnection(Node* node);
-      void  deleteNode(Scene::MaterialTemplate* matTemplate, Node* node);
+      void  deleteNode(Materials::MaterialTemplate* matTemplate, Node* node);
       void  saveConnection(Connection* connection);
-      void  saveNode(Scene::MaterialTemplate* matTemplate, Node* node);
+      void  saveNode(Materials::MaterialTemplate* matTemplate, Node* node);
       void  drawNode(wxGCDC& gdc, Node* node);
       void  drawConnection(wxGCDC& gdc, wxGraphicsContext* context, Connection* conn);
 

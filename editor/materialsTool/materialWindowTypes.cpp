@@ -37,7 +37,7 @@ void MaterialWindow::addConnection(const char* output, U32 outputIndex, const ch
    connectionList.push_back(newConnection);
 }
 
-Node* MaterialWindow::addOpaqueNode(Scene::BaseNode* node)
+Node* MaterialWindow::addOpaqueNode(Materials::BaseNode* node)
 {
    Node newNode;
    newNode.name = getUniqueNodeName("Opaque");
@@ -55,7 +55,7 @@ Node* MaterialWindow::addOpaqueNode(Scene::BaseNode* node)
 
    if (node != NULL)
    {
-      Scene::OpaqueNode* def_node = dynamic_cast<Scene::OpaqueNode*>(node);
+      Materials::OpaqueNode* def_node = dynamic_cast<Materials::OpaqueNode*>(node);
       if (def_node)
          newNode.alphaThreshold = def_node->mAlphaThreshold;
    }
@@ -64,7 +64,7 @@ Node* MaterialWindow::addOpaqueNode(Scene::BaseNode* node)
    return &nodeList.back();
 }
 
-Node* MaterialWindow::addFloatNode(Scene::BaseNode* node)
+Node* MaterialWindow::addFloatNode(Materials::BaseNode* node)
 {
    Node newNode;
    newNode.name = getUniqueNodeName("NewFloat");
@@ -77,7 +77,7 @@ Node* MaterialWindow::addFloatNode(Scene::BaseNode* node)
    newNode.color.set(0.0f, 0.0f, 0.0f, 0.0f);
    if ( node != NULL )
    {
-      Scene::FloatNode* float_node = dynamic_cast<Scene::FloatNode*>(node);
+      Materials::FloatNode* float_node = dynamic_cast<Materials::FloatNode*>(node);
       if ( float_node )
          newNode.color = ColorF(float_node->mValue, 0.0f, 0.0f, 0.0f);
    }
@@ -86,7 +86,7 @@ Node* MaterialWindow::addFloatNode(Scene::BaseNode* node)
    return &nodeList.back();
 }
 
-Node* MaterialWindow::addVec2Node(Scene::BaseNode* node)
+Node* MaterialWindow::addVec2Node(Materials::BaseNode* node)
 {
    Node newNode;
    newNode.name = getUniqueNodeName("NewVec2");
@@ -102,7 +102,7 @@ Node* MaterialWindow::addVec2Node(Scene::BaseNode* node)
    newNode.color.set(0.0, 0.0, 0.0, 1.0);
    if (node != NULL)
    {
-      Scene::Vec2Node* vec2_node = dynamic_cast<Scene::Vec2Node*>(node);
+      Materials::Vec2Node* vec2_node = dynamic_cast<Materials::Vec2Node*>(node);
       if (vec2_node)
          newNode.color = ColorF(vec2_node->mValue.x, vec2_node->mValue.y, 0.0, 1.0);
    }
@@ -111,7 +111,7 @@ Node* MaterialWindow::addVec2Node(Scene::BaseNode* node)
    return &nodeList.back();
 }
 
-Node* MaterialWindow::addVec3Node(Scene::BaseNode* node)
+Node* MaterialWindow::addVec3Node(Materials::BaseNode* node)
 {
    Node newNode;
    newNode.height = 130.0f;
@@ -128,7 +128,7 @@ Node* MaterialWindow::addVec3Node(Scene::BaseNode* node)
    newNode.color.set(0, 0, 0, 255);
    if ( node != NULL )
    {
-      Scene::Vec3Node* vec3_node = dynamic_cast<Scene::Vec3Node*>(node);
+      Materials::Vec3Node* vec3_node = dynamic_cast<Materials::Vec3Node*>(node);
       if ( vec3_node )
          newNode.color = ColorF(vec3_node->mValue.x, vec3_node->mValue.y, vec3_node->mValue.z, 1.0);
    }
@@ -137,7 +137,7 @@ Node* MaterialWindow::addVec3Node(Scene::BaseNode* node)
    return &nodeList.back();
 }
 
-Node* MaterialWindow::addVec4Node(Scene::BaseNode* node)
+Node* MaterialWindow::addVec4Node(Materials::BaseNode* node)
 {
    Node newNode;
    newNode.name = getUniqueNodeName("NewVec4");
@@ -154,7 +154,7 @@ Node* MaterialWindow::addVec4Node(Scene::BaseNode* node)
    newNode.color.set(0.0, 0.0, 0.0, 1.0);
    if (node != NULL)
    {
-      Scene::Vec4Node* vec4_node = dynamic_cast<Scene::Vec4Node*>(node);
+      Materials::Vec4Node* vec4_node = dynamic_cast<Materials::Vec4Node*>(node);
       if (vec4_node)
          newNode.color = ColorF(vec4_node->mValue.x, vec4_node->mValue.y, vec4_node->mValue.z, vec4_node->mValue.w);
    }
@@ -163,7 +163,7 @@ Node* MaterialWindow::addVec4Node(Scene::BaseNode* node)
    return &nodeList.back();
 }
 
-Node* MaterialWindow::addTextureNode(Scene::BaseNode* node)
+Node* MaterialWindow::addTextureNode(Materials::BaseNode* node)
 {
    Node newNode;
    newNode.name = getUniqueNodeName("NewTexture");
@@ -179,7 +179,7 @@ Node* MaterialWindow::addTextureNode(Scene::BaseNode* node)
 
    if ( node != NULL )
    {
-      Scene::TextureNode* tex_node = dynamic_cast<Scene::TextureNode*>(node);
+      Materials::TextureNode* tex_node = dynamic_cast<Materials::TextureNode*>(node);
       if ( tex_node )
       {
          newNode.textureSlot = tex_node->mSlot;
@@ -196,7 +196,7 @@ Node* MaterialWindow::addTextureNode(Scene::BaseNode* node)
    return &nodeList.back();
 }
 
-Node* MaterialWindow::addTimeNode(Scene::BaseNode* node)
+Node* MaterialWindow::addTimeNode(Materials::BaseNode* node)
 {
    Node newNode;
    newNode.name = getUniqueNodeName("NewTime");
@@ -209,7 +209,7 @@ Node* MaterialWindow::addTimeNode(Scene::BaseNode* node)
    newNode.color.set(0.0f, 0.0f, 0.0f, 0.0f);
    if (node != NULL)
    {
-      Scene::TimeNode* time_node = dynamic_cast<Scene::TimeNode*>(node);
+      Materials::TimeNode* time_node = dynamic_cast<Materials::TimeNode*>(node);
       if (time_node)
          newNode.color = ColorF(time_node->mMultiplier, 0.0f, 0.0f, 0.0f);
    }
@@ -218,7 +218,7 @@ Node* MaterialWindow::addTimeNode(Scene::BaseNode* node)
    return &nodeList.back();
 }
 
-Node* MaterialWindow::addCosNode(Scene::BaseNode* node)
+Node* MaterialWindow::addCosNode(Materials::BaseNode* node)
 {
    Node newNode;
    newNode.name = getUniqueNodeName("NewCos");
@@ -233,7 +233,7 @@ Node* MaterialWindow::addCosNode(Scene::BaseNode* node)
    return &nodeList.back();
 }
 
-Node* MaterialWindow::addSinNode(Scene::BaseNode* node)
+Node* MaterialWindow::addSinNode(Materials::BaseNode* node)
 {
    Node newNode;
    newNode.name = getUniqueNodeName("NewSin");
@@ -248,7 +248,7 @@ Node* MaterialWindow::addSinNode(Scene::BaseNode* node)
    return &nodeList.back();
 }
 
-Node* MaterialWindow::addMultiplyNode(Scene::BaseNode* node)
+Node* MaterialWindow::addMultiplyNode(Materials::BaseNode* node)
 {
    Node newNode;
    newNode.name = getUniqueNodeName("NewMultiply");
@@ -265,7 +265,7 @@ Node* MaterialWindow::addMultiplyNode(Scene::BaseNode* node)
    return &nodeList.back();
 }
 
-Node* MaterialWindow::addLerpNode(Scene::BaseNode* node)
+Node* MaterialWindow::addLerpNode(Materials::BaseNode* node)
 {
    Node newNode;
    newNode.name = getUniqueNodeName("NewLerp");
@@ -279,7 +279,7 @@ Node* MaterialWindow::addLerpNode(Scene::BaseNode* node)
    newNode.addInput("amount");
    if (node != NULL)
    {
-      Scene::LerpNode* lerp_node = dynamic_cast<Scene::LerpNode*>(node);
+      Materials::LerpNode* lerp_node = dynamic_cast<Materials::LerpNode*>(node);
       if (lerp_node)
          newNode.color = ColorF(lerp_node->mAmount, 0.0f, 0.0f, 0.0f);
    }
@@ -289,73 +289,73 @@ Node* MaterialWindow::addLerpNode(Scene::BaseNode* node)
    return &nodeList.back();
 }
 
-void MaterialWindow::addNode(Scene::MaterialTemplate* matTemplate, const char* type, Scene::BaseNode* node)
+void MaterialWindow::addNode(Materials::MaterialTemplate* matTemplate, const char* type, Materials::BaseNode* node)
 {
    if ( !matTemplate ) 
       return;
 
    Node* newNode = NULL;
-   Scene::BaseNode* matNode = node;
+   Materials::BaseNode* matNode = node;
    bool createMaterialNode = (matNode == NULL);
 
    // Outputs
    if ( dStrcmp(type, "Opaque") == 0 ) 
    {
-      if ( createMaterialNode ) matNode = new Scene::OpaqueNode();
+      if ( createMaterialNode ) matNode = new Materials::OpaqueNode();
       newNode = addOpaqueNode(matNode);
    }
 
    // Inputs
    if ( dStrcmp(type, "Float") == 0 ) 
    {
-      if ( createMaterialNode ) matNode = new Scene::FloatNode();
+      if ( createMaterialNode ) matNode = new Materials::FloatNode();
       newNode = addFloatNode(matNode);
    }
    if ( dStrcmp(type, "Vec2") == 0 )
    {
-      if (createMaterialNode) matNode = new Scene::Vec2Node();
+      if (createMaterialNode) matNode = new Materials::Vec2Node();
       newNode = addVec2Node(matNode);
    }
    if ( dStrcmp(type, "Vec3") == 0 ) 
    {
-      if ( createMaterialNode ) matNode = new Scene::Vec3Node();
+      if ( createMaterialNode ) matNode = new Materials::Vec3Node();
       newNode = addVec3Node(matNode);
    }
    if ( dStrcmp(type, "Vec4") == 0 ) 
    {
-      if (createMaterialNode) matNode = new Scene::Vec4Node();
+      if (createMaterialNode) matNode = new Materials::Vec4Node();
       newNode = addVec4Node(matNode);
    }
    if ( dStrcmp(type, "Texture") == 0 ) 
    {
-      if ( createMaterialNode ) matNode = new Scene::TextureNode();
+      if ( createMaterialNode ) matNode = new Materials::TextureNode();
       newNode = addTextureNode(matNode);
    }
    if ( dStrcmp(type, "Time") == 0 ) 
    {
-      if ( createMaterialNode ) matNode = new Scene::TimeNode();
+      if ( createMaterialNode ) matNode = new Materials::TimeNode();
       newNode = addTimeNode(matNode);
    }
 
    // Math
    if ( dStrcmp(type, "Multiply") == 0 ) 
    {
-      if ( createMaterialNode ) matNode = new Scene::MultiplyNode();
+      if ( createMaterialNode ) matNode = new Materials::MultiplyNode();
       newNode = addMultiplyNode(matNode);
    }
    if (dStrcmp(type, "Lerp") == 0)
    {
-      if (createMaterialNode) matNode = new Scene::LerpNode();
+      if (createMaterialNode) matNode = new Materials::LerpNode();
       newNode = addLerpNode(matNode);
    }
    if ( dStrcmp(type, "Sin") == 0 ) 
    {
-      if ( createMaterialNode ) matNode = new Scene::SinNode();
+      if ( createMaterialNode ) matNode = new Materials::SinNode();
       newNode = addSinNode(matNode);
    }
    if ( dStrcmp(type, "Cos") == 0 ) 
    {
-      if (createMaterialNode) matNode = new Scene::CosNode();
+      if (createMaterialNode) matNode = new Materials::CosNode();
       newNode = addCosNode(matNode);
    }
 
@@ -399,7 +399,7 @@ void MaterialWindow::addNodeConnection(Node* node)
       return;
 
    // Opaque
-   Scene::OpaqueNode* def_node = dynamic_cast<Scene::OpaqueNode*>(node->materialNode);
+   Materials::OpaqueNode* def_node = dynamic_cast<Materials::OpaqueNode*>(node->materialNode);
    if ( def_node )
    {
       addConnection(def_node->mColorSrc, 0, node->name, 0);
@@ -412,7 +412,7 @@ void MaterialWindow::addNodeConnection(Node* node)
    }
 
    // Multiply
-   Scene::MultiplyNode* mul_node = dynamic_cast<Scene::MultiplyNode*>(node->materialNode);
+   Materials::MultiplyNode* mul_node = dynamic_cast<Materials::MultiplyNode*>(node->materialNode);
    if ( mul_node )
    {
       addConnection(mul_node->mInputASrc, 0, node->name, 0);
@@ -421,7 +421,7 @@ void MaterialWindow::addNodeConnection(Node* node)
    }
 
    // Lerp
-   Scene::LerpNode* lerp_node = dynamic_cast<Scene::LerpNode*>(node->materialNode);
+   Materials::LerpNode* lerp_node = dynamic_cast<Materials::LerpNode*>(node->materialNode);
    if (lerp_node)
    {
       addConnection(lerp_node->mInputASrc, 0, node->name, 0);
@@ -431,7 +431,7 @@ void MaterialWindow::addNodeConnection(Node* node)
    }
 
    // Sin
-   Scene::SinNode* sin_node = dynamic_cast<Scene::SinNode*>(node->materialNode);
+   Materials::SinNode* sin_node = dynamic_cast<Materials::SinNode*>(node->materialNode);
    if ( sin_node )
    {
       addConnection(sin_node->mXSrc, 0, node->name, 0);
@@ -439,7 +439,7 @@ void MaterialWindow::addNodeConnection(Node* node)
    }
 
    // Cos
-   Scene::CosNode* cos_node = dynamic_cast<Scene::CosNode*>(node->materialNode);
+   Materials::CosNode* cos_node = dynamic_cast<Materials::CosNode*>(node->materialNode);
    if (sin_node)
    {
       addConnection(cos_node->mXSrc, 0, node->name, 0);
@@ -462,7 +462,7 @@ void MaterialWindow::saveConnection(Connection* connection)
       return;
 
    // Opaque
-   Scene::OpaqueNode* def_node = dynamic_cast<Scene::OpaqueNode*>(inputNode->materialNode);
+   Materials::OpaqueNode* def_node = dynamic_cast<Materials::OpaqueNode*>(inputNode->materialNode);
    if ( def_node )
    {
       if ( connection->inputIndex == 0 )
@@ -481,7 +481,7 @@ void MaterialWindow::saveConnection(Connection* connection)
    }
 
    // Multiply
-   Scene::MultiplyNode* mul_node = dynamic_cast<Scene::MultiplyNode*>(inputNode->materialNode);
+   Materials::MultiplyNode* mul_node = dynamic_cast<Materials::MultiplyNode*>(inputNode->materialNode);
    if ( mul_node )
    {
       if ( connection->inputIndex == 0 )
@@ -492,7 +492,7 @@ void MaterialWindow::saveConnection(Connection* connection)
    }
 
    // Lerp
-   Scene::LerpNode* lerp_node = dynamic_cast<Scene::LerpNode*>(inputNode->materialNode);
+   Materials::LerpNode* lerp_node = dynamic_cast<Materials::LerpNode*>(inputNode->materialNode);
    if (lerp_node)
    {
       if (connection->inputIndex == 0)
@@ -505,7 +505,7 @@ void MaterialWindow::saveConnection(Connection* connection)
    }
 
    // Sin
-   Scene::SinNode* sin_node = dynamic_cast<Scene::SinNode*>(inputNode->materialNode);
+   Materials::SinNode* sin_node = dynamic_cast<Materials::SinNode*>(inputNode->materialNode);
    if ( sin_node )
    {
       if ( connection->inputIndex == 0 )
@@ -514,7 +514,7 @@ void MaterialWindow::saveConnection(Connection* connection)
    }
 
    // Cos
-   Scene::CosNode* cos_node = dynamic_cast<Scene::CosNode*>(inputNode->materialNode);
+   Materials::CosNode* cos_node = dynamic_cast<Materials::CosNode*>(inputNode->materialNode);
    if (cos_node)
    {
       if (connection->inputIndex == 0)
@@ -523,10 +523,10 @@ void MaterialWindow::saveConnection(Connection* connection)
    }
 }
 
-void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
+void MaterialWindow::saveNode(Materials::MaterialTemplate* matTemplate, Node* node)
 {
    // Opaque
-   Scene::OpaqueNode* def_node = dynamic_cast<Scene::OpaqueNode*>(node->materialNode);
+   Materials::OpaqueNode* def_node = dynamic_cast<Materials::OpaqueNode*>(node->materialNode);
    if ( def_node )
    {
       def_node->mColorSrc           = Torque::StringTableLink->EmptyString;
@@ -540,7 +540,7 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    }
 
    // Texture
-   Scene::TextureNode* texture_node = dynamic_cast<Scene::TextureNode*>(node->materialNode);
+   Materials::TextureNode* texture_node = dynamic_cast<Materials::TextureNode*>(node->materialNode);
    if (texture_node)
    {
       texture_node->mSlot = node->textureSlot;
@@ -548,7 +548,7 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    }
 
    // Multiply
-   Scene::MultiplyNode* mul_node = dynamic_cast<Scene::MultiplyNode*>(node->materialNode);
+   Materials::MultiplyNode* mul_node = dynamic_cast<Materials::MultiplyNode*>(node->materialNode);
    if ( mul_node )
    {
       mul_node->mInputASrc = Torque::StringTableLink->EmptyString;
@@ -557,7 +557,7 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    }
 
    // Lerp
-   Scene::LerpNode* lerp_node = dynamic_cast<Scene::LerpNode*>(node->materialNode);
+   Materials::LerpNode* lerp_node = dynamic_cast<Materials::LerpNode*>(node->materialNode);
    if (lerp_node)
    {
       lerp_node->mInputASrc = Torque::StringTableLink->EmptyString;
@@ -567,7 +567,7 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    }
 
    // Sin
-   Scene::SinNode* sin_node = dynamic_cast<Scene::SinNode*>(node->materialNode);
+   Materials::SinNode* sin_node = dynamic_cast<Materials::SinNode*>(node->materialNode);
    if ( sin_node )
    {
       sin_node->mXSrc = Torque::StringTableLink->EmptyString;
@@ -575,7 +575,7 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    }
 
    // Cos
-   Scene::CosNode* cos_node = dynamic_cast<Scene::CosNode*>(node->materialNode);
+   Materials::CosNode* cos_node = dynamic_cast<Materials::CosNode*>(node->materialNode);
    if (cos_node)
    {
       cos_node->mXSrc = Torque::StringTableLink->EmptyString;
@@ -583,7 +583,7 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    }
 
    // Float
-   Scene::FloatNode* float_node = dynamic_cast<Scene::FloatNode*>(node->materialNode);
+   Materials::FloatNode* float_node = dynamic_cast<Materials::FloatNode*>(node->materialNode);
    if ( float_node )
    {
       float_node->mValue = node->color.red;
@@ -591,7 +591,7 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    }
 
    // Time
-   Scene::TimeNode* time_node = dynamic_cast<Scene::TimeNode*>(node->materialNode);
+   Materials::TimeNode* time_node = dynamic_cast<Materials::TimeNode*>(node->materialNode);
    if (time_node)
    {
       time_node->mMultiplier = node->color.red;
@@ -599,7 +599,7 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    }
 
    // Vec2
-   Scene::Vec2Node* vec2_node = dynamic_cast<Scene::Vec2Node*>(node->materialNode);
+   Materials::Vec2Node* vec2_node = dynamic_cast<Materials::Vec2Node*>(node->materialNode);
    if (vec2_node)
    {
       vec2_node->mValue.set(node->color.red, node->color.green);
@@ -607,7 +607,7 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    }
 
    // Vec3
-   Scene::Vec3Node* vec3_node = dynamic_cast<Scene::Vec3Node*>(node->materialNode);
+   Materials::Vec3Node* vec3_node = dynamic_cast<Materials::Vec3Node*>(node->materialNode);
    if ( vec3_node )
    {
       vec3_node->mValue.set(node->color.red, node->color.green, node->color.blue);
@@ -615,7 +615,7 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    }
 
    // Vec4
-   Scene::Vec4Node* vec4_node = dynamic_cast<Scene::Vec4Node*>(node->materialNode);
+   Materials::Vec4Node* vec4_node = dynamic_cast<Materials::Vec4Node*>(node->materialNode);
    if (vec4_node)
    {
       vec4_node->mValue.set(node->color.red, node->color.green, node->color.blue, node->color.alpha);
@@ -623,7 +623,7 @@ void MaterialWindow::saveNode(Scene::MaterialTemplate* matTemplate, Node* node)
    }
 }
 
-void MaterialWindow::deleteNode(Scene::MaterialTemplate* matTemplate, Node* targetNode)
+void MaterialWindow::deleteNode(Materials::MaterialTemplate* matTemplate, Node* targetNode)
 {
    // Erase any connections.
    Vector<Connection> newConnectionList;

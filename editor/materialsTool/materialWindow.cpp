@@ -513,11 +513,11 @@ Connection* MaterialWindow::findConnectionFromInput(const char* name, U32 index)
 void MaterialWindow::loadMaterial(MaterialAsset* mat)
 {
    mMaterialAsset = mat;
-   Scene::MaterialTemplate* mMaterialTemplate = mat->getTemplate();
+   Materials::MaterialTemplate* mMaterialTemplate = mat->getTemplate();
    
    for(S32 n = 0; n < mMaterialTemplate->size(); ++n)
    {
-      Scene::BaseNode* node = dynamic_cast<Scene::BaseNode*>(mMaterialTemplate->at(n));
+      Materials::BaseNode* node = dynamic_cast<Materials::BaseNode*>(mMaterialTemplate->at(n));
       addNode(mMaterialTemplate, node->type, node);
    }
 

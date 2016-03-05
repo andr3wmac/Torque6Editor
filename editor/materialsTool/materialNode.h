@@ -62,7 +62,7 @@ class Node
       bgfx::TextureHandle texture;
       S32 textureSlot;
 
-      Scene::BaseNode* materialNode;
+      Materials::BaseNode* materialNode;
 
       Vector<InputPoint> inputs;
       Vector<OutputPoint> outputs;
