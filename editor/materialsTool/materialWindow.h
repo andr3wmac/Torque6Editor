@@ -41,6 +41,10 @@
 #include "wx/dcbuffer.h"
 #endif
 
+#ifndef _MATERIALS_H_
+#include "materials/materials.h"
+#endif
+
 #ifndef _MATERIAL_NODE_H_
 #include "materialNode.h"
 #endif

@@ -36,6 +36,7 @@
 
 #include "projectTool.h"
 #include "module/moduleManager.h"
+#include "materials/materialAsset.h"
 #include <bx/bx.h>
 #include <bx/fpumath.h>
 

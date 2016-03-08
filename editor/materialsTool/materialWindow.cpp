@@ -24,6 +24,7 @@
 #include <wx/socket.h>
 #include "materialWindow.h"
 #include "materialsTool.h"
+#include "materials/materialAsset.h"
 
 wxBEGIN_EVENT_TABLE(MaterialWindow, wxScrolledWindow)
     EVT_PAINT                    (MaterialWindow::OnPaint)
