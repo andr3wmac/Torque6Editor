@@ -65,10 +65,6 @@
 #include "materials/nodes/floatNode.h"
 #endif
 
-#ifndef _FORWARD_NODE_H_
-#include "materials/nodes/forwardNode.h"
-#endif
-
 #ifndef _MULTIPLY_NODE_H_
 #include "materials/nodes/multiplyNode.h"
 #endif
