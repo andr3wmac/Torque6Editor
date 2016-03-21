@@ -38,6 +38,7 @@
 #include <bx/bx.h>
 #include <bx/fpumath.h>
 
+#include "lighting/lighting.h"
 #include "scene/components/animationComponent.h"
 #include "scene/components/controllerComponent.h"
 #include "scene/components/lighting/lightComponent.h"
@@ -163,10 +164,10 @@ void SceneTool::renderTool()
    // Draw Light Icons
    if (mLightIcon != NULL)
    {
-      Vector<Rendering::LightData*> lightList = Torque::Rendering.getLightList();
+      Vector<Lighting::LightData*> lightList = Torque::Lighting.getLightList();
       for (S32 n = 0; n < lightList.size(); ++n)
       {
-         Rendering::LightData* light = lightList[n];
+         Lighting::LightData* light = lightList[n];
 
          Torque::Graphics.drawBillboard(mProjectManager->mRenderLayer4View->id,
                                               mLightIcon,

@@ -377,7 +377,7 @@ void ProjectManager::preRender(Rendering::RenderCamera* camera)
 
 void ProjectManager::render(Rendering::RenderCamera* camera)
 {
-   Torque::bgfx.setViewRect(mEditorOverlayView->id, 0, 0, *Torque::Rendering.canvasWidth, *Torque::Rendering.canvasHeight);
+   Torque::bgfx.setViewRect(mEditorOverlayView->id, 0, 0, *Torque::Rendering.windowWidth, *Torque::Rendering.windowHeight);
    Torque::bgfx.setViewTransform(mEditorOverlayView->id, camera->viewMatrix, camera->projectionMatrix, BGFX_VIEW_STEREO, NULL);
 
    for(unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
