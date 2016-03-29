@@ -43,7 +43,8 @@
 #include "scene/components/controllerComponent.h"
 #include "scene/components/lighting/lightComponent.h"
 #include "scene/components/meshComponent.h"
-#include "scene/components/physicsComponent.h"
+#include "scene/components/physics/physicsBoxComponent.h"
+#include "scene/components/physics/physicsSphereComponent.h"
 #include "scene/components/textComponent.h"
 
 SceneTool::SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
