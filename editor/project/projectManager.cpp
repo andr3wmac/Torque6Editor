@@ -426,7 +426,7 @@ void _addObjectTemplateAsset(wxString assetID, Point3F position)
 {
    Scene::SceneObject* newObject = new Scene::SceneObject();
    newObject->setTemplateAsset(assetID);
-   newObject->mPosition.set(position);
+   newObject->mTransform.setPosition(position);
    Torque::Scene.addObject(newObject, "NewSceneObject");
    newObject->registerObject();
 }
@@ -437,7 +437,7 @@ void _addMeshAsset(wxString assetID, Point3F position)
    Scene::MeshComponent* meshComponent = new Scene::MeshComponent();
    meshComponent->setMesh(assetID.c_str());
    newObject->addComponent(meshComponent);
-   newObject->mPosition.set(position);
+   newObject->mTransform.setPosition(position);
    Torque::Scene.addObject(newObject, "NewSceneObject");
    newObject->registerObject();
    meshComponent->registerObject();

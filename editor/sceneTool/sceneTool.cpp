@@ -195,7 +195,7 @@ void SceneTool::renderTool()
    if (mSelectedObject != NULL && mSelectedComponent != NULL)
    {
       Box3F boundingBox = mSelectedComponent->getBoundingBox();
-      boundingBox.transform(mSelectedObject->mTransformMatrix);
+      boundingBox.transform(mSelectedObject->mTransform.matrix);
 
       // Bounding Box
       Torque::Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, boundingBox, ColorI(0, 255, 0, 255), NULL);

@@ -140,18 +140,18 @@ void Gizmo::selectObject(Scene::SceneObject* Object)
 {
    mSelectedObject      = Object;
    mSelectedComponent   = NULL;
-   mSelectedPosition    = Object->mPosition;
-   mSelectedRotation    = Object->mRotation;
-   mSelectedScale       = Object->mScale;
+   mSelectedPosition    = Object->mTransform.getPosition();
+   mSelectedRotation    = Object->mTransform.getRotationEuler();
+   mSelectedScale       = Object->mTransform.getScale();
 }
 
 void Gizmo::selectComponent(Scene::BaseComponent* component)
 {
    mSelectedObject      = component->mOwnerObject;
    mSelectedComponent   = component;
-   mSelectedPosition    = component->getPosition();
-   mSelectedRotation    = component->getRotation();
-   mSelectedScale       = component->getScale();
+   mSelectedPosition    = component->mTransform.getPosition();
+   mSelectedRotation    = component->mTransform.getRotationEuler();
+   mSelectedScale       = component->mTransform.getScale();
 }
 
 void Gizmo::render()
@@ -165,19 +165,19 @@ void Gizmo::render()
    // Selected Object
    if (mSelectedObject != NULL && mSelectedComponent == NULL)
    {
-      position = mSelectedObject->mPosition;
-      rotation = mSelectedObject->mRotation;
+      position = mSelectedObject->mTransform.getPosition();
+      rotation = mSelectedObject->mTransform.getRotationEuler();
    }
 
    // Selected Component
    if (mSelectedObject != NULL && mSelectedComponent != NULL)
    {
-      position = mSelectedComponent->getPosition();
-      rotation = mSelectedComponent->getRotation();
+      position = mSelectedComponent->mTransform.getPosition();
+      rotation = mSelectedComponent->mTransform.getRotationEuler();
    }
 
    Point3F editorPos;// = Torque::Scene.getActiveCamera()->getPosition();
-   Point3F camToObject = mSelectedObject->mPosition - editorPos;
+   Point3F camToObject = mSelectedObject->mTransform.getPosition() - editorPos;
 
    // Highlight selected axis
    ColorI redColor   = mSelectRed   ? ColorI(255, 0, 0, 255) : ColorI(128, 0, 0, 255);
@@ -259,11 +259,11 @@ bool Gizmo::onMouseLeftDown(int x, int y)
    Point3F editorPos;// = Torque::Scene.getActiveCamera()->getPosition();
 
    if (mSelectedObject != NULL && mSelectedComponent == NULL)
-      position = mSelectedObject->mPosition;
+      position = mSelectedObject->mTransform.getPosition();
 
    // Selected Component
    if (mSelectedObject != NULL && mSelectedComponent != NULL)
-      position = mSelectedComponent->getPosition();
+      position = mSelectedComponent->mTransform.getPosition();
 
    if (mSelectRed)
    {
@@ -315,11 +315,11 @@ bool Gizmo::onMouseMove(int x, int y)
 
    // Selected Object
    if (mSelectedObject != NULL && mSelectedComponent == NULL)
-      position = mSelectedObject->mPosition;
+      position = mSelectedObject->mTransform.getPosition();
 
    // Selected Component
    if (mSelectedObject != NULL && mSelectedComponent != NULL)
-      position = mSelectedComponent->getPosition();
+      position = mSelectedComponent->mTransform.getPosition();
 
    // Determine the worldspace points we're closest to.
    Point3F dummyPoint;
@@ -446,14 +446,14 @@ void Gizmo::dragTranslate(int x, int y)
    // Selected Object
    if (mSelectedObject != NULL && mSelectedComponent == NULL)
    {
-      mSelectedObject->mPosition = newPosition;
+      mSelectedObject->mTransform.setPosition(newPosition);
       mSelectedObject->refresh();
    }
       
    // Selected Component
    if (mSelectedObject != NULL && mSelectedComponent != NULL)
    {
-      mSelectedComponent->setPosition(newPosition);
+      mSelectedComponent->mTransform.setPosition(newPosition);
       mSelectedObject->refresh();
    }
 }
@@ -463,24 +463,26 @@ void Gizmo::dragRotate(int x, int y)
    F32 dragAngle = 0.0f;
    Point3F worldRay = Torque::Rendering.screenToWorld(Point2I(x, y));
    Point3F editorPos;// = Torque::Scene.getActiveCamera()->getPosition();
+   
+   Point3F position = mSelectedObject->mTransform.getPosition();
 
    if (mDragRed)
    {
-      Point3F xPoint = getPointOnXPlane(mSelectedObject->mPosition.x, editorPos, editorPos + (worldRay * 1000.0f));
+      Point3F xPoint = getPointOnXPlane(position.x, editorPos, editorPos + (worldRay * 1000.0f));
       dragAngle = mAtan(xPoint.z, xPoint.y) - mDownAngle;
       mSelectedRotation.x += dragAngle;
    }
 
    if (mDragGreen)
    {
-      Point3F yPoint = getPointOnYPlane(mSelectedObject->mPosition.y, editorPos, editorPos + (worldRay * 1000.0f));
+      Point3F yPoint = getPointOnYPlane(position.y, editorPos, editorPos + (worldRay * 1000.0f));
       dragAngle = mAtan(yPoint.z, yPoint.x) - mDownAngle;
       mSelectedRotation.y += dragAngle;
    }
 
    if (mDragBlue)
    {
-      Point3F zPoint = getPointOnZPlane(mSelectedObject->mPosition.z, editorPos, editorPos + (worldRay * 1000.0f));
+      Point3F zPoint = getPointOnZPlane(position.z, editorPos, editorPos + (worldRay * 1000.0f));
       dragAngle = mAtan(zPoint.y, zPoint.x) - mDownAngle;
       mSelectedRotation.z += dragAngle;
    }
@@ -494,14 +496,14 @@ void Gizmo::dragRotate(int x, int y)
    // Selected Object
    if (mSelectedObject != NULL && mSelectedComponent == NULL)
    {
-      mSelectedObject->mRotation = newRotation;
+      mSelectedObject->mTransform.setRotation(newRotation);
       mSelectedObject->refresh();
    }
 
    // Selected Component
    if (mSelectedObject != NULL && mSelectedComponent != NULL)
    {
-      mSelectedComponent->setRotation(newRotation);
+      mSelectedComponent->mTransform.setRotation(newRotation);
       mSelectedObject->refresh();
    }
 
@@ -529,19 +531,19 @@ void Gizmo::dragScale(int x, int y)
 
    // Snapping
    if (mScaleSnap > 0.0f)
-      mSelectedObject->mScale = snap(mSelectedScale, mScaleSnap);
+      mSelectedObject->mTransform.setScale(snap(mSelectedScale, mScaleSnap));
    
    // Selected Object
    if (mSelectedObject != NULL && mSelectedComponent == NULL)
    {
-      mSelectedObject->mScale = newScale;
+      mSelectedObject->mTransform.setScale(newScale);
       mSelectedObject->refresh();
    }
 
    // Selected Component
    if (mSelectedObject != NULL && mSelectedComponent != NULL)
    {
-      mSelectedComponent->setScale(newScale);
+      mSelectedComponent->mTransform.setScale(newScale);
       mSelectedObject->refresh();
    }
 }
