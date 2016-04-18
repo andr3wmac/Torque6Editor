@@ -62,8 +62,8 @@ ProjectManager::ProjectManager()
       mRenderLayer4View(NULL),
       mEditorMode(0)
 {
-   mEditorCameraPanVelocity = Point3F::Zero;
-   mEditorCameraSpeed = 0.5f;
+   mEditorCameraForwardVelocity  = Point3F::Zero;
+   mEditorCameraSpeed            = 0.5f;
 }
 
 ProjectManager::~ProjectManager()
@@ -138,16 +138,18 @@ bool ProjectManager::openProject(wxString projectPath)
       wxDir projectDir(mProjectPath);
       mProjectName = projectDir.GetName();
 
+      // Run a frame.
+      Torque::Engine.mainLoop();
+
       // Editor Overlay
-      mRenderLayer4View = Torque::Graphics.getView("RenderLayer4", 2000, NULL);
-      mEditorOverlayView = Torque::Graphics.getView("EditorOverlay", 6100, NULL);
+      Torque::Scene.pause();
+      Torque::Debug.registerDebugMode("Editor", this);
+      Torque::Debug.setDebugMode("Editor", true);
 
       // Editor Camera
-      //Scene::SceneCamera* activeCam = Torque::Scene.getActiveCamera();
-      //mEditorCamera.copy(activeCam);
-      //mEditorCamera.setBindMouse(true, false, true);
-      //Torque::Scene.addCamera("EditorCamera", &mEditorCamera);
-      //Torque::Scene.pushActiveCamera("EditorCamera");
+      mEditorCamera.initialize(this);
+      mRenderLayer4View = Torque::Graphics.getView("DeferredFinal", 1750, mEditorCamera.getRenderCamera());
+      mEditorOverlayView = Torque::Graphics.getView("EditorOverlay", 6100, mEditorCamera.getRenderCamera());
 
       onProjectLoaded(mProjectName, projectPath);
       return true;
@@ -209,6 +211,7 @@ void ProjectManager::OnIdle(wxIdleEvent& evt)
 {
    if (mProjectLoaded)
    {
+      mEditorCamera.mainLoop();
       Torque::Engine.mainLoop();
       evt.RequestMore();
    }
@@ -227,6 +230,8 @@ void ProjectManager::OnMouseMove(wxMouseEvent& evt)
    if (!mProjectLoaded)
       return;
 
+   mEditorCamera.onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
+
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
 
@@ -239,6 +244,8 @@ void ProjectManager::OnMouseLeftDown(wxMouseEvent& evt)
    if (!mProjectLoaded)
       return;
 
+   mEditorCamera.onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
+
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
 
@@ -248,6 +255,8 @@ void ProjectManager::OnMouseLeftUp(wxMouseEvent& evt)
 {
    if (!mProjectLoaded)
       return;
+
+   mEditorCamera.onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
 
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
@@ -261,6 +270,8 @@ void ProjectManager::OnMouseRightDown(wxMouseEvent& evt)
    if (!mProjectLoaded)
       return;
 
+   mEditorCamera.onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
+
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
 
@@ -270,6 +281,8 @@ void ProjectManager::OnMouseRightUp(wxMouseEvent& evt)
 {
    if (!mProjectLoaded)
       return;
+
+   mEditorCamera.onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
 
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
@@ -320,22 +333,22 @@ void ProjectManager::OnKeyDown(wxKeyEvent& evt)
    switch (evt.GetKeyCode())
    {
       case 87: // W
-         mEditorCameraPanVelocity.y = -1.0 * mEditorCameraSpeed;
+         mEditorCameraForwardVelocity.x = 1.0 * mEditorCameraSpeed;
          break;
 
       case 65: // A
-         mEditorCameraPanVelocity.x = 1.0 * mEditorCameraSpeed;
+         mEditorCameraForwardVelocity.y = 1.0 * mEditorCameraSpeed;
          break;
 
       case 83: // S
-         mEditorCameraPanVelocity.y = 1.0 * mEditorCameraSpeed;
+         mEditorCameraForwardVelocity.x = -1.0 * mEditorCameraSpeed;
          break;
 
       case 68: // D
-         mEditorCameraPanVelocity.x = -1.0 * mEditorCameraSpeed;
+         mEditorCameraForwardVelocity.y = -1.0 * mEditorCameraSpeed;
          break;
    }
-   //mEditorCamera.setPanVelocity(mEditorCameraPanVelocity);
+   mEditorCamera.setForwardVelocity(mEditorCameraForwardVelocity);
 
    KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
    Torque::Engine.keyDown(torqueKey);
@@ -349,44 +362,34 @@ void ProjectManager::OnKeyUp(wxKeyEvent& evt)
    switch (evt.GetKeyCode())
    {
       case 87: // W
-         mEditorCameraPanVelocity.y = 0.0;
+         mEditorCameraForwardVelocity.x = 0.0;
          break;
 
       case 65: // A
-         mEditorCameraPanVelocity.x = 0.0;
+         mEditorCameraForwardVelocity.y = 0.0;
          break;
 
       case 83: // S
-         mEditorCameraPanVelocity.y = 0.0;
+         mEditorCameraForwardVelocity.x = 0.0;
          break;
 
       case 68: // D
-         mEditorCameraPanVelocity.x = 0.0;
+         mEditorCameraForwardVelocity.y = 0.0;
          break;
    }
-   //mEditorCamera.setPanVelocity(mEditorCameraPanVelocity);
+   mEditorCamera.setForwardVelocity(mEditorCameraForwardVelocity);
 
    KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
    Torque::Engine.keyUp(torqueKey);
 }
 
-void ProjectManager::preRender(Rendering::RenderCamera* camera)
-{
-
-}
-
 void ProjectManager::render(Rendering::RenderCamera* camera)
 {
-   Torque::bgfx.setViewRect(mEditorOverlayView->id, 0, 0, *Torque::Rendering.windowWidth, *Torque::Rendering.windowHeight);
-   Torque::bgfx.setViewTransform(mEditorOverlayView->id, camera->viewMatrix, camera->projectionMatrix, BGFX_VIEW_STEREO, NULL);
+   //Torque::bgfx.setViewRect(mEditorOverlayView->id, 0, 0, *Torque::Rendering.windowWidth, *Torque::Rendering.windowHeight);
+   //Torque::bgfx.setViewTransform(mEditorOverlayView->id, camera->viewMatrix, camera->projectionMatrix, BGFX_VIEW_STEREO, NULL);
 
    for(unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->renderTool();
-}
-
-void ProjectManager::postRender(Rendering::RenderCamera* camera)
-{
-
 }
 
 // Project Tool Management
@@ -415,12 +418,102 @@ void ProjectManager::onProjectClosed()
 
 // ---------------------------------------------------------------
 
-IMPLEMENT_PLUGIN_CONOBJECT(EditorCamera);
-
 EditorCamera::EditorCamera()
 {
+   mRenderCamera     = NULL;
+   mForwardVelocity  = Point3F::Zero;
+   mWorldPosition    = Point3F(0.0f, 0.0f, 0.0f);
+   mMouseDown        = false;
+   mMouseStart       = Point2I(0, 0);
+   mHorizontalAngle  = 0.0f;
+   mVerticalAngle    = 0.0f;
 
+   mTransform.set(Point3F(0.0f, 0.0f, 0.0f), VectorF(0.0f, 0.0f, 0.0f), VectorF(1.0f, 1.0f, 1.0f));
 }
+
+void EditorCamera::initialize(ProjectManager* projectManager)
+{
+   mProjectManager   = projectManager;
+   mRenderCamera     = Torque::Rendering.getPriorityRenderCamera();
+}
+
+void EditorCamera::mainLoop()
+{
+   if (mRenderCamera == NULL)
+      return;
+
+   mVerticalAngle = mClampF(mVerticalAngle, -4.7f, -1.7f);
+   VectorF rotation = mTransform.getRotationEuler();
+   rotation.y = mVerticalAngle;
+   rotation.z = mHorizontalAngle;
+   mTransform.setRotation(rotation);
+
+   VectorF up(0.0f, 0.0f, 1.0f);
+   Point3F look;
+   Point3F cameraForward(1.0f, 0.0f, 0.0f);
+
+   bx::vec3MulMtx(look, cameraForward, mTransform.matrix);
+
+   if (mForwardVelocity.len() > 0.01f)
+   {
+      MatrixF lookMatrix;
+      bx::mtxLookAt(lookMatrix, mWorldPosition, look, up);
+      mWorldPosition += (lookMatrix.getForwardVector() * mForwardVelocity.x);
+      mWorldPosition -= (lookMatrix.getRightVector() * mForwardVelocity.y);
+      mTransform.setPosition(mWorldPosition);
+   }
+
+   bx::vec3MulMtx(look, cameraForward, mTransform.matrix);
+   bx::mtxLookAt(mRenderCamera->viewMatrix, mWorldPosition, look, up);
+   mRenderCamera->position = mWorldPosition;
+}
+
+void EditorCamera::setForwardVelocity(Point3F velocity)
+{
+   mForwardVelocity = velocity;
+}
+
+bool EditorCamera::onMouseLeftDown(int x, int y)
+{
+   return false;
+}
+
+bool EditorCamera::onMouseLeftUp(int x, int y)
+{
+   return false;
+}
+
+bool EditorCamera::onMouseRightDown(int x, int y)
+{
+   mMouseDown = true;
+   mMouseStart = Point2I(x, y);
+   return false;
+}
+
+bool EditorCamera::onMouseRightUp(int x, int y)
+{
+   mMouseDown = false;
+   return false;
+}
+
+bool EditorCamera::onMouseMove(int x, int y)
+{
+   if (!mMouseDown)
+      return false;
+
+   Point2I pos = Point2I(x, y);
+   Point2I delta = mMouseStart - pos;
+   mMouseStart = pos;
+
+   if (delta.isZero()) return false;
+
+   mHorizontalAngle += delta.x * 0.01f;
+   mVerticalAngle -= delta.y * 0.01f;
+   mVerticalAngle = mClampF(mVerticalAngle, -4.7f, -1.7f);
+   return false;
+}
+
+// ---------------------------------------------------------------
 
 void _addObjectTemplateAsset(wxString assetID, Point3F position)
 {

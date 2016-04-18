@@ -37,6 +37,7 @@
 #include "sceneTool.h"
 #include <bx/bx.h>
 #include <bx/fpumath.h>
+#include <debugdraw/debugdraw.h>
 
 #include "lighting/lighting.h"
 #include "scene/components/animationComponent.h"
@@ -105,14 +106,39 @@ void SceneTool::initTool()
    // Object Icons.
    mObjectIconList->Add(wxBitmap("images/objectIcon.png", wxBITMAP_TYPE_PNG));
    mObjectIconList->Add(wxBitmap("images/componentIcon.png", wxBITMAP_TYPE_PNG));
-   mScenePanel->objectList->AssignImageList(mObjectIconList);
+
+   // Load Tabs
+   mTabs = new wxFlatNotebook(mScenePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxFNB_NO_X_BUTTON | wxFNB_NO_NAV_BUTTONS);
+   mTabs->SetForegroundColour(wxColour(45, 45, 45));
+   mTabs->SetBackgroundColour(wxColour(45, 45, 45));
+   mTabs->SetGradientColors(wxColour(45, 45, 45), wxColour(45, 45, 45), wxColour(30, 30, 30));
+   mTabs->SetActiveTabColour(wxColour(30, 30, 30));
+   mTabs->SetActiveTabTextColour(wxColor(255, 255, 255));
+   mTabs->SetNonActiveTabTextColour(wxColor(255, 255, 255));
+   mTabs->SetTabAreaColour(wxColour(45, 45, 45));
+   
+   // Objects tab
+   mScenePanelObjects = new ScenePanel_Objects(mTabs, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+   mTabs->AddPage(mScenePanelObjects, "Objects ", true);
+
+   // Add Tabs to ScenePanel
+   mScenePanel->ScenePanelContent->Add(mTabs, 1, wxEXPAND | wxALL, 5);
+
+   // Object Icons
+   mScenePanelObjects->objectList->AssignImageList(mObjectIconList);
 
    // Object Events
-   mScenePanel->objectList->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(SceneTool::OnTreeEvent), NULL, this);
-   mScenePanel->objectList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneTool::OnTreeMenu), NULL, this);
-   mScenePanel->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnObjectPropChanged), NULL, this);
+   mScenePanelObjects->objectList->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(SceneTool::OnTreeEvent), NULL, this);
+   mScenePanelObjects->objectList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneTool::OnTreeMenu), NULL, this);
+   mScenePanelObjects->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnObjectPropChanged), NULL, this);
+   mScenePanelObjects->propertyGrid->SetEmptySpaceColour(wxColor(30, 30, 30));
+   mScenePanelObjects->propertyGrid->SetMarginColour(wxColor(30, 30, 30));
+   mScenePanelObjects->propertyGrid->SetCellBackgroundColour(wxColor(45, 45, 45));
+   mScenePanelObjects->propertyGrid->SetCellTextColour(wxColor(255, 255, 255));
+   mScenePanelObjects->propertyGrid->SetCaptionBackgroundColour(wxColor(30, 30, 30));
+   mScenePanelObjects->propertyGrid->SetCaptionTextColour(wxColor(255, 255, 255));
 
-   mObjectListRoot = mScenePanel->objectList->AddRoot("ROOT");
+   mObjectListRoot = mScenePanelObjects->objectList->AddRoot("ROOT");
 
    mManager->AddPane(mScenePanel, wxAuiPaneInfo().Caption("Scene")
                                                   .CaptionVisible( true )
@@ -162,8 +188,23 @@ void SceneTool::closeTool()
 
 void SceneTool::renderTool()
 {
+   Point3F editorPos = mProjectManager->mEditorCamera.getWorldPosition();
+   editorPos = editorPos / 10.0f;
+   editorPos.x = mFloor(editorPos.x);
+   editorPos.y = mFloor(editorPos.y);
+   editorPos = editorPos * 10.0f;
+
+   Torque::Debug.ddPush();
+   Torque::Debug.ddSetState(true, false, true);
+
+   Torque::Debug.ddSetWireframe(true);
+   Torque::Debug.ddSetColor(BGFXCOLOR_RGBA(255, 255, 255, 255));
+   F32 gridNormal[3] = { 0.0f, 0.0f, 1.0f };
+   F32 gridPos[3]    = { editorPos.x, editorPos.y, -0.01f };
+   Torque::Debug.ddDrawGrid(gridNormal, gridPos, 100, 10.0f);
+
    // Draw Light Icons
-   if (mLightIcon != NULL)
+   /*if (mLightIcon != NULL)
    {
       Vector<Lighting::LightData*> lightList = Torque::Lighting.getLightList();
       for (S32 n = 0; n < lightList.size(); ++n)
@@ -177,13 +218,27 @@ void SceneTool::renderTool()
                                               ColorI(light->color[0] * 255, light->color[1] * 255, light->color[2] * 255, 255),
                                               NULL);
       }
-   }
+   }*/
 
    // Object Selected
    if (mSelectedObject != NULL && mSelectedComponent == NULL)
    {
       // Bounding Box
-      Torque::Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, mSelectedObject->mBoundingBox, ColorI(255, 255, 255, 255), NULL);
+      //Torque::Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, mSelectedObject->mBoundingBox, ColorI(255, 255, 255, 255), NULL);
+
+      Aabb debugBox;
+      debugBox.m_min[0] = mSelectedObject->mBoundingBox.minExtents.x;
+      debugBox.m_min[1] = mSelectedObject->mBoundingBox.minExtents.y;
+      debugBox.m_min[2] = mSelectedObject->mBoundingBox.minExtents.z;
+      debugBox.m_max[0] = mSelectedObject->mBoundingBox.maxExtents.x;
+      debugBox.m_max[1] = mSelectedObject->mBoundingBox.maxExtents.y;
+      debugBox.m_max[2] = mSelectedObject->mBoundingBox.maxExtents.z;
+
+      Torque::Debug.ddSetWireframe(true);
+      Torque::Debug.ddSetColor(BGFXCOLOR_RGBA(255, 255, 255, 255));
+      Torque::Debug.ddDrawAabb(debugBox);
+
+      Torque::Debug.ddPop();
 
       // Render Gizmo
       mGizmo.render();
@@ -198,7 +253,21 @@ void SceneTool::renderTool()
       boundingBox.transform(mSelectedObject->mTransform.matrix);
 
       // Bounding Box
-      Torque::Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, boundingBox, ColorI(0, 255, 0, 255), NULL);
+      //Torque::Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, boundingBox, ColorI(0, 255, 0, 255), NULL);
+
+      Aabb debugBox;
+      debugBox.m_min[0] = boundingBox.minExtents.x;
+      debugBox.m_min[1] = boundingBox.minExtents.y;
+      debugBox.m_min[2] = boundingBox.minExtents.z;
+      debugBox.m_max[0] = boundingBox.maxExtents.x;
+      debugBox.m_max[1] = boundingBox.maxExtents.y;
+      debugBox.m_max[2] = boundingBox.maxExtents.z;
+
+      Torque::Debug.ddSetWireframe(true);
+      Torque::Debug.ddSetColor(BGFXCOLOR_RGBA(255, 255, 0, 255));
+      Torque::Debug.ddDrawAabb(debugBox);
+
+      Torque::Debug.ddPop();
 
       // Render Gizmo
       mGizmo.render();
@@ -208,7 +277,7 @@ void SceneTool::renderTool()
 bool SceneTool::onMouseLeftDown(int x, int y)
 {
    Point3F worldRay = Torque::Rendering.screenToWorld(Point2I(x, y));
-   Point3F editorPos;// = Torque::Scene.getActiveCamera()->getPosition();
+   Point3F editorPos = mProjectManager->mEditorCamera.getWorldPosition();
 
    if (!mGizmo.onMouseLeftDown(x, y))
    {
@@ -228,7 +297,7 @@ bool SceneTool::onMouseLeftUp(int x, int y)
    mGizmo.onMouseLeftUp(x, y);
 
    if ( mSelectedObject != NULL )
-      loadObjectProperties(mScenePanel->propertyGrid, mSelectedObject);
+      loadObjectProperties(mScenePanelObjects->propertyGrid, mSelectedObject);
 
    return false;
 }
@@ -396,7 +465,7 @@ void SceneTool::OnTreeEvent( wxTreeEvent& evt )
 
    if (evt.GetId() == OBJECT_LIST)
    {
-      ObjectTreeItemData* data = dynamic_cast<ObjectTreeItemData*>(mScenePanel->objectList->GetItemData(evt.GetItem()));
+      ObjectTreeItemData* data = dynamic_cast<ObjectTreeItemData*>(mScenePanelObjects->objectList->GetItemData(evt.GetItem()));
       if (data)
       {
          // Did we select an object?
@@ -422,7 +491,7 @@ void SceneTool::OnTreeMenu( wxTreeEvent& evt )
 { 
    if (evt.GetId() == OBJECT_LIST)
    {
-      ObjectTreeItemData* data = dynamic_cast<ObjectTreeItemData*>(mScenePanel->objectList->GetItemData(evt.GetItem()));
+      ObjectTreeItemData* data = dynamic_cast<ObjectTreeItemData*>(mScenePanelObjects->objectList->GetItemData(evt.GetItem()));
 
       Scene::SceneObject* Object = dynamic_cast<Scene::SceneObject*>(data->objPtr);
       if (Object)
@@ -473,7 +542,7 @@ void SceneTool::OnObjectMenuEvent(wxCommandEvent& evt)
       {
          mSelectedObject = NULL;
          mSelectedComponent = NULL;
-         mScenePanel->addComponentButton->Enable(false);
+         mScenePanelObjects->addComponentButton->Enable(false);
       }
 
       Torque::Scene.deleteObject(mMenuObject);
@@ -565,8 +634,8 @@ void SceneTool::refreshObjectList()
    mRefreshing = true;
 
    // Clear list.
-   mScenePanel->objectList->DeleteAllItems();
-   mObjectListRoot = mScenePanel->objectList->AddRoot("ROOT");
+   mScenePanelObjects->objectList->DeleteAllItems();
+   mObjectListRoot = mScenePanelObjects->objectList->AddRoot("ROOT");
 
    wxTreeItemId selectItem = mObjectListRoot;
    SimGroup* sceneGroup = Torque::Scene.getSceneGroup();
@@ -576,7 +645,7 @@ void SceneTool::refreshObjectList()
       {
          Scene::SceneObject* Object = dynamic_cast<Scene::SceneObject*>(sceneGroup->at(n));
          if ( !Object ) continue;
-         wxTreeItemId ObjectItem = mScenePanel->objectList->AppendItem(mObjectListRoot, Object->getName(), 0, -1, new ObjectTreeItemData(Object));
+         wxTreeItemId ObjectItem = mScenePanelObjects->objectList->AppendItem(mObjectListRoot, Object->getName(), 0, 0, new ObjectTreeItemData(Object));
          if (mSelectedObject == Object)
             selectItem = ObjectItem;
 
@@ -596,7 +665,7 @@ void SceneTool::refreshObjectList()
                compName.Append(")");
             }
 
-            wxTreeItemId componentItem = mScenePanel->objectList->AppendItem(ObjectItem, compName, 1, -1, new ObjectTreeItemData(component));
+            wxTreeItemId componentItem = mScenePanelObjects->objectList->AppendItem(ObjectItem, compName, 1, 1, new ObjectTreeItemData(component));
             if (mSelectedComponent == component)
                selectItem = componentItem;
          }
@@ -605,9 +674,9 @@ void SceneTool::refreshObjectList()
 
    // Retain selection.
    if (selectItem != mObjectListRoot)
-      mScenePanel->objectList->SelectItem(selectItem);
+      mScenePanelObjects->objectList->SelectItem(selectItem);
 
-   mScenePanel->objectList->Refresh();
+   mScenePanelObjects->objectList->Refresh();
    mRefreshing = false;
 }
 
@@ -786,7 +855,7 @@ void SceneTool::selectObject(Scene::SceneObject* obj, bool updateTree)
 {
    mSelectedObject = obj;
    mSelectedComponent = NULL;
-   mScenePanel->addComponentButton->Enable(true);
+   mScenePanelObjects->addComponentButton->Enable(true);
 
    // Update the gizmo.
    mGizmo.selectObject(obj);
@@ -795,26 +864,26 @@ void SceneTool::selectObject(Scene::SceneObject* obj, bool updateTree)
    if (updateTree)
    {
       wxTreeItemIdValue cookie;
-      wxTreeItemId item = mScenePanel->objectList->GetFirstChild(mObjectListRoot, cookie);
+      wxTreeItemId item = mScenePanelObjects->objectList->GetFirstChild(mObjectListRoot, cookie);
       wxTreeItemId child;
       while (item.IsOk())
       {
-         ObjectTreeItemData* data = dynamic_cast<ObjectTreeItemData*>(mScenePanel->objectList->GetItemData(item));
+         ObjectTreeItemData* data = dynamic_cast<ObjectTreeItemData*>(mScenePanelObjects->objectList->GetItemData(item));
          if (data)
          {
             Scene::SceneObject* dataObject = dynamic_cast<Scene::SceneObject*>(data->objPtr);
             if (dataObject == obj)
             {
-               mScenePanel->objectList->SelectItem(item);
+               mScenePanelObjects->objectList->SelectItem(item);
                break;
             }
          }
-         item = mScenePanel->objectList->GetNextChild(mObjectListRoot, cookie);
+         item = mScenePanelObjects->objectList->GetNextChild(mObjectListRoot, cookie);
       }
    }
 
    // Property Grid
-   loadObjectProperties(mScenePanel->propertyGrid, obj);
+   loadObjectProperties(mScenePanelObjects->propertyGrid, obj);
 }
 
 void SceneTool::addComponent(Scene::SceneObject* Object, StringTableEntry componentClassName)
@@ -842,26 +911,26 @@ void SceneTool::selectComponent(Scene::BaseComponent* component, bool updateTree
    if (updateTree)
    {
       wxTreeItemIdValue cookie;
-      wxTreeItemId item = mScenePanel->objectList->GetFirstChild(mObjectListRoot, cookie);
+      wxTreeItemId item = mScenePanelObjects->objectList->GetFirstChild(mObjectListRoot, cookie);
       wxTreeItemId child;
       while (item.IsOk())
       {
-         ObjectTreeItemData* data = dynamic_cast<ObjectTreeItemData*>(mScenePanel->objectList->GetItemData(item));
+         ObjectTreeItemData* data = dynamic_cast<ObjectTreeItemData*>(mScenePanelObjects->objectList->GetItemData(item));
          if (data)
          {
             Scene::BaseComponent* dataComponent = dynamic_cast<Scene::BaseComponent*>(data->objPtr);
             if (dataComponent == component)
             {
-               mScenePanel->objectList->SelectItem(item);
+               mScenePanelObjects->objectList->SelectItem(item);
                break;
             }
          }
-         item = mScenePanel->objectList->GetNextChild(mObjectListRoot, cookie);
+         item = mScenePanelObjects->objectList->GetNextChild(mObjectListRoot, cookie);
       }
    }
 
    // Property Grid
-   loadObjectProperties(mScenePanel->propertyGrid, component);
+   loadObjectProperties(mScenePanelObjects->propertyGrid, component);
 }
 
 void SceneTool::OnToolbarDropdownEvent(wxCommandEvent& evt)

@@ -60,23 +60,50 @@ void ProjectTool::initTool()
 {
    mProjectPanel = new ProjectPanel(mFrame, wxID_ANY);
 
-   // Object Icons
+   // Load Tabs
+   mTabs = new wxFlatNotebook(mProjectPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxFNB_NO_X_BUTTON | wxFNB_NO_NAV_BUTTONS);
+   mTabs->SetForegroundColour(wxColour(45, 45, 45));
+   mTabs->SetBackgroundColour(wxColour(45, 45, 45));
+   mTabs->SetGradientColors(wxColour(45, 45, 45), wxColour(45, 45, 45), wxColour(30, 30, 30));
+   mTabs->SetActiveTabColour(wxColour(30, 30, 30));
+   mTabs->SetActiveTabTextColour(wxColor(255, 255, 255));
+   mTabs->SetNonActiveTabTextColour(wxColor(255, 255, 255));
+   mTabs->SetTabAreaColour(wxColour(45, 45, 45));
+
+   // Project Tab
+   mProjectTab = new ProjectPanel_Project(mTabs);
+   mTabs->AddPage(mProjectTab, "Project ");
+
+   // Assets Tab
+   mAssetsTab = new ProjectPanel_Assets(mTabs);
+   mTabs->AddPage(mAssetsTab, "Assets ");
+
+   // Add Tabs to ProjectPanel
+   mProjectPanel->ProjectPanelContent->Add(mTabs, 1, wxEXPAND | wxALL, 5);
+
+   // Assets Icons
    mAssetIconList->Add(wxBitmap("images/moduleIcon.png", wxBITMAP_TYPE_PNG));
    mAssetIconList->Add(wxBitmap("images/iconFolderGrey.png", wxBITMAP_TYPE_PNG));
    mAssetIconList->Add(wxBitmap("images/assetIcon.png", wxBITMAP_TYPE_PNG));
-   mProjectPanel->assetList->AssignImageList(mAssetIconList);
+   mAssetsTab->assetList->AssignImageList(mAssetIconList);
 
-   // Object Events
-   mProjectPanel->assetList->Connect(wxID_ANY, wxEVT_TREE_BEGIN_DRAG, wxTreeEventHandler(ProjectTool::OnTreeDrag), NULL, this);
-   mProjectPanel->assetList->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(ProjectTool::OnTreeEvent), NULL, this);
-   mProjectPanel->assetList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(ProjectTool::OnTreeMenu), NULL, this);
-   mProjectPanel->assetPropGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(ProjectTool::OnPropertyChanged), NULL, this);
+   // Assets Events
+   mAssetsTab->assetList->Connect(wxID_ANY, wxEVT_TREE_BEGIN_DRAG, wxTreeEventHandler(ProjectTool::OnTreeDrag), NULL, this);
+   mAssetsTab->assetList->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(ProjectTool::OnTreeEvent), NULL, this);
+   mAssetsTab->assetList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(ProjectTool::OnTreeMenu), NULL, this);
+   mAssetsTab->assetPropGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(ProjectTool::OnPropertyChanged), NULL, this);
+   mAssetsTab->assetPropGrid->SetEmptySpaceColour(wxColor(30, 30, 30));
+   mAssetsTab->assetPropGrid->SetMarginColour(wxColor(30, 30, 30));
+   mAssetsTab->assetPropGrid->SetCellBackgroundColour(wxColor(45, 45, 45));
+   mAssetsTab->assetPropGrid->SetCellTextColour(wxColor(255, 255, 255));
+   mAssetsTab->assetPropGrid->SetCaptionBackgroundColour(wxColor(30, 30, 30));
+   mAssetsTab->assetPropGrid->SetCaptionTextColour(wxColor(255, 255, 255));
    
-   // Object Menu Events
+   // Assets Menu Events
    mProjectPanel->moduleMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(ProjectTool::OnMenuEvent), NULL, this);
 
-   // Object List
-   mAssetListRoot = mProjectPanel->assetList->AddRoot("ROOT");
+   // Assets List
+   mAssetListRoot = mAssetsTab->assetList->AddRoot("ROOT");
 
    mManager->AddPane(mProjectPanel, wxAuiPaneInfo().Caption("Project")
                                                   .CaptionVisible( true )
@@ -122,7 +149,7 @@ void ProjectTool::OnTreeDrag(wxTreeEvent& evt)
 {
    if (evt.GetId() == ASSET_LIST)
    {
-      AssetTreeItemData* data = dynamic_cast<AssetTreeItemData*>(mProjectPanel->assetList->GetItemData(evt.GetItem()));
+      AssetTreeItemData* data = dynamic_cast<AssetTreeItemData*>(mAssetsTab->assetList->GetItemData(evt.GetItem()));
       if (data)
       {
          const AssetDefinition* asset = data->objPtr;
@@ -145,10 +172,10 @@ void ProjectTool::OnTreeEvent( wxTreeEvent& evt )
 {
    if (evt.GetId() == ASSET_LIST)
    {
-      AssetTreeItemData* data = dynamic_cast<AssetTreeItemData*>(mProjectPanel->assetList->GetItemData(evt.GetItem()));
+      AssetTreeItemData* data = dynamic_cast<AssetTreeItemData*>(mAssetsTab->assetList->GetItemData(evt.GetItem()));
       if (data)
       {
-         loadAssetDefinitionProperties(mProjectPanel->assetPropGrid, data->objPtr);
+         loadAssetDefinitionProperties(mAssetsTab->assetPropGrid, data->objPtr);
          return;
       }
    }
@@ -160,7 +187,7 @@ void ProjectTool::OnTreeMenu( wxTreeEvent& evt )
 
    if (evt.GetId() == ASSET_LIST)
    {
-      ModuleTreeItemData* module_data = dynamic_cast<ModuleTreeItemData*>(mProjectPanel->assetList->GetItemData(evt.GetItem()));
+      ModuleTreeItemData* module_data = dynamic_cast<ModuleTreeItemData*>(mAssetsTab->assetList->GetItemData(evt.GetItem()));
       if (module_data)
       {
          ModuleInfo mod = module_data->obj;
@@ -335,7 +362,7 @@ void ProjectTool::OnPropertyChanged( wxPropertyGridEvent& evt )
    Torque::Scene.refresh();
 
    // Reload object properties.
-   loadAssetDefinitionProperties(mProjectPanel->assetPropGrid, mSelectedAssetDef);
+   loadAssetDefinitionProperties(mAssetsTab->assetPropGrid, mSelectedAssetDef);
 }
 
 const char* ProjectTool::getAssetCategoryName(const char* _name)
@@ -369,8 +396,8 @@ void ProjectTool::refresh()
 void ProjectTool::refreshAssetList()
 {
    // Clear list.
-   mProjectPanel->assetList->DeleteAllItems();
-   mAssetListRoot = mProjectPanel->assetList->AddRoot("ROOT");
+   mAssetsTab->assetList->DeleteAllItems();
+   mAssetListRoot = mAssetsTab->assetList->AddRoot("ROOT");
 
    Vector<ModuleInfo>* modules = mProjectManager->getModuleList();
 
@@ -381,12 +408,12 @@ void ProjectTool::refreshAssetList()
       if (dStrcmp(modulesItr->moduleID, currentModuleID) != 0)
       {
          currentModuleID = modulesItr->moduleID;
-         currentModuleTreeID = mProjectPanel->assetList->AppendItem(mAssetListRoot, modulesItr->moduleID, 0, -1, new ModuleTreeItemData(*modulesItr));
+         currentModuleTreeID = mAssetsTab->assetList->AppendItem(mAssetListRoot, modulesItr->moduleID, 0, -1, new ModuleTreeItemData(*modulesItr));
       }
       
       for (Vector<AssetCategoryInfo>::iterator assetCatItr = modulesItr->assets.begin(); assetCatItr != modulesItr->assets.end(); ++assetCatItr)
       {
-         wxTreeItemId categoryTreeID = mProjectPanel->assetList->AppendItem(currentModuleTreeID, assetCatItr->categoryName, 1, -1, new AssetCategoryTreeItemData(*assetCatItr));
+         wxTreeItemId categoryTreeID = mAssetsTab->assetList->AppendItem(currentModuleTreeID, assetCatItr->categoryName, 1, -1, new AssetCategoryTreeItemData(*assetCatItr));
 
          for (Vector<const AssetDefinition*>::iterator assetItr = assetCatItr->assets.begin(); assetItr != assetCatItr->assets.end(); ++assetItr)
          {
@@ -396,13 +423,13 @@ void ProjectTool::refreshAssetList()
             dStrcpy(buf, pAssetDefinition->mAssetId);
             const char* moduleName = dStrtok(buf, ":");
             const char* assetName = dStrtok(NULL, ":");
-            mProjectPanel->assetList->AppendItem(categoryTreeID, assetName, 2, -1, new AssetTreeItemData(pAssetDefinition));
+            mAssetsTab->assetList->AppendItem(categoryTreeID, assetName, 2, -1, new AssetTreeItemData(pAssetDefinition));
          }
       }
    }
 
    // Sort Modules by Name
-   mProjectPanel->assetList->SortChildren(mAssetListRoot);
+   mAssetsTab->assetList->SortChildren(mAssetListRoot);
 }
 
 static S32 QSORT_CALLBACK compareEntries(const void* a, const void* b)

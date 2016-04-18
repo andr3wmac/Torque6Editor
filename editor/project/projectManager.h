@@ -43,6 +43,8 @@
 #include "scene/components/cameraComponent.h"
 #endif
 
+#include "debug/debugMode.h"
+
 typedef int (*initFunc)(int argc, const char **argv, HWND windowHWND);
 typedef void (*shutdownFunc)();
 
@@ -51,15 +53,35 @@ class MainFrame;
 class wxAuiManager;
 
 // Editor Camera
-class EditorCamera : public Scene::CameraComponent
+class EditorCamera
 {
-   private:
-      typedef Scene::CameraComponent Parent;
+   protected:
+      ProjectManager*            mProjectManager;
+      Rendering::RenderCamera*   mRenderCamera;
+      Transform                  mTransform;
+      Point3F                    mWorldPosition;
+      Point3F                    mForwardVelocity;
+
+      bool                       mMouseDown;
+      Point2I                    mMouseStart;
+      F32                        mHorizontalAngle;
+      F32                        mVerticalAngle;
 
    public:
       EditorCamera();
 
-      DECLARE_PLUGIN_CONOBJECT(EditorCamera);
+      void initialize(ProjectManager* projectManager);
+      void mainLoop();
+      void setForwardVelocity(Point3F velocity);
+
+      Rendering::RenderCamera* getRenderCamera() { return mRenderCamera; }
+      Point3F getWorldPosition() { return mWorldPosition; }
+
+      bool onMouseLeftDown(int x, int y);
+      bool onMouseLeftUp(int x, int y);
+      bool onMouseRightDown(int x, int y);
+      bool onMouseRightUp(int x, int y);
+      bool onMouseMove(int x, int y);
 };
 
 struct AssetCategoryInfo
@@ -103,7 +125,7 @@ class EditorTool
       static wxVector<EditorTool*> smEditorTools;
 };
 
-class ProjectManager : public wxEvtHandler, public Rendering::RenderHook
+class ProjectManager : public wxEvtHandler, public Debug::DebugMode
 {
    public:
       ProjectManager();
@@ -125,7 +147,7 @@ class ProjectManager : public wxEvtHandler, public Rendering::RenderHook
       MainFrame*        mFrame;
       wxWindow*         mWindow;
       EditorCamera      mEditorCamera;
-      Point3F           mEditorCameraPanVelocity;
+      Point3F           mEditorCameraForwardVelocity;
       F32               mEditorCameraSpeed;
 
       S32                  mEditorMode;
@@ -146,9 +168,7 @@ class ProjectManager : public wxEvtHandler, public Rendering::RenderHook
       Vector<ModuleInfo>* getModuleList();
       wxPGChoices* getTextureAssetChoices();
 
-      virtual void preRender(Rendering::RenderCamera* camera);
-      virtual void render(Rendering::RenderCamera* camera);
-      virtual void postRender(Rendering::RenderCamera* camera);
+      virtual void render(Rendering::RenderCamera*);
 
       virtual void OnToolbarEvent(wxCommandEvent& evt);
       virtual void OnIdle(wxIdleEvent& evt);

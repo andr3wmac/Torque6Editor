@@ -43,6 +43,10 @@
 #include "gizmo.h"
 #endif
 
+#ifndef WXFLATNOTEBOOK_H
+#include "../wxWidgets/wxFlatNotebook/wxFlatNotebook.h"
+#endif
+
 class ObjectTreeItemData : public wxTreeItemData
 {
 public:
@@ -59,9 +63,11 @@ class SceneTool : public wxEvtHandler, public EditorTool
    typedef EditorTool Parent;
 
    protected:
-      ScenePanel*    mScenePanel;
-      wxImageList*   mObjectIconList;
-      wxTreeItemId   mObjectListRoot;
+      ScenePanel*          mScenePanel;
+      ScenePanel_Objects*  mScenePanelObjects;
+      wxImageList*         mObjectIconList;
+      wxTreeItemId         mObjectListRoot;
+      wxFlatNotebook*      mTabs;
       
       Scene::SceneObject*     mSelectedObject;
       Scene::BaseComponent*   mSelectedComponent;

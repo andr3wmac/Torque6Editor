@@ -12,10 +12,15 @@
 MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	this->SetForegroundColour( wxColour( 45, 45, 45 ) );
+	this->SetBackgroundColour( wxColour( 45, 45, 45 ) );
 	m_mgr.SetManagedWindow(this);
 	m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
 	
 	mainMenuBar = new wxMenuBar( 0 );
+	mainMenuBar->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_3DDKSHADOW ) );
+	mainMenuBar->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_3DDKSHADOW ) );
+	
 	m_menu1 = new wxMenu();
 	wxMenuItem* m_menuItem4;
 	m_menuItem4 = new wxMenuItem( m_menu1, MENU_EXIT, wxString( wxT("Exit") ) , wxEmptyString, wxITEM_NORMAL );
@@ -98,12 +103,15 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	this->SetMenuBar( mainMenuBar );
 	
 	mainToolbar = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_HORIZONTAL ); 
+	mainToolbar->SetForegroundColour( wxColour( 30, 30, 30 ) );
+	mainToolbar->SetBackgroundColour( wxColour( 30, 30, 30 ) );
+	
 	mainToolbar->Realize();
-	m_mgr.AddPane( mainToolbar, wxAuiPaneInfo() .Top() .CaptionVisible( false ).CloseButton( false ).Gripper().Dock().Resizable().FloatingSize( wxSize( 37,57 ) ).MinSize( wxSize( -1,39 ) ).Layer( 1 ) );
+	m_mgr.AddPane( mainToolbar, wxAuiPaneInfo() .Top() .CaptionVisible( false ).CloseButton( false ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( 37,57 ) ).MinSize( wxSize( -1,39 ) ).Layer( 1 ) );
 	
 	
 	mainPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	m_mgr.AddPane( mainPanel, wxAuiPaneInfo() .Left() .CaptionVisible( false ).CloseButton( false ).PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ).CentrePane() );
+	m_mgr.AddPane( mainPanel, wxAuiPaneInfo() .Left() .CaptionVisible( false ).CloseButton( false ).PinButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxDefaultSize ).CentrePane() );
 	
 	
 	m_mgr.Update();
@@ -228,68 +236,37 @@ ProfilerPanel::~ProfilerPanel()
 
 ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
 {
-	wxBoxSizer* bSizer3;
-	bSizer3 = new wxBoxSizer( wxVERTICAL );
+	this->SetForegroundColour( wxColour( 45, 45, 45 ) );
+	this->SetBackgroundColour( wxColour( 45, 45, 45 ) );
 	
-	wxBoxSizer* bSizer4;
-	bSizer4 = new wxBoxSizer( wxHORIZONTAL );
+	ScenePanelContent = new wxBoxSizer( wxVERTICAL );
 	
-	m_button21 = new wxButton( this, SCENE_NEW, wxT("New"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer4->Add( m_button21, 1, wxALL, 5 );
+	wxBoxSizer* bSizer;
+	bSizer = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_button2 = new wxButton( this, SCENE_OPEN, wxT("Open"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer4->Add( m_button2, 1, wxALL|wxEXPAND, 5 );
+	m_button21 = new wxButton( this, SCENE_NEW, wxT("New"), wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
+	m_button21->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_HIGHLIGHTTEXT ) );
+	m_button21->SetBackgroundColour( wxColour( 30, 30, 30 ) );
 	
-	m_button4 = new wxButton( this, SCENE_SAVE, wxT("Save"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer4->Add( m_button4, 1, wxALL|wxEXPAND, 5 );
+	bSizer->Add( m_button21, 1, wxALL, 5 );
 	
+	m_button2 = new wxButton( this, SCENE_OPEN, wxT("Open"), wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
+	m_button2->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_HIGHLIGHTTEXT ) );
+	m_button2->SetBackgroundColour( wxColour( 30, 30, 30 ) );
 	
-	bSizer3->Add( bSizer4, 0, wxEXPAND, 5 );
+	bSizer->Add( m_button2, 1, wxALL|wxEXPAND, 5 );
 	
-	m_notebook2 = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_panel11 = new wxPanel( m_notebook2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* bSizer5;
-	bSizer5 = new wxBoxSizer( wxVERTICAL );
+	m_button4 = new wxButton( this, SCENE_SAVE, wxT("Save"), wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
+	m_button4->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_BTNHIGHLIGHT ) );
+	m_button4->SetBackgroundColour( wxColour( 30, 30, 30 ) );
 	
-	wxBoxSizer* bSizer6;
-	bSizer6 = new wxBoxSizer( wxHORIZONTAL );
-	
-	addObjectButton = new wxBitmapButton( m_panel11, ADD_OBJECT_BUTTON, wxBitmap( wxT("images/objectIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	bSizer6->Add( addObjectButton, 0, wxALL, 2 );
-	
-	addComponentButton = new wxBitmapButton( m_panel11, ADD_COMPONENT_BUTTON, wxBitmap( wxT("images/componentIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	addComponentButton->Enable( false );
-	
-	bSizer6->Add( addComponentButton, 0, wxALL, 2 );
-	
-	m_searchCtrl1 = new wxSearchCtrl( m_panel11, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	#ifndef __WXMAC__
-	m_searchCtrl1->ShowSearchButton( true );
-	#endif
-	m_searchCtrl1->ShowCancelButton( true );
-	m_searchCtrl1->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), 70, 94, 90, false, wxEmptyString ) );
-	
-	bSizer6->Add( m_searchCtrl1, 1, wxALL, 1 );
+	bSizer->Add( m_button4, 1, wxALL|wxEXPAND, 5 );
 	
 	
-	bSizer5->Add( bSizer6, 0, wxEXPAND, 0 );
-	
-	objectList = new wxTreeCtrl( m_panel11, OBJECT_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
-	bSizer5->Add( objectList, 1, wxALL|wxEXPAND, 1 );
-	
-	propertyGrid = new wxPropertyGrid(m_panel11, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE);
-	bSizer5->Add( propertyGrid, 1, wxALL|wxEXPAND, 2 );
+	ScenePanelContent->Add( bSizer, 0, wxEXPAND, 5 );
 	
 	
-	m_panel11->SetSizer( bSizer5 );
-	m_panel11->Layout();
-	bSizer5->Fit( m_panel11 );
-	m_notebook2->AddPage( m_panel11, wxT("Objects"), true );
-	
-	bSizer3->Add( m_notebook2, 1, wxEXPAND | wxALL, 5 );
-	
-	
-	this->SetSizer( bSizer3 );
+	this->SetSizer( ScenePanelContent );
 	this->Layout();
 	translateMenu = new wxMenu();
 	wxMenuItem* m_menuItem114;
@@ -319,6 +296,62 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 ScenePanel::~ScenePanel()
 {
 	delete translateMenu; 
+}
+
+ScenePanel_Objects::ScenePanel_Objects( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
+{
+	this->SetBackgroundColour( wxColour( 45, 45, 45 ) );
+	
+	wxBoxSizer* bSizer5;
+	bSizer5 = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizer6;
+	bSizer6 = new wxBoxSizer( wxHORIZONTAL );
+	
+	addObjectButton = new wxBitmapButton( this, ADD_OBJECT_BUTTON, wxBitmap( wxT("images/objectIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxSize( 28,28 ), wxBU_AUTODRAW|wxNO_BORDER );
+	addObjectButton->SetForegroundColour( wxColour( 30, 30, 30 ) );
+	addObjectButton->SetBackgroundColour( wxColour( 30, 30, 30 ) );
+	
+	bSizer6->Add( addObjectButton, 0, wxALL, 2 );
+	
+	addComponentButton = new wxBitmapButton( this, ADD_COMPONENT_BUTTON, wxBitmap( wxT("images/componentIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxSize( 28,28 ), wxBU_AUTODRAW|wxNO_BORDER );
+	addComponentButton->SetForegroundColour( wxColour( 30, 30, 30 ) );
+	addComponentButton->SetBackgroundColour( wxColour( 30, 30, 30 ) );
+	addComponentButton->Enable( false );
+	
+	bSizer6->Add( addComponentButton, 0, wxALL, 2 );
+	
+	m_searchCtrl1 = new wxSearchCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	#ifndef __WXMAC__
+	m_searchCtrl1->ShowSearchButton( true );
+	#endif
+	m_searchCtrl1->ShowCancelButton( true );
+	m_searchCtrl1->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), 70, 94, 90, false, wxEmptyString ) );
+	
+	bSizer6->Add( m_searchCtrl1, 1, wxALL, 3 );
+	
+	
+	bSizer5->Add( bSizer6, 0, wxEXPAND, 0 );
+	
+	objectList = new wxTreeCtrl( this, OBJECT_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
+	objectList->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_HIGHLIGHTTEXT ) );
+	objectList->SetBackgroundColour( wxColour( 30, 30, 30 ) );
+	
+	bSizer5->Add( objectList, 1, wxALL|wxEXPAND, 1 );
+	
+	propertyGrid = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE|wxNO_BORDER);
+	propertyGrid->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_BTNHIGHLIGHT ) );
+	propertyGrid->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_BTNHIGHLIGHT ) );
+	
+	bSizer5->Add( propertyGrid, 1, wxALL|wxEXPAND, 0 );
+	
+	
+	this->SetSizer( bSizer5 );
+	this->Layout();
+}
+
+ScenePanel_Objects::~ScenePanel_Objects()
+{
 }
 
 MaterialsPanel::MaterialsPanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
@@ -367,48 +400,10 @@ MaterialsPanel::~MaterialsPanel()
 
 ProjectPanel::ProjectPanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
 {
-	wxBoxSizer* bSizer3;
-	bSizer3 = new wxBoxSizer( wxVERTICAL );
-	
-	m_notebook2 = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_panel11 = new wxPanel( m_notebook2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* bSizer5;
-	bSizer5 = new wxBoxSizer( wxVERTICAL );
+	ProjectPanelContent = new wxBoxSizer( wxVERTICAL );
 	
 	
-	m_panel11->SetSizer( bSizer5 );
-	m_panel11->Layout();
-	bSizer5->Fit( m_panel11 );
-	m_notebook2->AddPage( m_panel11, wxT("Project"), false );
-	m_panel12 = new wxPanel( m_notebook2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* bSizer51;
-	bSizer51 = new wxBoxSizer( wxVERTICAL );
-	
-	wxBoxSizer* bSizer61;
-	bSizer61 = new wxBoxSizer( wxHORIZONTAL );
-	
-	m_bpButton11 = new wxBitmapButton( m_panel12, wxID_ANY, wxBitmap( wxT("images/featureIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	bSizer61->Add( m_bpButton11, 0, wxALL, 2 );
-	
-	
-	bSizer51->Add( bSizer61, 0, wxEXPAND, 0 );
-	
-	assetList = new wxTreeCtrl( m_panel12, ASSET_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
-	bSizer51->Add( assetList, 1, wxALL|wxEXPAND, 1 );
-	
-	assetPropGrid = new wxPropertyGrid(m_panel12, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE);
-	bSizer51->Add( assetPropGrid, 1, wxALL|wxEXPAND, 2 );
-	
-	
-	m_panel12->SetSizer( bSizer51 );
-	m_panel12->Layout();
-	bSizer51->Fit( m_panel12 );
-	m_notebook2->AddPage( m_panel12, wxT("Assets"), true );
-	
-	bSizer3->Add( m_notebook2, 1, wxEXPAND | wxALL, 5 );
-	
-	
-	this->SetSizer( bSizer3 );
+	this->SetSizer( ProjectPanelContent );
 	this->Layout();
 	moduleMenu = new wxMenu();
 	wxMenuItem* m_menuItem12;
@@ -430,6 +425,58 @@ ProjectPanel::ProjectPanel( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 ProjectPanel::~ProjectPanel()
 {
 	delete moduleMenu; 
+}
+
+ProjectPanel_Project::ProjectPanel_Project( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
+{
+	this->SetBackgroundColour( wxColour( 45, 45, 45 ) );
+	
+	wxBoxSizer* bSizer5;
+	bSizer5 = new wxBoxSizer( wxVERTICAL );
+	
+	
+	this->SetSizer( bSizer5 );
+	this->Layout();
+}
+
+ProjectPanel_Project::~ProjectPanel_Project()
+{
+}
+
+ProjectPanel_Assets::ProjectPanel_Assets( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
+{
+	this->SetBackgroundColour( wxColour( 45, 45, 45 ) );
+	
+	wxBoxSizer* bSizer51;
+	bSizer51 = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizer61;
+	bSizer61 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_bpButton11 = new wxBitmapButton( this, wxID_ANY, wxBitmap( wxT("images/featureIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxSize( 28,28 ), wxBU_AUTODRAW|wxNO_BORDER );
+	m_bpButton11->SetBackgroundColour( wxColour( 30, 30, 30 ) );
+	
+	bSizer61->Add( m_bpButton11, 0, wxALL, 2 );
+	
+	
+	bSizer51->Add( bSizer61, 0, wxEXPAND, 0 );
+	
+	assetList = new wxTreeCtrl( this, ASSET_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
+	assetList->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	assetList->SetBackgroundColour( wxColour( 30, 30, 30 ) );
+	
+	bSizer51->Add( assetList, 1, wxALL|wxEXPAND, 1 );
+	
+	assetPropGrid = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE|wxNO_BORDER);
+	bSizer51->Add( assetPropGrid, 1, wxALL|wxEXPAND, 0 );
+	
+	
+	this->SetSizer( bSizer51 );
+	this->Layout();
+}
+
+ProjectPanel_Assets::~ProjectPanel_Assets()
+{
 }
 
 ImportMeshWizard::ImportMeshWizard( wxWindow* parent, wxWindowID id, const wxString& title, const wxBitmap& bitmap, const wxPoint& pos, long style ) 

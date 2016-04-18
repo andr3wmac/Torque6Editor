@@ -39,6 +39,10 @@
 #include <scene/object.h>
 #endif
 
+#ifndef WXFLATNOTEBOOK_H
+#include "../wxWidgets/wxFlatNotebook/wxFlatNotebook.h"
+#endif
+
 class ModuleTreeItemData : public wxTreeItemData
 {
 public:
@@ -79,9 +83,12 @@ class ProjectTool : public wxEvtHandler, public EditorTool
    typedef EditorTool Parent;
 
    protected:
-      ProjectPanel*  mProjectPanel;
-      wxImageList*   mAssetIconList;
-      wxTreeItemId   mAssetListRoot;
+      wxFlatNotebook*         mTabs;
+      ProjectPanel*           mProjectPanel;
+      ProjectPanel_Project*   mProjectTab;
+      ProjectPanel_Assets*    mAssetsTab;
+      wxImageList*            mAssetIconList;
+      wxTreeItemId            mAssetListRoot;
 
       ModuleDefinition*       mSelectedModule;
       const AssetDefinition*  mSelectedAssetDef;

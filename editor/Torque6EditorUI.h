@@ -36,7 +36,6 @@
 #include <wx/srchctrl.h>
 #include <wx/propgrid/propgrid.h>
 #include <wx/propgrid/advprops.h>
-#include <wx/notebook.h>
 #include <wx/filepicker.h>
 #include <wx/checkbox.h>
 #include <wx/textctrl.h>
@@ -64,19 +63,19 @@ WX_DEFINE_ARRAY_PTR( wxWizardPageSimple*, WizardPages );
 #define SCENE_NEW 1015
 #define SCENE_OPEN 1016
 #define SCENE_SAVE 1017
-#define ADD_OBJECT_BUTTON 1018
-#define ADD_COMPONENT_BUTTON 1019
-#define OBJECT_LIST 1020
-#define TRANSLATE_SNAP_NONE 1021
-#define TRANSLATE_SNAP_1 1022
-#define TRANSLATE_SNAP_2 1023
-#define TRANSLATE_SNAP_3 1024
-#define TRANSLATE_SNAP_4 1025
+#define TRANSLATE_SNAP_NONE 1018
+#define TRANSLATE_SNAP_1 1019
+#define TRANSLATE_SNAP_2 1020
+#define TRANSLATE_SNAP_3 1021
+#define TRANSLATE_SNAP_4 1022
+#define ADD_OBJECT_BUTTON 1023
+#define ADD_COMPONENT_BUTTON 1024
+#define OBJECT_LIST 1025
 #define MATERIAL_SAVE 1026
-#define ASSET_LIST 1027
-#define MENU_IMPORT_MESH 1028
-#define MENU_IMPORT_TEXTURE 1029
-#define MENU_NEW_MATERIAL 1030
+#define MENU_IMPORT_MESH 1027
+#define MENU_IMPORT_TEXTURE 1028
+#define MENU_NEW_MATERIAL 1029
+#define ASSET_LIST 1030
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainFrame
@@ -177,8 +176,29 @@ class ScenePanel : public wxPanel
 		wxButton* m_button21;
 		wxButton* m_button2;
 		wxButton* m_button4;
-		wxNotebook* m_notebook2;
-		wxPanel* m_panel11;
+	
+	public:
+		wxBoxSizer* ScenePanelContent;
+		wxMenu* translateMenu;
+		
+		ScenePanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxNO_BORDER|wxTAB_TRAVERSAL ); 
+		~ScenePanel();
+		
+		void ScenePanelOnContextMenu( wxMouseEvent &event )
+		{
+			this->PopupMenu( translateMenu, event.GetPosition() );
+		}
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ScenePanel_Objects
+///////////////////////////////////////////////////////////////////////////////
+class ScenePanel_Objects : public wxPanel 
+{
+	private:
+	
+	protected:
 		wxSearchCtrl* m_searchCtrl1;
 	
 	public:
@@ -186,15 +206,9 @@ class ScenePanel : public wxPanel
 		wxBitmapButton* addComponentButton;
 		wxTreeCtrl* objectList;
 		wxPropertyGrid* propertyGrid;
-		wxMenu* translateMenu;
 		
-		ScenePanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
-		~ScenePanel();
-		
-		void ScenePanelOnContextMenu( wxMouseEvent &event )
-		{
-			this->PopupMenu( translateMenu, event.GetPosition() );
-		}
+		ScenePanel_Objects( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
+		~ScenePanel_Objects();
 	
 };
 
@@ -228,14 +242,9 @@ class ProjectPanel : public wxPanel
 	private:
 	
 	protected:
-		wxNotebook* m_notebook2;
-		wxPanel* m_panel11;
-		wxPanel* m_panel12;
-		wxBitmapButton* m_bpButton11;
 	
 	public:
-		wxTreeCtrl* assetList;
-		wxPropertyGrid* assetPropGrid;
+		wxBoxSizer* ProjectPanelContent;
 		wxMenu* moduleMenu;
 		
 		ProjectPanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
@@ -245,6 +254,41 @@ class ProjectPanel : public wxPanel
 		{
 			this->PopupMenu( moduleMenu, event.GetPosition() );
 		}
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ProjectPanel_Project
+///////////////////////////////////////////////////////////////////////////////
+class ProjectPanel_Project : public wxPanel 
+{
+	private:
+	
+	protected:
+	
+	public:
+		
+		ProjectPanel_Project( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
+		~ProjectPanel_Project();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ProjectPanel_Assets
+///////////////////////////////////////////////////////////////////////////////
+class ProjectPanel_Assets : public wxPanel 
+{
+	private:
+	
+	protected:
+		wxBitmapButton* m_bpButton11;
+	
+	public:
+		wxTreeCtrl* assetList;
+		wxPropertyGrid* assetPropGrid;
+		
+		ProjectPanel_Assets( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
+		~ProjectPanel_Assets();
 	
 };
 
