@@ -8,7 +8,7 @@ solution "Torque6Editor"
     SRC_DIR             = "../../engine/src/"
     PLUGIN_DIR          = "../../engine/plugins/"
     PLUGIN_BUILD_DIR    = "../../engine/projects/shared-modules/"
-    PROJECT             = "../../engine/projects/00-Console/"
+    PROJECT             = "../../engine/projects/00-RollTheBall/"
     EDITOR_DIR          = "../../"
 
     -- Solution
