@@ -34,6 +34,8 @@
 // UI generated from wxFormBuilder
 #include "../Torque6EditorUI.h"
 
+#include "../widgets/wxTorqueInspector/wxTorqueInspector.h"
+
 #include "projectTool.h"
 #include "module/moduleManager.h"
 #include "materials/materialAsset.h"
@@ -81,6 +83,10 @@ void ProjectTool::initTool()
    // Add Tabs to ProjectPanel
    mProjectPanel->ProjectPanelContent->Add(mTabs, 1, wxEXPAND | wxALL, 5);
 
+   // Add TorqueInspector to scene panel objects.
+   mAssetsInspector = new wxTorqueInspector(mAssetsTab->InspectorWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+   mAssetsTab->InspectorContents->Add(mAssetsInspector, 1, wxALL | wxEXPAND, 1);
+
    // Assets Icons
    mAssetIconList->Add(wxBitmap("images/moduleIcon.png", wxBITMAP_TYPE_PNG));
    mAssetIconList->Add(wxBitmap("images/iconFolderGrey.png", wxBITMAP_TYPE_PNG));
@@ -91,13 +97,6 @@ void ProjectTool::initTool()
    mAssetsTab->assetList->Connect(wxID_ANY, wxEVT_TREE_BEGIN_DRAG, wxTreeEventHandler(ProjectTool::OnTreeDrag), NULL, this);
    mAssetsTab->assetList->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(ProjectTool::OnTreeEvent), NULL, this);
    mAssetsTab->assetList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(ProjectTool::OnTreeMenu), NULL, this);
-   mAssetsTab->assetPropGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(ProjectTool::OnPropertyChanged), NULL, this);
-   mAssetsTab->assetPropGrid->SetEmptySpaceColour(wxColor(30, 30, 30));
-   mAssetsTab->assetPropGrid->SetMarginColour(wxColor(30, 30, 30));
-   mAssetsTab->assetPropGrid->SetCellBackgroundColour(wxColor(45, 45, 45));
-   mAssetsTab->assetPropGrid->SetCellTextColour(wxColor(255, 255, 255));
-   mAssetsTab->assetPropGrid->SetCaptionBackgroundColour(wxColor(30, 30, 30));
-   mAssetsTab->assetPropGrid->SetCaptionTextColour(wxColor(255, 255, 255));
    
    // Assets Menu Events
    mProjectPanel->moduleMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(ProjectTool::OnMenuEvent), NULL, this);
@@ -175,7 +174,7 @@ void ProjectTool::OnTreeEvent( wxTreeEvent& evt )
       AssetTreeItemData* data = dynamic_cast<AssetTreeItemData*>(mAssetsTab->assetList->GetItemData(evt.GetItem()));
       if (data)
       {
-         loadAssetDefinitionProperties(mAssetsTab->assetPropGrid, data->objPtr);
+         mAssetsInspector->Inspect(data->objPtr);
          return;
       }
    }
@@ -362,7 +361,7 @@ void ProjectTool::OnPropertyChanged( wxPropertyGridEvent& evt )
    Torque::Scene.refresh();
 
    // Reload object properties.
-   loadAssetDefinitionProperties(mAssetsTab->assetPropGrid, mSelectedAssetDef);
+   mAssetsInspector->Inspect(mSelectedAssetDef);
 }
 
 const char* ProjectTool::getAssetCategoryName(const char* _name)
@@ -430,121 +429,4 @@ void ProjectTool::refreshAssetList()
 
    // Sort Modules by Name
    mAssetsTab->assetList->SortChildren(mAssetListRoot);
-}
-
-static S32 QSORT_CALLBACK compareEntries(const void* a, const void* b)
-{
-   SimFieldDictionary::Entry *fa = *((SimFieldDictionary::Entry **)a);
-   SimFieldDictionary::Entry *fb = *((SimFieldDictionary::Entry **)b);
-   return dStricmp(fa->slotName, fb->slotName);
-}
-
-void ProjectTool::loadAssetDefinitionProperties(wxPropertyGrid* propertyGrid, const AssetDefinition* assetDef)
-{
-   propertyGrid->Clear();
-
-   // Fetch the asset.
-   AssetBase* asset = Torque::AssetDatabaseLink.getAssetBase(assetDef->mAssetId);
-
-   mSelectedAssetDef = assetDef;
-   mSelectedAsset = asset;
-   mSelectedMaterialAsset = NULL;
-
-   // Determine if this is a material asset.
-   bool isMaterialAsset = (dStrcmp(assetDef->mAssetType, "MaterialAsset") == 0);
-   wxPGProperty* texturesCategory = NULL;
-
-   wxString fieldGroup("");
-   bool addFieldGroup = false;
-
-   // Static Fields
-   AbstractClassRep::FieldList fieldList = asset->getFieldList();
-   for (Vector<AbstractClassRep::Field>::iterator itr = fieldList.begin(); itr != fieldList.end(); itr++)
-   {
-      const AbstractClassRep::Field* f = itr;
-      if (f->type == AbstractClassRep::DepricatedFieldType ||
-         f->type == AbstractClassRep::EndGroupFieldType)
-         continue;
-
-      if (f->type == AbstractClassRep::StartGroupFieldType)
-      {
-         addFieldGroup = true;
-         fieldGroup = f->pGroupname;
-         continue;
-      }
-
-      for (U32 j = 0; S32(j) < f->elementCount; j++)
-      {
-         const char *val = (*f->getDataFn)(asset, Torque::Con.getData(f->type, (void *)(((const char *)asset) + f->offset), j, f->table, f->flag));
-
-         if (!val)
-            continue;
-
-         if (addFieldGroup)
-         {
-            if ( fieldGroup == "Textures" )
-               texturesCategory = propertyGrid->Append(new wxPropertyCategory(fieldGroup));
-            else
-               propertyGrid->Append(new wxPropertyCategory(fieldGroup));
-            addFieldGroup = false;
-         }
-
-         if (f->type == Torque::Con.TypeBool)
-            propertyGrid->Append(new wxBoolProperty(f->pFieldname, f->pFieldname, dAtob(val)));
-         else
-            propertyGrid->Append(new wxStringProperty(f->pFieldname, f->pFieldname, val));
-      }
-   }
-
-   // Get list of dynamic fields and sort by name
-   Vector<SimFieldDictionary::Entry *> flist;
-   SimFieldDictionary* fieldDictionary = asset->getFieldDictionary();
-   for (SimFieldDictionaryIterator ditr(fieldDictionary); *ditr; ++ditr)
-      flist.push_back(*ditr);
-   dQsort(flist.address(), flist.size(), sizeof(SimFieldDictionary::Entry *), compareEntries);
-
-   // Add dynamic fields.
-   propertyGrid->Append(new wxPropertyCategory("Other"));
-   for (U32 i = 0; i < (U32)flist.size(); i++)
-   {
-      SimFieldDictionary::Entry* entry = flist[i];
-
-      if (isMaterialAsset && dStrncmp(entry->slotName, "TextureAsset", 12) == 0)
-         continue;
-      else if (isMaterialAsset && dStrncmp(entry->slotName, "TextureFile", 11) == 0)
-         continue;
-      else if (dStrncmp(entry->slotName, "TextureAsset", 12) == 0)
-         propertyGrid->Append(new wxEnumProperty(entry->slotName, wxPG_LABEL, *mProjectManager->getTextureAssetChoices()));
-      else if (dStrncmp(entry->slotName, "TextureFile", 11) == 0)
-         propertyGrid->Append(new wxFileProperty(entry->slotName, wxPG_LABEL, entry->value));
-      else
-         propertyGrid->Append(new wxStringProperty(entry->slotName, entry->slotName, entry->value));
-   }
-
-   // Determine if this is a material asset.
-   if (isMaterialAsset)
-   {
-      mSelectedMaterialAsset = dynamic_cast<MaterialAsset*>(asset);
-
-      if ( texturesCategory == NULL )
-         texturesCategory = propertyGrid->Append(new wxPropertyCategory("Textures"));
-
-      for (S32 n = 0; n < mSelectedMaterialAsset->getTextureCount(); ++n)
-      {
-         char fieldName[32];
-
-         // Texture Asset?
-         dSprintf(fieldName, 32, "TextureAsset%d", n);
-         const char* textureAssetId = mSelectedMaterialAsset->getDataField(Torque::StringTableLink->insert(fieldName), NULL);
-         propertyGrid->AppendIn(texturesCategory, new wxEditEnumProperty(wxString(fieldName), wxPG_LABEL, *mProjectManager->getTextureAssetChoices(), textureAssetId));
-
-         // Texture File?
-         dSprintf(fieldName, 32, "TextureFile%d", n);
-         const char* texturePath = mSelectedMaterialAsset->expandAssetFilePath(mSelectedMaterialAsset->getDataField(Torque::StringTableLink->insert(fieldName), NULL));
-         if ( texturePath )
-            propertyGrid->AppendIn(texturesCategory, new wxFileProperty(wxString(fieldName), wxPG_LABEL, wxString(texturePath)));
-         else
-            propertyGrid->AppendIn(texturesCategory, new wxFileProperty(wxString(fieldName), wxPG_LABEL, ""));
-      }
-   }
 }

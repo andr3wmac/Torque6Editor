@@ -44,7 +44,7 @@
 #endif
 
 #ifndef WXFLATNOTEBOOK_H
-#include "../wxWidgets/wxFlatNotebook/wxFlatNotebook.h"
+#include "../widgets/wxFlatNotebook/wxFlatNotebook.h"
 #endif
 
 class ObjectTreeItemData : public wxTreeItemData
@@ -58,6 +58,8 @@ public:
    }
 };
 
+class wxTorqueInspector;
+
 class SceneTool : public wxEvtHandler, public EditorTool
 {
    typedef EditorTool Parent;
@@ -65,6 +67,7 @@ class SceneTool : public wxEvtHandler, public EditorTool
    protected:
       ScenePanel*          mScenePanel;
       ScenePanel_Objects*  mScenePanelObjects;
+      wxTorqueInspector*   mScenePanelInspector;
       wxImageList*         mObjectIconList;
       wxTreeItemId         mObjectListRoot;
       wxFlatNotebook*      mTabs;

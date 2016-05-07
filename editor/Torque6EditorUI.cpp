@@ -302,8 +302,7 @@ ScenePanel_Objects::ScenePanel_Objects( wxWindow* parent, wxWindowID id, const w
 {
 	this->SetBackgroundColour( wxColour( 45, 45, 45 ) );
 	
-	wxBoxSizer* bSizer5;
-	bSizer5 = new wxBoxSizer( wxVERTICAL );
+	ScenePanel_ObjectsContent = new wxBoxSizer( wxVERTICAL );
 	
 	wxBoxSizer* bSizer6;
 	bSizer6 = new wxBoxSizer( wxHORIZONTAL );
@@ -331,22 +330,26 @@ ScenePanel_Objects::ScenePanel_Objects( wxWindow* parent, wxWindowID id, const w
 	bSizer6->Add( m_searchCtrl1, 1, wxALL, 3 );
 	
 	
-	bSizer5->Add( bSizer6, 0, wxEXPAND, 0 );
+	ScenePanel_ObjectsContent->Add( bSizer6, 0, wxEXPAND, 0 );
 	
-	objectList = new wxTreeCtrl( this, OBJECT_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
+	objectList = new wxTreeCtrl( this, OBJECT_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT|wxSIMPLE_BORDER );
 	objectList->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_HIGHLIGHTTEXT ) );
 	objectList->SetBackgroundColour( wxColour( 30, 30, 30 ) );
 	
-	bSizer5->Add( objectList, 1, wxALL|wxEXPAND, 1 );
+	ScenePanel_ObjectsContent->Add( objectList, 1, wxALL|wxEXPAND, 1 );
 	
-	propertyGrid = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE|wxNO_BORDER);
-	propertyGrid->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_BTNHIGHLIGHT ) );
-	propertyGrid->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_BTNHIGHLIGHT ) );
-	
-	bSizer5->Add( propertyGrid, 1, wxALL|wxEXPAND, 0 );
+	InspectorWindow = new wxScrolledWindow( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxVSCROLL );
+	InspectorWindow->SetScrollRate( 0, 5 );
+	InspectorContents = new wxBoxSizer( wxVERTICAL );
 	
 	
-	this->SetSizer( bSizer5 );
+	InspectorWindow->SetSizer( InspectorContents );
+	InspectorWindow->Layout();
+	InspectorContents->Fit( InspectorWindow );
+	ScenePanel_ObjectsContent->Add( InspectorWindow, 1, wxEXPAND | wxALL, 1 );
+	
+	
+	this->SetSizer( ScenePanel_ObjectsContent );
 	this->Layout();
 }
 
@@ -467,8 +470,15 @@ ProjectPanel_Assets::ProjectPanel_Assets( wxWindow* parent, wxWindowID id, const
 	
 	bSizer51->Add( assetList, 1, wxALL|wxEXPAND, 1 );
 	
-	assetPropGrid = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE|wxNO_BORDER);
-	bSizer51->Add( assetPropGrid, 1, wxALL|wxEXPAND, 0 );
+	InspectorWindow = new wxScrolledWindow( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxVSCROLL );
+	InspectorWindow->SetScrollRate( 0, 5 );
+	InspectorContents = new wxBoxSizer( wxVERTICAL );
+	
+	
+	InspectorWindow->SetSizer( InspectorContents );
+	InspectorWindow->Layout();
+	InspectorContents->Fit( InspectorWindow );
+	bSizer51->Add( InspectorWindow, 1, wxEXPAND | wxALL, 1 );
 	
 	
 	this->SetSizer( bSizer51 );

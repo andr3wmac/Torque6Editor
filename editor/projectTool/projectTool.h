@@ -40,7 +40,7 @@
 #endif
 
 #ifndef WXFLATNOTEBOOK_H
-#include "../wxWidgets/wxFlatNotebook/wxFlatNotebook.h"
+#include "../widgets/wxFlatNotebook/wxFlatNotebook.h"
 #endif
 
 class ModuleTreeItemData : public wxTreeItemData
@@ -77,6 +77,7 @@ public:
 };
 
 class ModuleDefinition;
+class wxTorqueInspector;
 
 class ProjectTool : public wxEvtHandler, public EditorTool
 {
@@ -87,6 +88,7 @@ class ProjectTool : public wxEvtHandler, public EditorTool
       ProjectPanel*           mProjectPanel;
       ProjectPanel_Project*   mProjectTab;
       ProjectPanel_Assets*    mAssetsTab;
+      wxTorqueInspector*      mAssetsInspector;
       wxImageList*            mAssetIconList;
       wxTreeItemId            mAssetListRoot;
 
@@ -116,8 +118,6 @@ class ProjectTool : public wxEvtHandler, public EditorTool
 
       virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
       virtual void onProjectClosed();
-
-      void loadAssetDefinitionProperties(wxPropertyGrid* propertyGrid, const AssetDefinition* assetDef);
 };
 
 #endif // _PROJECT_TOOL_H_

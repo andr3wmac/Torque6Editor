@@ -34,6 +34,7 @@
 #include <wx/dataview.h>
 #include <wx/bmpbuttn.h>
 #include <wx/srchctrl.h>
+#include <wx/scrolwin.h>
 #include <wx/propgrid/propgrid.h>
 #include <wx/propgrid/advprops.h>
 #include <wx/filepicker.h>
@@ -202,10 +203,12 @@ class ScenePanel_Objects : public wxPanel
 		wxSearchCtrl* m_searchCtrl1;
 	
 	public:
+		wxBoxSizer* ScenePanel_ObjectsContent;
 		wxBitmapButton* addObjectButton;
 		wxBitmapButton* addComponentButton;
 		wxTreeCtrl* objectList;
-		wxPropertyGrid* propertyGrid;
+		wxScrolledWindow* InspectorWindow;
+		wxBoxSizer* InspectorContents;
 		
 		ScenePanel_Objects( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
 		~ScenePanel_Objects();
@@ -285,7 +288,8 @@ class ProjectPanel_Assets : public wxPanel
 	
 	public:
 		wxTreeCtrl* assetList;
-		wxPropertyGrid* assetPropGrid;
+		wxScrolledWindow* InspectorWindow;
+		wxBoxSizer* InspectorContents;
 		
 		ProjectPanel_Assets( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 367,509 ), long style = wxTAB_TRAVERSAL ); 
 		~ProjectPanel_Assets();

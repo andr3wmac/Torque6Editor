@@ -47,6 +47,7 @@
 #include "scene/components/physics/physicsBoxComponent.h"
 #include "scene/components/physics/physicsSphereComponent.h"
 #include "scene/components/textComponent.h"
+#include "../widgets/wxTorqueInspector/wxTorqueInspector.h"
 
 SceneTool::SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
    : Parent(_projectManager, _frame, _manager),
@@ -119,6 +120,11 @@ void SceneTool::initTool()
    
    // Objects tab
    mScenePanelObjects = new ScenePanel_Objects(mTabs, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+
+   // Add TorqueInspector to scene panel objects.
+   mScenePanelInspector = new wxTorqueInspector(mScenePanelObjects->InspectorWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+   mScenePanelObjects->InspectorContents->Add(mScenePanelInspector, 1, wxALL | wxEXPAND, 1);
+
    mTabs->AddPage(mScenePanelObjects, "Objects ", true);
 
    // Add Tabs to ScenePanel
@@ -130,13 +136,13 @@ void SceneTool::initTool()
    // Object Events
    mScenePanelObjects->objectList->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(SceneTool::OnTreeEvent), NULL, this);
    mScenePanelObjects->objectList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneTool::OnTreeMenu), NULL, this);
-   mScenePanelObjects->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnObjectPropChanged), NULL, this);
+   /*mScenePanelObjects->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnObjectPropChanged), NULL, this);
    mScenePanelObjects->propertyGrid->SetEmptySpaceColour(wxColor(30, 30, 30));
    mScenePanelObjects->propertyGrid->SetMarginColour(wxColor(30, 30, 30));
    mScenePanelObjects->propertyGrid->SetCellBackgroundColour(wxColor(45, 45, 45));
    mScenePanelObjects->propertyGrid->SetCellTextColour(wxColor(255, 255, 255));
    mScenePanelObjects->propertyGrid->SetCaptionBackgroundColour(wxColor(30, 30, 30));
-   mScenePanelObjects->propertyGrid->SetCaptionTextColour(wxColor(255, 255, 255));
+   mScenePanelObjects->propertyGrid->SetCaptionTextColour(wxColor(255, 255, 255));*/
 
    mObjectListRoot = mScenePanelObjects->objectList->AddRoot("ROOT");
 
@@ -296,8 +302,9 @@ bool SceneTool::onMouseLeftUp(int x, int y)
 {
    mGizmo.onMouseLeftUp(x, y);
 
-   if ( mSelectedObject != NULL )
-      loadObjectProperties(mScenePanelObjects->propertyGrid, mSelectedObject);
+   //if ( mSelectedObject != NULL )
+      //loadObjectProperties(mScenePanelObjects->propertyGrid, mSelectedObject);
+   mScenePanelInspector->Inspect(mSelectedObject);
 
    return false;
 }
@@ -742,6 +749,7 @@ static S32 QSORT_CALLBACK compareEntries(const void* a, const void* b)
 
 void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* obj)
 {
+   /*
    propertyGrid->Clear();
 
    Scene::SceneObject* Object = dynamic_cast<Scene::SceneObject*>(obj);
@@ -849,6 +857,7 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
          propertyGrid->AppendIn(otherCategory, new wxStringProperty(entry->slotName, entry->slotName, entry->value));
       }
    }
+   */
 }
 
 void SceneTool::selectObject(Scene::SceneObject* obj, bool updateTree)
@@ -883,7 +892,8 @@ void SceneTool::selectObject(Scene::SceneObject* obj, bool updateTree)
    }
 
    // Property Grid
-   loadObjectProperties(mScenePanelObjects->propertyGrid, obj);
+   //loadObjectProperties(mScenePanelObjects->propertyGrid, obj);
+   mScenePanelInspector->Inspect(obj);
 }
 
 void SceneTool::addComponent(Scene::SceneObject* Object, StringTableEntry componentClassName)
@@ -930,7 +940,9 @@ void SceneTool::selectComponent(Scene::BaseComponent* component, bool updateTree
    }
 
    // Property Grid
-   loadObjectProperties(mScenePanelObjects->propertyGrid, component);
+   //loadObjectProperties(mScenePanelObjects->propertyGrid, component);
+   mScenePanelInspector->Inspect(component);
+   
 }
 
 void SceneTool::OnToolbarDropdownEvent(wxCommandEvent& evt)
