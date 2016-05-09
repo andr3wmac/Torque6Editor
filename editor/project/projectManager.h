@@ -150,6 +150,8 @@ class ProjectManager : public wxEvtHandler, public Debug::DebugMode
       Point3F           mEditorCameraForwardVelocity;
       F32               mEditorCameraSpeed;
 
+      wxImageList*         mCommonIcons;
+
       S32                  mEditorMode;
       Vector<ModuleInfo>   mModuleList;
       wxPGChoices          mTextureAssetChoices;

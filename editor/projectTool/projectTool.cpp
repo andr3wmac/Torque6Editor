@@ -84,7 +84,7 @@ void ProjectTool::initTool()
    mProjectPanel->ProjectPanelContent->Add(mTabs, 1, wxEXPAND | wxALL, 5);
 
    // Add TorqueInspector to scene panel objects.
-   mAssetsInspector = new wxTorqueInspector(mAssetsTab->InspectorWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+   mAssetsInspector = new wxTorqueInspector(mProjectManager, mAssetsTab->InspectorWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize);
    mAssetsTab->InspectorContents->Add(mAssetsInspector, 1, wxALL | wxEXPAND, 1);
 
    // Assets Icons

@@ -35,8 +35,6 @@
 #include <wx/bmpbuttn.h>
 #include <wx/srchctrl.h>
 #include <wx/scrolwin.h>
-#include <wx/propgrid/propgrid.h>
-#include <wx/propgrid/advprops.h>
 #include <wx/filepicker.h>
 #include <wx/checkbox.h>
 #include <wx/textctrl.h>
@@ -228,7 +226,8 @@ class MaterialsPanel : public wxPanel
 	
 	public:
 		wxTreeCtrl* m_materialTree;
-		wxPropertyGrid* propertyGrid;
+		wxScrolledWindow* InspectorWindow;
+		wxBoxSizer* InspectorContents;
 		wxAuiNotebook* m_materialNotebook;
 		
 		MaterialsPanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 498,301 ), long style = wxTAB_TRAVERSAL ); wxAuiManager m_mgr;

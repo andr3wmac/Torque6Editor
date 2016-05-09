@@ -64,6 +64,8 @@ ProjectManager::ProjectManager()
 {
    mEditorCameraForwardVelocity  = Point3F::Zero;
    mEditorCameraSpeed            = 0.5f;
+
+   mCommonIcons = new wxImageList(16, 16);
 }
 
 ProjectManager::~ProjectManager()
@@ -79,6 +81,11 @@ void ProjectManager::init(wxString runPath, wxAuiManager* manager, MainFrame* fr
    mManager = manager;
    mFrame   = frame;
    mWindow  = window;
+
+   // Common Icons
+   mCommonIcons->Add(wxBitmap("images/moduleIcon.png", wxBITMAP_TYPE_PNG));
+   mCommonIcons->Add(wxBitmap("images/iconFolderGrey.png", wxBITMAP_TYPE_PNG));
+   mCommonIcons->Add(wxBitmap("images/assetIcon.png", wxBITMAP_TYPE_PNG));
 
    TextDropTarget* dropTarget = new TextDropTarget();
    mWindow->SetDropTarget(dropTarget);

@@ -30,6 +30,7 @@
 #include "scene/components/physics/physicsBoxComponent.h"
 #include "scene/components/physics/physicsSphereComponent.h"
 #include "scene/components/textComponent.h"
+#include "../wxTorqueAssetBrowser/wxTorqueAssetSelectDialog.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxTorqueInspector, wxPanel)
 
@@ -51,7 +52,15 @@ void wxTorqueInspector::Init()
    mContentsSizer = new wxBoxSizer(wxVERTICAL);
    this->SetSizer(mContentsSizer);
 
+   mAssetSelectDialog = new wxTorqueAssetSelectDialog(mProjectManager, this);
+
    this->Layout();
+}
+
+void wxTorqueInspector::Clear()
+{
+   if (mContentsSizer->GetChildren().size() > 0)
+      mContentsSizer->Clear(true);
 }
 
 // -----------------------
@@ -117,22 +126,23 @@ void wxTorqueInspector::AddStringField(wxPanel* panel, const char* fieldName, co
 {
    wxSizer* panelSizer = panel->GetSizer();
 
-   wxTorqueStringField* stringField = new wxTorqueStringField();
-   stringField->fieldName = fieldName;
-   stringField->sizer = new wxBoxSizer(wxHORIZONTAL);
+   wxTorqueStringField* field = new wxTorqueStringField();
+   field->fieldName = fieldName;
+   field->sizer = new wxBoxSizer(wxHORIZONTAL);
 
-   stringField->label = new wxStaticText(panel, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, 0);
-   stringField->label->Wrap(-1);
-   stringField->label->SetForegroundColour(wxColour(255, 255, 255));
-   stringField->sizer->Add(stringField->label, 1, wxALL, 3);
+   field->label = new wxStaticText(panel, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, 0);
+   field->label->Wrap(-1);
+   field->label->SetForegroundColour(wxColour(255, 255, 255));
+   field->sizer->Add(field->label, 1, wxALL, 5);
 
-   stringField->value = new wxTextCtrl(panel, wxID_ANY, value, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-   stringField->value->SetBackgroundColour(wxColour(30, 30, 30));
-   stringField->value->SetForegroundColour(wxColour(255, 255, 255));
-   stringField->value->Bind(wxEVT_TEXT_ENTER, &wxTorqueInspector::OnStringFieldChanged, this, -1, -1, stringField);
-   stringField->sizer->Add(stringField->value, 1, wxALL, 0);
+   field->value = new wxTextCtrl(panel, wxID_ANY, value, wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
+   field->value->SetBackgroundColour(wxColour(30, 30, 30));
+   field->value->SetForegroundColour(wxColour(255, 255, 255));
+   field->value->SetMinSize(wxSize(10, 20));
+   field->value->Bind(wxEVT_TEXT_ENTER, &wxTorqueInspector::OnStringFieldChanged, this, -1, -1, field);
+   field->sizer->Add(field->value, 1, wxALL, 2);
 
-   panelSizer->Add(stringField->sizer, 0, wxEXPAND, 5);
+   panelSizer->Add(field->sizer, 0, wxEXPAND, 5);
 }
 
 void wxTorqueInspector::OnStringFieldChanged(wxCommandEvent& evt)
@@ -163,7 +173,7 @@ void wxTorqueInspector::AddBoolField(wxPanel* panel, const char* fieldName, cons
    wxStaticText* labelCtrl = new wxStaticText(panel, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, 0);
    labelCtrl->Wrap(-1);
    labelCtrl->SetForegroundColour(wxColour(255, 255, 255));
-   sizer->Add(labelCtrl, 1, wxALL, 3);
+   sizer->Add(labelCtrl, 1, wxALL, 5);
 
    wxTorqueBoolField* field = new wxTorqueBoolField();
    field->fieldName = fieldName;
@@ -194,6 +204,48 @@ void wxTorqueInspector::OnBoolFieldChanged(wxCommandEvent& evt)
 }
 
 // -----------------------
+//  File Field
+// -----------------------
+
+void wxTorqueInspector::AddFileField(wxPanel* panel, const char* fieldName, const wxString& label, const wxString& value)
+{
+   wxSizer* panelSizer = panel->GetSizer();
+
+   wxTorqueFileField* field = new wxTorqueFileField();
+   field->fieldName = fieldName;
+   wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+
+   wxStaticText* labelCtrl = new wxStaticText(panel, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, 0);
+   labelCtrl->Wrap(-1);
+   labelCtrl->SetForegroundColour(wxColour(255, 255, 255));
+   sizer->Add(labelCtrl, 1, wxALL, 5);
+
+   field->value = new wxFilePickerCtrl(panel, wxID_ANY, value, wxT("Choose File"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
+   field->value->SetBackgroundColour(wxColour(30, 30, 30));
+   field->value->SetForegroundColour(wxColour(255, 255, 255));
+   field->value->SetMinSize(wxSize(10, 20));
+   field->value->Bind(wxEVT_TEXT_ENTER, &wxTorqueInspector::OnFileFieldChanged, this, -1, -1, field);
+   sizer->Add(field->value, 1, wxALL, 2);
+
+   panelSizer->Add(sizer, 0, wxEXPAND, 5);
+}
+
+void wxTorqueInspector::OnFileFieldChanged(wxCommandEvent& evt)
+{
+   wxTorqueFileField* field = dynamic_cast<wxTorqueFileField*>(evt.GetEventUserData());
+   if (field)
+   {
+      mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetPath());
+
+      if (mSceneObject != NULL)
+         mSceneObject->refresh();
+
+      if (mComponent != NULL)
+         mComponent->mOwnerObject->refresh();
+   }
+}
+
+// -----------------------
 //  Point3F Field
 // -----------------------
 
@@ -206,28 +258,28 @@ void wxTorqueInspector::AddPoint3FField(wxPanel* panel, const char* fieldName, c
    wxStaticText* labelCtrl = new wxStaticText(panel, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, 0);
    labelCtrl->Wrap(-1);
    labelCtrl->SetForegroundColour(wxColour(255, 255, 255));
-   sizer->Add(labelCtrl, 3, wxALL, 3);
+   sizer->Add(labelCtrl, 3, wxALL, 5);
 
    // X Value
-   wxTextCtrl* xValueCtrl = new wxTextCtrl(panel, wxID_ANY, wxString::Format(wxT("%g"), value.x), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+   wxTextCtrl* xValueCtrl = new wxTextCtrl(panel, wxID_ANY, wxString::Format(wxT("%g"), value.x), wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
    xValueCtrl->SetBackgroundColour(wxColour(30, 30, 30));
    xValueCtrl->SetForegroundColour(wxColour(255, 255, 255));
-   xValueCtrl->SetMinSize(wxSize(10, -1));
-   sizer->Add(xValueCtrl, 1, wxALL, 0);
+   xValueCtrl->SetMinSize(wxSize(10, 20));
+   sizer->Add(xValueCtrl, 1, wxALL, 2);
 
    // Y Value
-   wxTextCtrl* yValueCtrl = new wxTextCtrl(panel, wxID_ANY, wxString::Format(wxT("%g"), value.y), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+   wxTextCtrl* yValueCtrl = new wxTextCtrl(panel, wxID_ANY, wxString::Format(wxT("%g"), value.y), wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
    yValueCtrl->SetBackgroundColour(wxColour(30, 30, 30));
    yValueCtrl->SetForegroundColour(wxColour(255, 255, 255));
-   yValueCtrl->SetMinSize(wxSize(10, -1));
-   sizer->Add(yValueCtrl, 1, wxALL, 0);
+   yValueCtrl->SetMinSize(wxSize(10, 20));
+   sizer->Add(yValueCtrl, 1, wxALL, 2);
 
    // Z Value
-   wxTextCtrl* zValueCtrl = new wxTextCtrl(panel, wxID_ANY, wxString::Format(wxT("%g"), value.z), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+   wxTextCtrl* zValueCtrl = new wxTextCtrl(panel, wxID_ANY, wxString::Format(wxT("%g"), value.z), wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
    zValueCtrl->SetBackgroundColour(wxColour(30, 30, 30));
    zValueCtrl->SetForegroundColour(wxColour(255, 255, 255));
-   zValueCtrl->SetMinSize(wxSize(10, -1));
-   sizer->Add(zValueCtrl, 1, wxALL, 0);
+   zValueCtrl->SetMinSize(wxSize(10, 20));
+   sizer->Add(zValueCtrl, 1, wxALL, 2);
 
    // Events
    wxTorquePoint3FField* xField = new wxTorquePoint3FField();
@@ -290,6 +342,226 @@ void wxTorqueInspector::AddButtonField(wxPanel* panel, const char* fieldName, co
 }
 
 // -----------------------
+//  MeshAsset Field
+// -----------------------
+
+void wxTorqueInspector::AddMeshAssetField(wxPanel* panel, const char* fieldName, const wxString& label, const wxString& value)
+{
+   wxSizer* panelSizer = panel->GetSizer();
+
+   wxTorqueMeshAssetField* field = new wxTorqueMeshAssetField();
+   field->fieldName = fieldName;
+   field->sizer = new wxBoxSizer(wxHORIZONTAL);
+
+   field->label = new wxStaticText(panel, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, 0);
+   field->label->Wrap(-1);
+   field->label->SetForegroundColour(wxColour(255, 255, 255));
+   field->sizer->Add(field->label, 1, wxALL, 5);
+
+   wxBoxSizer* valueSizer = new wxBoxSizer(wxHORIZONTAL);
+
+   field->value = new wxTextCtrl(panel, wxID_ANY, value, wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
+   field->value->SetBackgroundColour(wxColour(30, 30, 30));
+   field->value->SetForegroundColour(wxColour(255, 255, 255));
+   field->value->SetMinSize(wxSize(1, 20));
+   valueSizer->Add(field->value, 1, wxALL, 2);
+
+   wxButton* button = new wxButton(panel, wxID_ANY, wxT("..."), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   button->SetBackgroundColour(wxColour(30, 30, 30));
+   button->SetForegroundColour(wxColour(255, 255, 255));
+   button->SetMinSize(wxSize(20, 20));
+   button->SetMaxSize(wxSize(20, 20));
+   button->Bind(wxEVT_BUTTON, &wxTorqueInspector::OnMeshAssetFieldSelect, this, -1, -1, field);
+   valueSizer->Add(button, 0, wxALL, 2);
+
+   field->sizer->Add(valueSizer, 1, wxEXPAND, 0);
+
+   panelSizer->Add(field->sizer, 1, wxEXPAND, 5);
+}
+
+void wxTorqueInspector::OnMeshAssetFieldSelect(wxCommandEvent& evt)
+{
+   wxTorqueMeshAssetField* field = dynamic_cast<wxTorqueMeshAssetField*>(evt.GetEventUserData());
+   if (field)
+   {
+      mAssetSelectDialog->AssetToTextCtrl(field->value, "MeshAsset");
+
+      mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
+
+      if (mSceneObject != NULL)
+         mSceneObject->refresh();
+
+      if (mComponent != NULL)
+         mComponent->mOwnerObject->refresh();
+   }
+}
+
+// -----------------------
+//  ObjectTemplateAsset Field
+// -----------------------
+
+void wxTorqueInspector::AddObjectTemplateAssetField(wxPanel* panel, const char* fieldName, const wxString& label, const wxString& value)
+{
+   wxSizer* panelSizer = panel->GetSizer();
+
+   wxTorqueObjectTemplateAssetField* field = new wxTorqueObjectTemplateAssetField();
+   field->fieldName = fieldName;
+   field->sizer = new wxBoxSizer(wxHORIZONTAL);
+
+   field->label = new wxStaticText(panel, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, 0);
+   field->label->Wrap(-1);
+   field->label->SetForegroundColour(wxColour(255, 255, 255));
+   field->sizer->Add(field->label, 1, wxALL, 5);
+
+   wxBoxSizer* valueSizer = new wxBoxSizer(wxHORIZONTAL);
+
+   field->value = new wxTextCtrl(panel, wxID_ANY, value, wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
+   field->value->SetBackgroundColour(wxColour(30, 30, 30));
+   field->value->SetForegroundColour(wxColour(255, 255, 255));
+   field->value->SetMinSize(wxSize(1, 20));
+   valueSizer->Add(field->value, 1, wxALL, 2);
+
+   wxButton* button = new wxButton(panel, wxID_ANY, wxT("..."), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   button->SetBackgroundColour(wxColour(30, 30, 30));
+   button->SetForegroundColour(wxColour(255, 255, 255));
+   button->SetMinSize(wxSize(20, 20));
+   button->SetMaxSize(wxSize(20, 20));
+   button->Bind(wxEVT_BUTTON, &wxTorqueInspector::OnObjectTemplateAssetFieldSelect, this, -1, -1, field);
+   valueSizer->Add(button, 0, wxALL, 2);
+
+   field->sizer->Add(valueSizer, 1, wxEXPAND, 0);
+
+   panelSizer->Add(field->sizer, 1, wxEXPAND, 5);
+}
+
+void wxTorqueInspector::OnObjectTemplateAssetFieldSelect(wxCommandEvent& evt)
+{
+   wxTorqueObjectTemplateAssetField* field = dynamic_cast<wxTorqueObjectTemplateAssetField*>(evt.GetEventUserData());
+   if (field)
+   {
+      mAssetSelectDialog->AssetToTextCtrl(field->value, "ObjectTemplateAsset");
+
+      mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
+
+      if (mSceneObject != NULL)
+         mSceneObject->refresh();
+
+      if (mComponent != NULL)
+         mComponent->mOwnerObject->refresh();
+   }
+}
+
+// -----------------------
+//  MaterialAsset Field
+// -----------------------
+
+void wxTorqueInspector::AddMaterialAssetField(wxPanel* panel, const char* fieldName, const wxString& label, const wxString& value)
+{
+   wxSizer* panelSizer = panel->GetSizer();
+
+   wxTorqueMaterialAssetField* field = new wxTorqueMaterialAssetField();
+   field->fieldName = fieldName;
+   field->sizer = new wxBoxSizer(wxHORIZONTAL);
+
+   field->label = new wxStaticText(panel, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, 0);
+   field->label->Wrap(-1);
+   field->label->SetForegroundColour(wxColour(255, 255, 255));
+   field->sizer->Add(field->label, 1, wxALL, 5);
+
+   wxBoxSizer* valueSizer = new wxBoxSizer(wxHORIZONTAL);
+
+   field->value = new wxTextCtrl(panel, wxID_ANY, value, wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
+   field->value->SetBackgroundColour(wxColour(30, 30, 30));
+   field->value->SetForegroundColour(wxColour(255, 255, 255));
+   field->value->SetMinSize(wxSize(1, 20));
+   valueSizer->Add(field->value, 1, wxALL, 2);
+
+   wxButton* button = new wxButton(panel, wxID_ANY, wxT("..."), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   button->SetBackgroundColour(wxColour(30, 30, 30));
+   button->SetForegroundColour(wxColour(255, 255, 255));
+   button->SetMinSize(wxSize(20, 20));
+   button->SetMaxSize(wxSize(20, 20));
+   button->Bind(wxEVT_BUTTON, &wxTorqueInspector::OnMaterialAssetFieldSelect, this, -1, -1, field);
+   valueSizer->Add(button, 0, wxALL, 2);
+
+   field->sizer->Add(valueSizer, 1, wxEXPAND, 0);
+
+   panelSizer->Add(field->sizer, 1, wxEXPAND, 5);
+}
+
+void wxTorqueInspector::OnMaterialAssetFieldSelect(wxCommandEvent& evt)
+{
+   wxTorqueMaterialAssetField* field = dynamic_cast<wxTorqueMaterialAssetField*>(evt.GetEventUserData());
+   if (field)
+   {
+      mAssetSelectDialog->AssetToTextCtrl(field->value, "MaterialAsset");
+
+      mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
+
+      if (mSceneObject != NULL)
+         mSceneObject->refresh();
+
+      if (mComponent != NULL)
+         mComponent->mOwnerObject->refresh();
+   }
+}
+
+// -----------------------
+//  TextureAsset Field
+// -----------------------
+
+void wxTorqueInspector::AddTextureAssetField(wxPanel* panel, const char* fieldName, const wxString& label, const wxString& value)
+{
+   wxSizer* panelSizer = panel->GetSizer();
+
+   wxTorqueTextureAssetField* field = new wxTorqueTextureAssetField();
+   field->fieldName = fieldName;
+   field->sizer = new wxBoxSizer(wxHORIZONTAL);
+
+   field->label = new wxStaticText(panel, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, 0);
+   field->label->Wrap(-1);
+   field->label->SetForegroundColour(wxColour(255, 255, 255));
+   field->sizer->Add(field->label, 1, wxALL, 5);
+
+   wxBoxSizer* valueSizer = new wxBoxSizer(wxHORIZONTAL);
+
+   field->value = new wxTextCtrl(panel, wxID_ANY, value, wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
+   field->value->SetBackgroundColour(wxColour(30, 30, 30));
+   field->value->SetForegroundColour(wxColour(255, 255, 255));
+   field->value->SetMinSize(wxSize(1, 20));
+   valueSizer->Add(field->value, 1, wxALL, 2);
+
+   wxButton* button = new wxButton(panel, wxID_ANY, wxT("..."), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   button->SetBackgroundColour(wxColour(30, 30, 30));
+   button->SetForegroundColour(wxColour(255, 255, 255));
+   button->SetMinSize(wxSize(20, 20));
+   button->SetMaxSize(wxSize(20, 20));
+   button->Bind(wxEVT_BUTTON, &wxTorqueInspector::OnTextureAssetFieldSelect, this, -1, -1, field);
+   valueSizer->Add(button, 0, wxALL, 2);
+
+   field->sizer->Add(valueSizer, 1, wxEXPAND, 0);
+
+   panelSizer->Add(field->sizer, 1, wxEXPAND, 5);
+}
+
+void wxTorqueInspector::OnTextureAssetFieldSelect(wxCommandEvent& evt)
+{
+   wxTorqueTextureAssetField* field = dynamic_cast<wxTorqueTextureAssetField*>(evt.GetEventUserData());
+   if (field)
+   {
+      mAssetSelectDialog->AssetToTextCtrl(field->value, "TextureAsset");
+
+      mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
+
+      if (mSceneObject != NULL)
+         mSceneObject->refresh();
+
+      if (mComponent != NULL)
+         mComponent->mOwnerObject->refresh();
+   }
+}
+
+// -----------------------
 //  Inspection Functions
 // -----------------------
 
@@ -305,10 +577,11 @@ void wxTorqueInspector::Inspect(SimObject* obj)
    if (!obj)
       return;
 
-   if ( mContentsSizer->GetChildren().size() > 0 )
-      mContentsSizer->Clear(true);
+   Clear();
 
-   mObject = obj;
+   mObject        = obj;
+   mSceneObject   = NULL;
+   mComponent     = NULL;
 
    wxPanel* group;
 
@@ -370,40 +643,43 @@ void wxTorqueInspector::Inspect(SimObject* obj)
             Torque::Con.setData(Torque::Con.TypePoint3F, &pointVal, 0, 1, &val, NULL, 0);
             AddPoint3FField(group, f->pFieldname, wxString(f->pFieldname), pointVal);
          } 
-         
-         // Default to String Field
-         else 
-         {
-            AddStringField(group, f->pFieldname, wxString(f->pFieldname), wxString(val));
-         }
 
-         /*if (dStrcmp(f->pFieldname, "MeshAsset") == 0)
-            propertyGrid->Append(new wxEnumProperty("MeshAsset", wxPG_LABEL, mMeshChoices));
-         else if (f->flag.test(AbstractClassRep::ACRFieldFlags::TextureAssetField))
-         {
-            propertyGrid->Append(new wxEditEnumProperty(f->pFieldname, wxPG_LABEL, *mProjectManager->getTextureAssetChoices(), val));
-         }
+         // ColorF Field
          else if (f->type == Torque::Con.TypeColorF)
          {
             ColorF colorVal;
             Torque::Con.setData(Torque::Con.TypeColorF, &colorVal, 0, 1, &val, NULL, 0);
             wxColour color;
             color.Set(colorVal.red * 255, colorVal.green * 255, colorVal.blue * 255, 255);
-            propertyGrid->Append(new wxColourProperty(f->pFieldname, f->pFieldname, color));
+            //propertyGrid->Append(new wxColourProperty(f->pFieldname, f->pFieldname, color));
          }
-         else if (f->type == Torque::Con.TypeBool)
+         
+         // MeshAsset Field
+         else if (f->flag.test(AbstractClassRep::MeshAssetField))
          {
-            bool boolVal;
-            Torque::Con.setData(Torque::Con.TypeBool, &boolVal, 0, 1, &val, NULL, 0);
-            propertyGrid->Append(new wxBoolProperty(f->pFieldname, f->pFieldname, boolVal));
+            AddMeshAssetField(group, f->pFieldname, wxString(f->pFieldname), wxString(val));
          }
-         else
-            propertyGrid->Append(new wxStringProperty(f->pFieldname, f->pFieldname, val));
-            */
+
+         // TextureAsset Field
+         else if (f->flag.test(AbstractClassRep::TextureAssetField))
+         {
+            AddTextureAssetField(group, f->pFieldname, wxString(f->pFieldname), wxString(val));
+         }
+
+         // ObjectTemplateAsset Field
+         else if (f->flag.test(AbstractClassRep::ObjectTemplateAssetField))
+         {
+            AddObjectTemplateAssetField(group, f->pFieldname, wxString(f->pFieldname), wxString(val));
+         }
+
+         // Default to String Field
+         else 
+         {
+            AddStringField(group, f->pFieldname, wxString(f->pFieldname), wxString(val));
+         }
       }
    }
 
-   /*
    // Get list of dynamic fields and sort by name
    Vector<SimFieldDictionary::Entry *> flist;
    SimFieldDictionary* fieldDictionary = obj->getFieldDictionary();
@@ -412,33 +688,36 @@ void wxTorqueInspector::Inspect(SimObject* obj)
    dQsort(flist.address(), flist.size(), sizeof(SimFieldDictionary::Entry *), compareEntries);
 
    // Add dynamic fields.
-   wxPGProperty* materialsCategory = NULL;
-   wxPGProperty* submeshCategory = NULL;
-   wxPGProperty* otherCategory = NULL;
+   wxPanel* materialsGroup = NULL;
+   wxPanel* submeshGroup   = NULL;
+   wxPanel* otherGroup     = NULL;
    for (U32 i = 0; i < (U32)flist.size(); i++)
    {
       SimFieldDictionary::Entry* entry = flist[i];
 
       if (dStrncmp(entry->slotName, "MaterialAsset", 13) == 0)
       {
-         if (materialsCategory == NULL)
-            materialsCategory = propertyGrid->Append(new wxPropertyCategory("Materials"));
-         propertyGrid->Append(new wxEnumProperty(entry->slotName, wxPG_LABEL, mMaterialChoices));
+         if (materialsGroup == NULL)
+            materialsGroup = AddGroup(this, wxT("Materials"));
+         AddMaterialAssetField(materialsGroup, entry->slotName, wxString(entry->slotName), wxString(entry->value));
       }
       else if (dStrncmp(entry->slotName, "SubMesh", 7) == 0)
       {
-         if (submeshCategory == NULL)
-            submeshCategory = propertyGrid->Append(new wxPropertyCategory("SubMeshes"));
-         propertyGrid->AppendIn(submeshCategory, new wxBoolProperty(entry->slotName, wxPG_LABEL, dAtob(entry->value)));
+         if (submeshGroup == NULL)
+            submeshGroup = AddGroup(this, wxT("SubMeshes"));
+
+         bool boolVal;
+         const char* val = entry->value;
+         Torque::Con.setData(Torque::Con.TypeBool, &boolVal, 0, 1, &val, NULL, 0);
+         AddBoolField(submeshGroup, entry->slotName, wxString(entry->slotName), boolVal);
       }
       else
       {
-         if (otherCategory == NULL)
-            otherCategory = propertyGrid->Append(new wxPropertyCategory("Other"));
-         propertyGrid->AppendIn(otherCategory, new wxStringProperty(entry->slotName, entry->slotName, entry->value));
+         if (otherGroup == NULL)
+            otherGroup = AddGroup(this, wxT("Other"));
+         AddStringField(otherGroup, entry->slotName, wxString(entry->slotName), wxString(entry->value));
       }
    }
-   */
 
    wxSize size = this->GetParent()->GetBestVirtualSize();
    this->GetParent()->SetVirtualSize(size);
@@ -463,11 +742,14 @@ void wxTorqueInspector::Inspect(Scene::BaseComponent* component)
 
 void wxTorqueInspector::Inspect(const AssetDefinition* assetDef)
 {
-   if (mContentsSizer->GetChildren().size() > 0)
-      mContentsSizer->Clear(true);
-
    // Fetch the asset.
    AssetBase* asset = Torque::AssetDatabaseLink.getAssetBase(assetDef->mAssetId);
+
+   Clear();
+
+   mObject        = asset;
+   mSceneObject   = NULL;
+   mComponent     = NULL;
 
    // Determine if this is a material asset.
    bool isMaterialAsset = (dStrcmp(assetDef->mAssetType, "MaterialAsset") == 0);
@@ -524,6 +806,18 @@ void wxTorqueInspector::Inspect(const AssetDefinition* assetDef)
             AddPoint3FField(group, f->pFieldname, wxString(f->pFieldname), pointVal);
          }
 
+         // MeshAsset Field
+         else if (f->flag.test(AbstractClassRep::MeshAssetField))
+         {
+            AddMeshAssetField(group, f->pFieldname, wxString(f->pFieldname), wxString(val));
+         }
+
+         // ObjectTemplateAsset Field
+         else if (f->flag.test(AbstractClassRep::ObjectTemplateAssetField))
+         {
+            AddObjectTemplateAssetField(group, f->pFieldname, wxString(f->pFieldname), wxString(val));
+         }
+
          // Default to String Field
          else
          {
@@ -540,7 +834,7 @@ void wxTorqueInspector::Inspect(const AssetDefinition* assetDef)
    dQsort(flist.address(), flist.size(), sizeof(SimFieldDictionary::Entry *), compareEntries);
 
    // Add dynamic fields.
-   group = AddGroup(this ,wxT("Other"));
+   group = AddGroup(this, wxT("Other"));
    for (U32 i = 0; i < (U32)flist.size(); i++)
    {
       SimFieldDictionary::Entry* entry = flist[i];
@@ -554,12 +848,12 @@ void wxTorqueInspector::Inspect(const AssetDefinition* assetDef)
    }
 
    // Determine if this is a material asset.
-   /*if (isMaterialAsset)
+   if (isMaterialAsset)
    {
-      mSelectedMaterialAsset = dynamic_cast<MaterialAsset*>(asset);
+      MaterialAsset* mSelectedMaterialAsset = dynamic_cast<MaterialAsset*>(asset);
 
-      if (texturesCategory == NULL)
-         texturesCategory = propertyGrid->Append(new wxPropertyCategory("Textures"));
+      if (texturesGroup == NULL)
+         texturesGroup = AddGroup(this, wxT("Textures"));
 
       for (S32 n = 0; n < mSelectedMaterialAsset->getTextureCount(); ++n)
       {
@@ -568,17 +862,17 @@ void wxTorqueInspector::Inspect(const AssetDefinition* assetDef)
          // Texture Asset?
          dSprintf(fieldName, 32, "TextureAsset%d", n);
          const char* textureAssetId = mSelectedMaterialAsset->getDataField(Torque::StringTableLink->insert(fieldName), NULL);
-         propertyGrid->AppendIn(texturesCategory, new wxEditEnumProperty(wxString(fieldName), wxPG_LABEL, *mProjectManager->getTextureAssetChoices(), textureAssetId));
+         AddTextureAssetField(texturesGroup, fieldName, wxString(fieldName), wxString(textureAssetId));
 
          // Texture File?
          dSprintf(fieldName, 32, "TextureFile%d", n);
          const char* texturePath = mSelectedMaterialAsset->expandAssetFilePath(mSelectedMaterialAsset->getDataField(Torque::StringTableLink->insert(fieldName), NULL));
          if (texturePath)
-            propertyGrid->AppendIn(texturesCategory, new wxFileProperty(wxString(fieldName), wxPG_LABEL, wxString(texturePath)));
+            AddFileField(texturesGroup, fieldName, wxString(fieldName), wxString(texturePath));
          else
-            propertyGrid->AppendIn(texturesCategory, new wxFileProperty(wxString(fieldName), wxPG_LABEL, ""));
+            AddFileField(texturesGroup, fieldName, wxString(fieldName), wxString(""));
       }
-   }*/
+   }
 
    wxSize size = this->GetParent()->GetBestVirtualSize();
    this->GetParent()->SetVirtualSize(size);

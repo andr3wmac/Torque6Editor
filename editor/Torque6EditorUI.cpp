@@ -338,7 +338,7 @@ ScenePanel_Objects::ScenePanel_Objects( wxWindow* parent, wxWindowID id, const w
 	
 	ScenePanel_ObjectsContent->Add( objectList, 1, wxALL|wxEXPAND, 1 );
 	
-	InspectorWindow = new wxScrolledWindow( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxVSCROLL );
+	InspectorWindow = new wxScrolledWindow( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxALWAYS_SHOW_SB|wxSIMPLE_BORDER|wxVSCROLL );
 	InspectorWindow->SetScrollRate( 0, 5 );
 	InspectorContents = new wxBoxSizer( wxVERTICAL );
 	
@@ -359,6 +359,7 @@ ScenePanel_Objects::~ScenePanel_Objects()
 
 MaterialsPanel::MaterialsPanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
 {
+	this->SetBackgroundColour( wxColour( 45, 45, 45 ) );
 	m_mgr.SetManagedWindow(this);
 	m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
 	
@@ -378,16 +379,28 @@ MaterialsPanel::MaterialsPanel( wxWindow* parent, wxWindowID id, const wxPoint& 
 	bSizer1->Add( bSizer2, 0, wxEXPAND, 5 );
 	
 	m_materialTree = new wxTreeCtrl( m_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
-	bSizer1->Add( m_materialTree, 1, wxALL|wxEXPAND, 2 );
+	m_materialTree->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	m_materialTree->SetBackgroundColour( wxColour( 30, 30, 30 ) );
 	
-	propertyGrid = new wxPropertyGrid(m_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE);
-	bSizer1->Add( propertyGrid, 1, wxALL|wxEXPAND, 2 );
+	bSizer1->Add( m_materialTree, 1, wxALL|wxEXPAND, 1 );
+	
+	InspectorWindow = new wxScrolledWindow( m_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxVSCROLL );
+	InspectorWindow->SetScrollRate( 0, 5 );
+	InspectorContents = new wxBoxSizer( wxVERTICAL );
+	
+	
+	InspectorWindow->SetSizer( InspectorContents );
+	InspectorWindow->Layout();
+	InspectorContents->Fit( InspectorWindow );
+	bSizer1->Add( InspectorWindow, 1, wxEXPAND | wxALL, 1 );
 	
 	
 	m_panel->SetSizer( bSizer1 );
 	m_panel->Layout();
 	bSizer1->Fit( m_panel );
 	m_materialNotebook = new wxAuiNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_DEFAULT_STYLE );
+	m_materialNotebook->SetBackgroundColour( wxColour( 45, 45, 45 ) );
+	
 	m_mgr.AddPane( m_materialNotebook, wxAuiPaneInfo() .Left() .PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ).CentrePane() );
 	
 	

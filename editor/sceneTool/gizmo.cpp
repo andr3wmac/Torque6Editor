@@ -208,7 +208,7 @@ void Gizmo::render()
    if (mProjectManager->mEditorMode == 0)
    {
       F32 size = camToObject.len() / 4.0f;
-      F32 length = size / 10.0f;
+      F32 length = size / 5.0f;
 
       Torque::Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, position, position + Point3F(size, 0.0f, 0.0f), redColor, NULL);
       Torque::Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, position, position + Point3F(0.0f, size, 0.0f), greenColor, NULL);

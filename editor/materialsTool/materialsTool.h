@@ -39,6 +39,8 @@
 #include <wx/treectrl.h>
 #endif
 
+class wxTorqueInspector;
+
 class MaterialsTreeItemData : public wxTreeItemData
 {
 public:
@@ -61,6 +63,7 @@ class MaterialsTool : public wxEvtHandler, public EditorTool
       Node*                   mSelectedNode;
       MaterialWindow*         mSelectedNodeParent;
       ModuleDefinition*       mSelectedModule;
+      wxTorqueInspector*      mInspector;
       //Vector<MaterialWindow*> mMaterialWindows;
 
       MaterialsTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);

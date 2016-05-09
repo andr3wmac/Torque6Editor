@@ -54,6 +54,13 @@
 #include <scene/object.h>
 #endif
 
+#ifndef __TORQUE6EDITORUI_H__
+#include "../../Torque6EditorUI.h"
+#endif
+
+class ProjectManager;
+class wxTorqueAssetSelectDialog;
+
 class wxTorqueGroup : public wxObject
 {
    public:
@@ -81,6 +88,13 @@ public:
    wxCheckBox*    value;
 };
 
+class wxTorqueFileField : public wxObject
+{
+public:
+   const char*       fieldName;
+   wxFilePickerCtrl* value;
+};
+
 class wxTorquePoint3FField : public wxObject
 {
 public:
@@ -91,16 +105,60 @@ public:
    wxTextCtrl*    zValue;
 };
 
+class wxTorqueMeshAssetField : public wxObject
+{
+public:
+   const char*    fieldName;
+
+   wxBoxSizer*    sizer;
+   wxStaticText*  label;
+   wxTextCtrl*    value;
+};
+
+class wxTorqueObjectTemplateAssetField : public wxObject
+{
+public:
+   const char*    fieldName;
+
+   wxBoxSizer*    sizer;
+   wxStaticText*  label;
+   wxTextCtrl*    value;
+};
+
+class wxTorqueMaterialAssetField : public wxObject
+{
+public:
+   const char*    fieldName;
+
+   wxBoxSizer*    sizer;
+   wxStaticText*  label;
+   wxTextCtrl*    value;
+};
+
+class wxTorqueTextureAssetField : public wxObject
+{
+public:
+   const char*    fieldName;
+
+   wxBoxSizer*    sizer;
+   wxStaticText*  label;
+   wxTextCtrl*    value;
+};
+
 class wxTorqueInspector : public wxPanel
 {
    protected:
-      wxPanel*       mGroupPanel;
-      wxBoxSizer*    mContentsSizer;
-      wxImageList*   mIconList;
+      ProjectManager*   mProjectManager;
+      wxPanel*          mGroupPanel;
+      wxBoxSizer*       mContentsSizer;
+      wxImageList*      mIconList;
 
       SimObject*              mObject;
       Scene::SceneObject*     mSceneObject;
       Scene::BaseComponent*   mComponent;
+
+      // Dialogs
+      wxTorqueAssetSelectDialog* mAssetSelectDialog;
 
    public:
       wxTorqueInspector() : wxPanel()
@@ -108,7 +166,8 @@ class wxTorqueInspector : public wxPanel
          Init();
       }
 
-      wxTorqueInspector(wxWindow *parent,
+      wxTorqueInspector(ProjectManager* projectManager, 
+         wxWindow *parent,
          wxWindowID winid = wxID_ANY,
          const wxPoint& pos = wxDefaultPosition,
          const wxSize& size = wxDefaultSize,
@@ -116,10 +175,12 @@ class wxTorqueInspector : public wxPanel
          const wxString& name = wxPanelNameStr)
          : wxPanel(parent, winid, pos, size, style, name)
       {
+         mProjectManager = projectManager;
          Init();
       }
 
       void Init();
+      void Clear();
 
       // Groups
       wxPanel* AddGroup(wxPanel* panel, const wxString& label);
@@ -133,9 +194,29 @@ class wxTorqueInspector : public wxPanel
       void AddBoolField(wxPanel* panel, const char* fieldName, const wxString& label, bool value);
       void OnBoolFieldChanged(wxCommandEvent& evt);
 
+      // String Field
+      void AddFileField(wxPanel* panel, const char* fieldName, const wxString& label, const wxString& value);
+      void OnFileFieldChanged(wxCommandEvent& evt);
+
       // Point3F Field
       void AddPoint3FField(wxPanel* panel, const char* fieldName, const wxString& label, const Point3F& value);
       void OnPoint3FFieldChanged(wxCommandEvent& evt);
+
+      // MeshAsset Field
+      void AddMeshAssetField(wxPanel* panel, const char* fieldName, const wxString& label, const wxString& value);
+      void OnMeshAssetFieldSelect(wxCommandEvent& evt);
+
+      // ObjectTemplateAsset Field
+      void AddObjectTemplateAssetField(wxPanel* panel, const char* fieldName, const wxString& label, const wxString& value);
+      void OnObjectTemplateAssetFieldSelect(wxCommandEvent& evt);
+
+      // MaterialAsset Field
+      void AddMaterialAssetField(wxPanel* panel, const char* fieldName, const wxString& label, const wxString& value);
+      void OnMaterialAssetFieldSelect(wxCommandEvent& evt);
+
+      // TextureAsset Field
+      void AddTextureAssetField(wxPanel* panel, const char* fieldName, const wxString& label, const wxString& value);
+      void OnTextureAssetFieldSelect(wxCommandEvent& evt);
 
       // Button Field
       void AddButtonField(wxPanel* panel, const char* fieldName, const wxString& label);

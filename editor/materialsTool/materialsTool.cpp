@@ -36,6 +36,7 @@
 #include "materialsTool.h"
 #include "plugins/plugins_shared.h"
 #include "module/moduleManager.h"
+#include "../widgets/wxTorqueInspector/wxTorqueInspector.h"
 
 MaterialsTool::MaterialsTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
    : Parent(_projectManager, _frame, _manager),
@@ -67,7 +68,10 @@ void MaterialsTool::initTool()
    mMaterialsPanel->Connect(wxID_ANY, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MaterialsTool::OnMenuEvent), NULL, this);
    mMaterialsPanel->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(MaterialsTool::OnTreeEvent), NULL, this);
    mMaterialsPanel->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(MaterialsTool::OnTreeMenu), NULL, this);
-   mMaterialsPanel->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(MaterialsTool::OnPropertyChanged), NULL, this);
+
+   // Add TorqueInspector to scene panel objects.
+   mInspector = new wxTorqueInspector(mProjectManager, mMaterialsPanel->InspectorWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+   mMaterialsPanel->InspectorContents->Add(mInspector, 1, wxALL | wxEXPAND, 1);
 
    // Root for material tree
    mMaterialTreeRoot = mMaterialsPanel->m_materialTree->AddRoot("ROOT");
@@ -280,12 +284,13 @@ void MaterialsTool::selectNode(MaterialWindow* parent, Node* node)
 {
    mSelectedNode = node;
    mSelectedNodeParent = parent;
-   wxPropertyGrid* grid = mMaterialsPanel->propertyGrid;
 
-   grid->Clear();
+   mInspector->Clear();
 
    // Standard for all nodes.
-   grid->Append(new wxPropertyCategory("Material Node"));
+   mInspector->AddGroup(mInspector, wxT("Material Node"));
+
+   /*grid->Append(new wxPropertyCategory());
    grid->Append(new wxStringProperty("Name", "Name", node->name));
    grid->Append(new wxPropertyCategory(node->type));
 
@@ -326,14 +331,14 @@ void MaterialsTool::selectNode(MaterialWindow* parent, Node* node)
    if (node->type == "Vec4")
    {
       grid->Append(new wxFloatProperty("Alpha", "Alpha", node->color.alpha));
-   }
+   }*/
 }
 
 void MaterialsTool::OnPropertyChanged(wxPropertyGridEvent& evt)
 {
    if (mSelectedNode == NULL)
       return;
-
+   /*
    wxString name = evt.GetPropertyName();
    wxVariant val = evt.GetPropertyValue();
 
@@ -383,4 +388,5 @@ void MaterialsTool::OnPropertyChanged(wxPropertyGridEvent& evt)
 
    if (mSelectedNodeParent != NULL)
       mSelectedNodeParent->Refresh(false);
+      */
 }

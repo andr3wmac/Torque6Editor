@@ -122,7 +122,7 @@ void SceneTool::initTool()
    mScenePanelObjects = new ScenePanel_Objects(mTabs, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
    // Add TorqueInspector to scene panel objects.
-   mScenePanelInspector = new wxTorqueInspector(mScenePanelObjects->InspectorWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+   mScenePanelInspector = new wxTorqueInspector(mProjectManager, mScenePanelObjects->InspectorWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize);
    mScenePanelObjects->InspectorContents->Add(mScenePanelInspector, 1, wxALL | wxEXPAND, 1);
 
    mTabs->AddPage(mScenePanelObjects, "Objects ", true);
