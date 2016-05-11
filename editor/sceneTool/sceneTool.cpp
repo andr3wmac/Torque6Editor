@@ -33,6 +33,7 @@
 
 // UI generated from wxFormBuilder
 #include "../Torque6EditorUI.h"
+#include "../theme.h"
 
 #include "sceneTool.h"
 #include <bx/bx.h>
@@ -110,13 +111,13 @@ void SceneTool::initTool()
 
    // Load Tabs
    mTabs = new wxFlatNotebook(mScenePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxFNB_NO_X_BUTTON | wxFNB_NO_NAV_BUTTONS);
-   mTabs->SetForegroundColour(wxColour(45, 45, 45));
-   mTabs->SetBackgroundColour(wxColour(45, 45, 45));
-   mTabs->SetGradientColors(wxColour(45, 45, 45), wxColour(45, 45, 45), wxColour(30, 30, 30));
-   mTabs->SetActiveTabColour(wxColour(30, 30, 30));
+   mTabs->SetForegroundColour(Theme::lightBackgroundColor);
+   mTabs->SetBackgroundColour(Theme::lightBackgroundColor);
+   mTabs->SetGradientColors(Theme::lightBackgroundColor, Theme::lightBackgroundColor, Theme::darkBackgroundColor);
+   mTabs->SetActiveTabColour(Theme::darkBackgroundColor);
    mTabs->SetActiveTabTextColour(wxColor(255, 255, 255));
    mTabs->SetNonActiveTabTextColour(wxColor(255, 255, 255));
-   mTabs->SetTabAreaColour(wxColour(45, 45, 45));
+   mTabs->SetTabAreaColour(Theme::lightBackgroundColor);
    
    // Objects tab
    mScenePanelObjects = new ScenePanel_Objects(mTabs, wxID_ANY, wxDefaultPosition, wxDefaultSize);
@@ -137,11 +138,11 @@ void SceneTool::initTool()
    mScenePanelObjects->objectList->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(SceneTool::OnTreeEvent), NULL, this);
    mScenePanelObjects->objectList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneTool::OnTreeMenu), NULL, this);
    /*mScenePanelObjects->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnObjectPropChanged), NULL, this);
-   mScenePanelObjects->propertyGrid->SetEmptySpaceColour(wxColor(30, 30, 30));
-   mScenePanelObjects->propertyGrid->SetMarginColour(wxColor(30, 30, 30));
-   mScenePanelObjects->propertyGrid->SetCellBackgroundColour(wxColor(45, 45, 45));
+   mScenePanelObjects->propertyGrid->SetEmptySpaceColour(wxColor(51, 51, 51));
+   mScenePanelObjects->propertyGrid->SetMarginColour(wxColor(51, 51, 51));
+   mScenePanelObjects->propertyGrid->SetCellBackgroundColour(wxColor(75, 75, 75));
    mScenePanelObjects->propertyGrid->SetCellTextColour(wxColor(255, 255, 255));
-   mScenePanelObjects->propertyGrid->SetCaptionBackgroundColour(wxColor(30, 30, 30));
+   mScenePanelObjects->propertyGrid->SetCaptionBackgroundColour(wxColor(51, 51, 51));
    mScenePanelObjects->propertyGrid->SetCaptionTextColour(wxColor(255, 255, 255));*/
 
    mObjectListRoot = mScenePanelObjects->objectList->AddRoot("ROOT");

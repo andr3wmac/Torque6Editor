@@ -25,6 +25,7 @@
 #include "materialWindow.h"
 #include "materialsTool.h"
 #include "materials/materialAsset.h"
+#include "../theme.h"
 
 wxBEGIN_EVENT_TABLE(MaterialWindow, wxScrolledWindow)
     EVT_PAINT                    (MaterialWindow::OnPaint)
@@ -344,14 +345,14 @@ void MaterialWindow::OnMenuEvent( wxCommandEvent& evt )
 void MaterialWindow::drawNode(wxGCDC& gdc, Node* node)
 {
    // Background
-   gdc.SetBrush(wxBrush(wxColour(75, 75, 75), wxBRUSHSTYLE_SOLID));
+   gdc.SetBrush(wxBrush(Theme::lightBackgroundColor, wxBRUSHSTYLE_SOLID));
    gdc.DrawRoundedRectangle(mWindowX + node->x, mWindowY + node->y, node->width, node->height, 10);
 
    // Title Bar Background
    if ( node->mouseOver || mSelectedNode == node )
       gdc.SetBrush(wxBrush(wxColour(50, 50, 50), wxBRUSHSTYLE_SOLID));
    else
-      gdc.SetBrush(wxBrush(wxColour(30, 30, 30), wxBRUSHSTYLE_SOLID));
+      gdc.SetBrush(wxBrush(Theme::darkBackgroundColor, wxBRUSHSTYLE_SOLID));
    gdc.DrawRoundedRectangle(mWindowX + node->x + 5, mWindowY + node->y + 5, node->width - 10, 30, 10);
 
    // Title Bar Text

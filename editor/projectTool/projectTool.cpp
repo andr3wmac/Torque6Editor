@@ -35,6 +35,7 @@
 #include "../Torque6EditorUI.h"
 
 #include "../widgets/wxTorqueInspector/wxTorqueInspector.h"
+#include "../theme.h"
 
 #include "projectTool.h"
 #include "module/moduleManager.h"
@@ -64,13 +65,13 @@ void ProjectTool::initTool()
 
    // Load Tabs
    mTabs = new wxFlatNotebook(mProjectPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxFNB_NO_X_BUTTON | wxFNB_NO_NAV_BUTTONS);
-   mTabs->SetForegroundColour(wxColour(45, 45, 45));
-   mTabs->SetBackgroundColour(wxColour(45, 45, 45));
-   mTabs->SetGradientColors(wxColour(45, 45, 45), wxColour(45, 45, 45), wxColour(30, 30, 30));
-   mTabs->SetActiveTabColour(wxColour(30, 30, 30));
+   mTabs->SetForegroundColour(Theme::lightBackgroundColor);
+   mTabs->SetBackgroundColour(Theme::lightBackgroundColor);
+   mTabs->SetGradientColors(Theme::lightBackgroundColor, Theme::lightBackgroundColor, Theme::darkBackgroundColor);
+   mTabs->SetActiveTabColour(Theme::darkBackgroundColor);
    mTabs->SetActiveTabTextColour(wxColor(255, 255, 255));
    mTabs->SetNonActiveTabTextColour(wxColor(255, 255, 255));
-   mTabs->SetTabAreaColour(wxColour(45, 45, 45));
+   mTabs->SetTabAreaColour(Theme::lightBackgroundColor);
 
    // Project Tab
    mProjectTab = new ProjectPanel_Project(mTabs);

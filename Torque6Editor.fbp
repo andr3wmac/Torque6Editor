@@ -29,14 +29,14 @@
         <object class="Frame" expanded="0">
             <property name="aui_managed">1</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
-            <property name="bg">45,45,45</property>
+            <property name="bg">75,75,75</property>
             <property name="center">wxBOTH</property>
             <property name="context_help"></property>
             <property name="context_menu">1</property>
             <property name="enabled">1</property>
             <property name="event_handler">impl_virtual</property>
             <property name="extra_style"></property>
-            <property name="fg">45,45,45</property>
+            <property name="fg">75,75,75</property>
             <property name="font"></property>
             <property name="hidden">0</property>
             <property name="id">wxID_ANY</property>
@@ -402,7 +402,7 @@
                 <property name="aui_position"></property>
                 <property name="aui_row"></property>
                 <property name="best_size"></property>
-                <property name="bg">30,30,30</property>
+                <property name="bg">75,75,75</property>
                 <property name="bitmapsize"></property>
                 <property name="caption"></property>
                 <property name="caption_visible">0</property>
@@ -415,7 +415,7 @@
                 <property name="dock_fixed">0</property>
                 <property name="docking">Top</property>
                 <property name="enabled">1</property>
-                <property name="fg">30,30,30</property>
+                <property name="fg">75,75,75</property>
                 <property name="floatable">1</property>
                 <property name="font"></property>
                 <property name="gripper">0</property>
@@ -1728,12 +1728,12 @@
         <object class="Panel" expanded="0">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
-            <property name="bg">45,45,45</property>
+            <property name="bg">75,75,75</property>
             <property name="context_help"></property>
             <property name="context_menu">1</property>
             <property name="enabled">1</property>
             <property name="event_handler">impl_virtual</property>
-            <property name="fg">45,45,45</property>
+            <property name="fg">75,75,75</property>
             <property name="font"></property>
             <property name="hidden">0</property>
             <property name="id">wxID_ANY</property>
@@ -1805,7 +1805,7 @@
                                 <property name="aui_position"></property>
                                 <property name="aui_row"></property>
                                 <property name="best_size"></property>
-                                <property name="bg">30,30,30</property>
+                                <property name="bg">51,51,51</property>
                                 <property name="caption"></property>
                                 <property name="caption_visible">1</property>
                                 <property name="center_pane">0</property>
@@ -1893,7 +1893,7 @@
                                 <property name="aui_position"></property>
                                 <property name="aui_row"></property>
                                 <property name="best_size"></property>
-                                <property name="bg">30,30,30</property>
+                                <property name="bg">51,51,51</property>
                                 <property name="caption"></property>
                                 <property name="caption_visible">1</property>
                                 <property name="center_pane">0</property>
@@ -1981,7 +1981,7 @@
                                 <property name="aui_position"></property>
                                 <property name="aui_row"></property>
                                 <property name="best_size"></property>
-                                <property name="bg">30,30,30</property>
+                                <property name="bg">51,51,51</property>
                                 <property name="caption"></property>
                                 <property name="caption_visible">1</property>
                                 <property name="center_pane">0</property>
@@ -2142,7 +2142,7 @@
         <object class="Panel" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
-            <property name="bg">45,45,45</property>
+            <property name="bg">75,75,75</property>
             <property name="context_help"></property>
             <property name="context_menu">1</property>
             <property name="enabled">1</property>
@@ -2219,7 +2219,7 @@
                                 <property name="aui_position"></property>
                                 <property name="aui_row"></property>
                                 <property name="best_size"></property>
-                                <property name="bg">30,30,30</property>
+                                <property name="bg">51,51,51</property>
                                 <property name="bitmap">Load From File; images\objectIcon.png</property>
                                 <property name="caption"></property>
                                 <property name="caption_visible">1</property>
@@ -2234,7 +2234,7 @@
                                 <property name="dock_fixed">0</property>
                                 <property name="docking">Left</property>
                                 <property name="enabled">1</property>
-                                <property name="fg">30,30,30</property>
+                                <property name="fg">51,51,51</property>
                                 <property name="floatable">1</property>
                                 <property name="focus"></property>
                                 <property name="font"></property>
@@ -2312,7 +2312,7 @@
                                 <property name="aui_position"></property>
                                 <property name="aui_row"></property>
                                 <property name="best_size"></property>
-                                <property name="bg">30,30,30</property>
+                                <property name="bg">51,51,51</property>
                                 <property name="bitmap">Load From File; images/componentIcon.png</property>
                                 <property name="caption"></property>
                                 <property name="caption_visible">1</property>
@@ -2327,7 +2327,7 @@
                                 <property name="dock_fixed">0</property>
                                 <property name="docking">Left</property>
                                 <property name="enabled">0</property>
-                                <property name="fg">30,30,30</property>
+                                <property name="fg">51,51,51</property>
                                 <property name="floatable">1</property>
                                 <property name="focus"></property>
                                 <property name="font"></property>
@@ -2399,6 +2399,7 @@
                                 <property name="BottomDockable">1</property>
                                 <property name="LeftDockable">1</property>
                                 <property name="RightDockable">1</property>
+
                                 <property name="TopDockable">1</property>
                                 <property name="aui_layer"></property>
                                 <property name="aui_name"></property>
@@ -2499,7 +2500,7 @@
                         <property name="aui_position"></property>
                         <property name="aui_row"></property>
                         <property name="best_size"></property>
-                        <property name="bg">30,30,30</property>
+                        <property name="bg">75,75,75</property>
                         <property name="caption"></property>
                         <property name="caption_visible">1</property>
                         <property name="center_pane">0</property>
@@ -2680,7 +2681,7 @@
         <object class="Panel" expanded="1">
             <property name="aui_managed">1</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
-            <property name="bg">45,45,45</property>
+            <property name="bg">75,75,75</property>
             <property name="context_help"></property>
             <property name="context_menu">1</property>
             <property name="enabled">1</property>
@@ -2926,7 +2927,7 @@
                             <property name="aui_position"></property>
                             <property name="aui_row"></property>
                             <property name="best_size"></property>
-                            <property name="bg">30,30,30</property>
+                            <property name="bg">51,51,51</property>
                             <property name="caption"></property>
                             <property name="caption_visible">1</property>
                             <property name="center_pane">0</property>
@@ -3114,7 +3115,7 @@
                 <property name="aui_position"></property>
                 <property name="aui_row"></property>
                 <property name="best_size"></property>
-                <property name="bg">45,45,45</property>
+                <property name="bg">75,75,75</property>
                 <property name="caption"></property>
                 <property name="caption_visible">1</property>
                 <property name="center_pane">1</property>
@@ -3303,7 +3304,7 @@
         <object class="Panel" expanded="0">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
-            <property name="bg">45,45,45</property>
+            <property name="bg">75,75,75</property>
             <property name="context_help"></property>
             <property name="context_menu">1</property>
             <property name="enabled">1</property>
@@ -3362,7 +3363,7 @@
         <object class="Panel" expanded="0">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
-            <property name="bg">45,45,45</property>
+            <property name="bg">75,75,75</property>
             <property name="context_help"></property>
             <property name="context_menu">1</property>
             <property name="enabled">1</property>
@@ -3439,7 +3440,7 @@
                                 <property name="aui_position"></property>
                                 <property name="aui_row"></property>
                                 <property name="best_size"></property>
-                                <property name="bg">30,30,30</property>
+                                <property name="bg">51,51,51</property>
                                 <property name="bitmap">Load From File; images/featureIcon.png</property>
                                 <property name="caption"></property>
                                 <property name="caption_visible">1</property>
@@ -3534,7 +3535,7 @@
                         <property name="aui_position"></property>
                         <property name="aui_row"></property>
                         <property name="best_size"></property>
-                        <property name="bg">30,30,30</property>
+                        <property name="bg">51,51,51</property>
                         <property name="caption"></property>
                         <property name="caption_visible">1</property>
                         <property name="center_pane">0</property>

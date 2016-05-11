@@ -31,6 +31,7 @@
 #include "scene/components/physics/physicsSphereComponent.h"
 #include "scene/components/textComponent.h"
 #include "../wxTorqueAssetBrowser/wxTorqueAssetSelectDialog.h"
+#include "../../theme.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxTorqueInspector, wxPanel)
 
@@ -79,7 +80,7 @@ wxPanel* wxTorqueInspector::AddGroup(wxPanel* panel, const wxString& label)
    panelSizer->Add(group->headerPanel, 0, wxEXPAND, 0);
 
    group->headerButton = new wxButton(group->headerPanel, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW | wxBU_LEFT | wxBORDER_NONE);
-   group->headerButton->SetBackgroundColour(wxColour(30, 30, 30));
+   group->headerButton->SetBackgroundColour(Theme::darkBackgroundColor);
    group->headerButton->SetForegroundColour(wxColour(255, 255, 255));
    group->headerButton->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false));
    group->headerButton->SetBitmap(mIconList->GetBitmap(0));
@@ -136,7 +137,7 @@ void wxTorqueInspector::AddStringField(wxPanel* panel, const char* fieldName, co
    field->sizer->Add(field->label, 1, wxALL, 5);
 
    field->value = new wxTextCtrl(panel, wxID_ANY, value, wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
-   field->value->SetBackgroundColour(wxColour(30, 30, 30));
+   field->value->SetBackgroundColour(Theme::darkBackgroundColor);
    field->value->SetForegroundColour(wxColour(255, 255, 255));
    field->value->SetMinSize(wxSize(10, 20));
    field->value->Bind(wxEVT_TEXT_ENTER, &wxTorqueInspector::OnStringFieldChanged, this, -1, -1, field);
@@ -178,7 +179,7 @@ void wxTorqueInspector::AddBoolField(wxPanel* panel, const char* fieldName, cons
    wxTorqueBoolField* field = new wxTorqueBoolField();
    field->fieldName = fieldName;
    field->value = new wxCheckBox(panel, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-   field->value->SetBackgroundColour(wxColour(45, 45, 45));
+   field->value->SetBackgroundColour(Theme::lightBackgroundColor);
    field->value->SetForegroundColour(wxColour(255, 255, 255));
    field->value->SetValue(value);
    field->value->Bind(wxEVT_CHECKBOX, &wxTorqueInspector::OnBoolFieldChanged, this, -1, -1, field);
@@ -221,7 +222,7 @@ void wxTorqueInspector::AddFileField(wxPanel* panel, const char* fieldName, cons
    sizer->Add(labelCtrl, 1, wxALL, 5);
 
    field->value = new wxFilePickerCtrl(panel, wxID_ANY, value, wxT("Choose File"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
-   field->value->SetBackgroundColour(wxColour(30, 30, 30));
+   field->value->SetBackgroundColour(Theme::darkBackgroundColor);
    field->value->SetForegroundColour(wxColour(255, 255, 255));
    field->value->SetMinSize(wxSize(10, 20));
    field->value->Bind(wxEVT_TEXT_ENTER, &wxTorqueInspector::OnFileFieldChanged, this, -1, -1, field);
@@ -262,21 +263,21 @@ void wxTorqueInspector::AddPoint3FField(wxPanel* panel, const char* fieldName, c
 
    // X Value
    wxTextCtrl* xValueCtrl = new wxTextCtrl(panel, wxID_ANY, wxString::Format(wxT("%g"), value.x), wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
-   xValueCtrl->SetBackgroundColour(wxColour(30, 30, 30));
+   xValueCtrl->SetBackgroundColour(Theme::darkBackgroundColor);
    xValueCtrl->SetForegroundColour(wxColour(255, 255, 255));
    xValueCtrl->SetMinSize(wxSize(10, 20));
    sizer->Add(xValueCtrl, 1, wxALL, 2);
 
    // Y Value
    wxTextCtrl* yValueCtrl = new wxTextCtrl(panel, wxID_ANY, wxString::Format(wxT("%g"), value.y), wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
-   yValueCtrl->SetBackgroundColour(wxColour(30, 30, 30));
+   yValueCtrl->SetBackgroundColour(Theme::darkBackgroundColor);
    yValueCtrl->SetForegroundColour(wxColour(255, 255, 255));
    yValueCtrl->SetMinSize(wxSize(10, 20));
    sizer->Add(yValueCtrl, 1, wxALL, 2);
 
    // Z Value
    wxTextCtrl* zValueCtrl = new wxTextCtrl(panel, wxID_ANY, wxString::Format(wxT("%g"), value.z), wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
-   zValueCtrl->SetBackgroundColour(wxColour(30, 30, 30));
+   zValueCtrl->SetBackgroundColour(Theme::darkBackgroundColor);
    zValueCtrl->SetForegroundColour(wxColour(255, 255, 255));
    zValueCtrl->SetMinSize(wxSize(10, 20));
    sizer->Add(zValueCtrl, 1, wxALL, 2);
@@ -334,7 +335,7 @@ void wxTorqueInspector::AddButtonField(wxPanel* panel, const char* fieldName, co
    rowSizer = new wxBoxSizer(wxHORIZONTAL);
 
    wxButton* valueControl = new wxButton(panel, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE);
-   valueControl->SetBackgroundColour(wxColour(30, 30, 30));
+   valueControl->SetBackgroundColour(Theme::darkBackgroundColor);
    valueControl->SetForegroundColour(wxColour(255, 255, 255));
    rowSizer->Add(valueControl, 1, wxALL, 5);
 
@@ -361,13 +362,13 @@ void wxTorqueInspector::AddMeshAssetField(wxPanel* panel, const char* fieldName,
    wxBoxSizer* valueSizer = new wxBoxSizer(wxHORIZONTAL);
 
    field->value = new wxTextCtrl(panel, wxID_ANY, value, wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
-   field->value->SetBackgroundColour(wxColour(30, 30, 30));
+   field->value->SetBackgroundColour(Theme::darkBackgroundColor);
    field->value->SetForegroundColour(wxColour(255, 255, 255));
    field->value->SetMinSize(wxSize(1, 20));
    valueSizer->Add(field->value, 1, wxALL, 2);
 
    wxButton* button = new wxButton(panel, wxID_ANY, wxT("..."), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
-   button->SetBackgroundColour(wxColour(30, 30, 30));
+   button->SetBackgroundColour(Theme::darkBackgroundColor);
    button->SetForegroundColour(wxColour(255, 255, 255));
    button->SetMinSize(wxSize(20, 20));
    button->SetMaxSize(wxSize(20, 20));
@@ -416,13 +417,13 @@ void wxTorqueInspector::AddObjectTemplateAssetField(wxPanel* panel, const char* 
    wxBoxSizer* valueSizer = new wxBoxSizer(wxHORIZONTAL);
 
    field->value = new wxTextCtrl(panel, wxID_ANY, value, wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
-   field->value->SetBackgroundColour(wxColour(30, 30, 30));
+   field->value->SetBackgroundColour(Theme::darkBackgroundColor);
    field->value->SetForegroundColour(wxColour(255, 255, 255));
    field->value->SetMinSize(wxSize(1, 20));
    valueSizer->Add(field->value, 1, wxALL, 2);
 
    wxButton* button = new wxButton(panel, wxID_ANY, wxT("..."), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
-   button->SetBackgroundColour(wxColour(30, 30, 30));
+   button->SetBackgroundColour(Theme::darkBackgroundColor);
    button->SetForegroundColour(wxColour(255, 255, 255));
    button->SetMinSize(wxSize(20, 20));
    button->SetMaxSize(wxSize(20, 20));
@@ -471,13 +472,13 @@ void wxTorqueInspector::AddMaterialAssetField(wxPanel* panel, const char* fieldN
    wxBoxSizer* valueSizer = new wxBoxSizer(wxHORIZONTAL);
 
    field->value = new wxTextCtrl(panel, wxID_ANY, value, wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
-   field->value->SetBackgroundColour(wxColour(30, 30, 30));
+   field->value->SetBackgroundColour(Theme::darkBackgroundColor);
    field->value->SetForegroundColour(wxColour(255, 255, 255));
    field->value->SetMinSize(wxSize(1, 20));
    valueSizer->Add(field->value, 1, wxALL, 2);
 
    wxButton* button = new wxButton(panel, wxID_ANY, wxT("..."), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
-   button->SetBackgroundColour(wxColour(30, 30, 30));
+   button->SetBackgroundColour(Theme::darkBackgroundColor);
    button->SetForegroundColour(wxColour(255, 255, 255));
    button->SetMinSize(wxSize(20, 20));
    button->SetMaxSize(wxSize(20, 20));
@@ -526,13 +527,13 @@ void wxTorqueInspector::AddTextureAssetField(wxPanel* panel, const char* fieldNa
    wxBoxSizer* valueSizer = new wxBoxSizer(wxHORIZONTAL);
 
    field->value = new wxTextCtrl(panel, wxID_ANY, value, wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxTE_PROCESS_ENTER);
-   field->value->SetBackgroundColour(wxColour(30, 30, 30));
+   field->value->SetBackgroundColour(Theme::darkBackgroundColor);
    field->value->SetForegroundColour(wxColour(255, 255, 255));
    field->value->SetMinSize(wxSize(1, 20));
    valueSizer->Add(field->value, 1, wxALL, 2);
 
    wxButton* button = new wxButton(panel, wxID_ANY, wxT("..."), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
-   button->SetBackgroundColour(wxColour(30, 30, 30));
+   button->SetBackgroundColour(Theme::darkBackgroundColor);
    button->SetForegroundColour(wxColour(255, 255, 255));
    button->SetMinSize(wxSize(20, 20));
    button->SetMaxSize(wxSize(20, 20));

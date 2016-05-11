@@ -30,6 +30,7 @@
 #include "scene/components/physics/physicsBoxComponent.h"
 #include "scene/components/physics/physicsSphereComponent.h"
 #include "scene/components/textComponent.h"
+#include "../../theme.h"
 
 wxTorqueAssetSelectDialog::wxTorqueAssetSelectDialog(ProjectManager* projectManager, wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : wxDialog(parent, id, title, pos, size, style)
 {
@@ -37,14 +38,14 @@ wxTorqueAssetSelectDialog::wxTorqueAssetSelectDialog(ProjectManager* projectMana
    mSelectedAsset    = NULL;
 
    this->SetSizeHints(wxDefaultSize, wxDefaultSize);
-   this->SetBackgroundColour(wxColour(45, 45, 45));
+   this->SetBackgroundColour(Theme::lightBackgroundColor);
 
    wxBoxSizer* bSizer51;
    bSizer51 = new wxBoxSizer(wxVERTICAL);
 
    assetList = new wxTorqueAssetTree(mProjectManager, this, ASSET_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_HIDE_ROOT);
    assetList->SetForegroundColour(wxColour(255, 255, 255));
-   assetList->SetBackgroundColour(wxColour(30, 30, 30));
+   assetList->SetBackgroundColour(Theme::darkBackgroundColor);
    assetList->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(wxTorqueAssetSelectDialog::OnAssetTreeEvent), NULL, this);
 
    bSizer51->Add(assetList, 1, wxALL | wxEXPAND, 1);
@@ -57,14 +58,14 @@ wxTorqueAssetSelectDialog::wxTorqueAssetSelectDialog(ProjectManager* projectMana
 
    m_button6 = new wxButton(this, wxID_ANY, wxT("Select"), wxDefaultPosition, wxDefaultSize, 0 | wxNO_BORDER);
    m_button6->SetForegroundColour(wxColour(255, 255, 255));
-   m_button6->SetBackgroundColour(wxColour(30, 30, 30));
+   m_button6->SetBackgroundColour(Theme::darkBackgroundColor);
    m_button6->Bind(wxEVT_BUTTON, &wxTorqueAssetSelectDialog::OnSelectButton, this, -1, -1, NULL);
 
    bSizer611->Add(m_button6, 0, wxALL, 5);
 
    m_button61 = new wxButton(this, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 | wxNO_BORDER);
    m_button61->SetForegroundColour(wxColour(255, 255, 255));
-   m_button61->SetBackgroundColour(wxColour(30, 30, 30));
+   m_button61->SetBackgroundColour(Theme::darkBackgroundColor);
    m_button61->Bind(wxEVT_BUTTON, &wxTorqueAssetSelectDialog::OnCancelButton, this, -1, -1, NULL);
 
    bSizer611->Add(m_button61, 0, wxALL, 5);
