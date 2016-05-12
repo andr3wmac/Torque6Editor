@@ -109,13 +109,16 @@ void wxTorqueAssetSelectDialog::OnCancelButton(wxCommandEvent& evt)
    EndModal(0);
 }
 
-void wxTorqueAssetSelectDialog::AssetToTextCtrl(wxTextCtrl* textCtrl, const char* filter)
+bool wxTorqueAssetSelectDialog::SelectAsset(wxString& returnValue, const char* filter)
 {
    assetList->ShowAssets(filter);
    ShowModal();
 
    if (mSelectedAsset != NULL)
    {
-      textCtrl->SetValue(wxString(mSelectedAsset->mAssetId));
+      returnValue = wxString(mSelectedAsset->mAssetId);
+      return true;
    }
+
+   return false;
 }

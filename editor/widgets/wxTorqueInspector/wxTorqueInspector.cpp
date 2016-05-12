@@ -30,7 +30,8 @@
 #include "scene/components/physics/physicsBoxComponent.h"
 #include "scene/components/physics/physicsSphereComponent.h"
 #include "scene/components/textComponent.h"
-#include "../wxTorqueAssetBrowser/wxTorqueAssetSelectDialog.h"
+
+#include "../../project/projectManager.h"
 #include "../../theme.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxTorqueInspector, wxPanel)
@@ -52,9 +53,6 @@ void wxTorqueInspector::Init()
 
    mContentsSizer = new wxBoxSizer(wxVERTICAL);
    this->SetSizer(mContentsSizer);
-
-   mAssetSelectDialog = new wxTorqueAssetSelectDialog(mProjectManager, this);
-
    this->Layout();
 }
 
@@ -385,7 +383,9 @@ void wxTorqueInspector::OnMeshAssetFieldSelect(wxCommandEvent& evt)
    wxTorqueMeshAssetField* field = dynamic_cast<wxTorqueMeshAssetField*>(evt.GetEventUserData());
    if (field)
    {
-      mAssetSelectDialog->AssetToTextCtrl(field->value, "MeshAsset");
+      wxString returnValue;
+      if (mProjectManager->selectAsset(returnValue, "MeshAsset"))
+         field->value->SetValue(returnValue);
 
       mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
 
@@ -440,7 +440,9 @@ void wxTorqueInspector::OnObjectTemplateAssetFieldSelect(wxCommandEvent& evt)
    wxTorqueObjectTemplateAssetField* field = dynamic_cast<wxTorqueObjectTemplateAssetField*>(evt.GetEventUserData());
    if (field)
    {
-      mAssetSelectDialog->AssetToTextCtrl(field->value, "ObjectTemplateAsset");
+      wxString returnValue;
+      if (mProjectManager->selectAsset(returnValue, "ObjectTemplateAsset"))
+         field->value->SetValue(returnValue);
 
       mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
 
@@ -495,7 +497,9 @@ void wxTorqueInspector::OnMaterialAssetFieldSelect(wxCommandEvent& evt)
    wxTorqueMaterialAssetField* field = dynamic_cast<wxTorqueMaterialAssetField*>(evt.GetEventUserData());
    if (field)
    {
-      mAssetSelectDialog->AssetToTextCtrl(field->value, "MaterialAsset");
+      wxString returnValue;
+      if (mProjectManager->selectMaterial(returnValue))
+         field->value->SetValue(returnValue);
 
       mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
 
@@ -550,7 +554,9 @@ void wxTorqueInspector::OnTextureAssetFieldSelect(wxCommandEvent& evt)
    wxTorqueTextureAssetField* field = dynamic_cast<wxTorqueTextureAssetField*>(evt.GetEventUserData());
    if (field)
    {
-      mAssetSelectDialog->AssetToTextCtrl(field->value, "TextureAsset");
+      wxString returnValue;
+      if (mProjectManager->selectAsset(returnValue, "TextureAsset"))
+         field->value->SetValue(returnValue);
 
       mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
 
@@ -727,18 +733,20 @@ void wxTorqueInspector::Inspect(SimObject* obj)
 
 void wxTorqueInspector::Inspect(Scene::SceneObject* sceneObject)
 {
-   mObject        = sceneObject;
+   mObject = sceneObject;
+   Inspect(mObject);
+
    mSceneObject   = sceneObject;
    mComponent     = NULL;
-   Inspect(mObject);
 };
 
 void wxTorqueInspector::Inspect(Scene::BaseComponent* component)
 {
-   mObject        = component;
+   mObject = component;
+   Inspect(mObject);
+
    mSceneObject   = NULL;
    mComponent     = component;
-   Inspect(mObject);
 };
 
 void wxTorqueInspector::Inspect(const AssetDefinition* assetDef)

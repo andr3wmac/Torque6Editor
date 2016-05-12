@@ -59,7 +59,6 @@
 #endif
 
 class ProjectManager;
-class wxTorqueAssetSelectDialog;
 
 class wxTorqueGroup : public wxObject
 {
@@ -156,9 +155,6 @@ class wxTorqueInspector : public wxPanel
       SimObject*              mObject;
       Scene::SceneObject*     mSceneObject;
       Scene::BaseComponent*   mComponent;
-
-      // Dialogs
-      wxTorqueAssetSelectDialog* mAssetSelectDialog;
 
    public:
       wxTorqueInspector() : wxPanel()

@@ -89,7 +89,7 @@ class wxTorqueAssetSelectDialog : public wxDialog
       void OnSelectButton(wxCommandEvent& evt);
       void OnCancelButton(wxCommandEvent& evt);
       void OnAssetTreeEvent(wxTreeEvent& evt);
-      void AssetToTextCtrl(wxTextCtrl* textCtrl, const char* filter = NULL);
+      bool SelectAsset(wxString &returnValue, const char* filter = NULL);
 };
 
 #endif // WXTORQUEASSETSELECTDIALOG_H
