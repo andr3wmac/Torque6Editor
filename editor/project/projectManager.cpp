@@ -38,6 +38,10 @@
 // UI generated from wxFormBuilder
 #include "../Torque6EditorUI.h"
 
+#include "../widgets/wxTorqueAssetBrowser/wxTorqueAssetSelectDialog.h"
+#include "../widgets/wxTorqueAssetBrowser/wxTorqueAssetTree.h"
+#include "../theme.h"
+
 #include "projectManager.h"
 #include "module/moduleManager.h"
 #include "scene/components/meshComponent.h"
@@ -112,6 +116,10 @@ void ProjectManager::init(wxString runPath, wxAuiManager* manager, MainFrame* fr
 
    // Toolbar Events
    mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(ProjectManager::OnToolbarEvent), NULL, this);
+
+   // Dialogs
+   mAssetSelectDialog = new wxTorqueAssetSelectDialog(this, mWindow);
+   mMaterialSelectDialog = new wxTorqueAssetSelectDialog(this, mWindow);
 }
 
 bool ProjectManager::openProject(wxString projectPath)
@@ -709,4 +717,14 @@ wxPGChoices* ProjectManager::getTextureAssetChoices()
 {
    refreshChoices();
    return &mTextureAssetChoices;
+}
+
+bool ProjectManager::selectMaterial(wxString& returnMaterialName)
+{
+   return mMaterialSelectDialog->SelectAsset(returnMaterialName, "MaterialAsset");
+}
+
+bool ProjectManager::selectAsset(wxString& returnValue, const char* filter)
+{
+   return mAssetSelectDialog->SelectAsset(returnValue, filter);
 }

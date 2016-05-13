@@ -6,15 +6,14 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include "editor/Torque6EditorUI.h"
-#include "theme.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
 MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
-	this->SetForegroundColour( Theme::lightBackgroundColor );
-	this->SetBackgroundColour( Theme::lightBackgroundColor );
+	this->SetForegroundColour( wxColour( 75, 75, 75 ) );
+	this->SetBackgroundColour( wxColour( 75, 75, 75 ) );
 	m_mgr.SetManagedWindow(this);
 	m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
 	
@@ -104,8 +103,8 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	this->SetMenuBar( mainMenuBar );
 	
 	mainToolbar = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_HORIZONTAL ); 
-	mainToolbar->SetForegroundColour( Theme::lightBackgroundColor );
-	mainToolbar->SetBackgroundColour( Theme::lightBackgroundColor );
+	mainToolbar->SetForegroundColour( wxColour( 75, 75, 75 ) );
+	mainToolbar->SetBackgroundColour( wxColour( 75, 75, 75 ) );
 	
 	mainToolbar->Realize();
 	m_mgr.AddPane( mainToolbar, wxAuiPaneInfo() .Top() .CaptionVisible( false ).CloseButton( false ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( 37,57 ) ).MinSize( wxSize( -1,39 ) ).Layer( 1 ) );
@@ -237,8 +236,8 @@ ProfilerPanel::~ProfilerPanel()
 
 ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
 {
-	this->SetForegroundColour( Theme::lightBackgroundColor );
-	this->SetBackgroundColour( Theme::lightBackgroundColor );
+	this->SetForegroundColour( wxColour( 75, 75, 75 ) );
+	this->SetBackgroundColour( wxColour( 75, 75, 75 ) );
 	
 	ScenePanelContent = new wxBoxSizer( wxVERTICAL );
 	
@@ -247,19 +246,19 @@ ScenePanel::ScenePanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	m_button21 = new wxButton( this, SCENE_NEW, wxT("New"), wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
 	m_button21->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_HIGHLIGHTTEXT ) );
-	m_button21->SetBackgroundColour( Theme::darkBackgroundColor );
+	m_button21->SetBackgroundColour( wxColour( 51, 51, 51 ) );
 	
 	bSizer->Add( m_button21, 1, wxALL, 5 );
 	
 	m_button2 = new wxButton( this, SCENE_OPEN, wxT("Open"), wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
 	m_button2->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_HIGHLIGHTTEXT ) );
-	m_button2->SetBackgroundColour( Theme::darkBackgroundColor );
+	m_button2->SetBackgroundColour( wxColour( 51, 51, 51 ) );
 	
 	bSizer->Add( m_button2, 1, wxALL|wxEXPAND, 5 );
 	
 	m_button4 = new wxButton( this, SCENE_SAVE, wxT("Save"), wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
 	m_button4->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_BTNHIGHLIGHT ) );
-	m_button4->SetBackgroundColour( Theme::darkBackgroundColor );
+	m_button4->SetBackgroundColour( wxColour( 51, 51, 51 ) );
 	
 	bSizer->Add( m_button4, 1, wxALL|wxEXPAND, 5 );
 	
@@ -301,7 +300,7 @@ ScenePanel::~ScenePanel()
 
 ScenePanel_Objects::ScenePanel_Objects( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
 {
-	this->SetBackgroundColour( Theme::lightBackgroundColor );
+	this->SetBackgroundColour( wxColour( 75, 75, 75 ) );
 	
 	ScenePanel_ObjectsContent = new wxBoxSizer( wxVERTICAL );
 	
@@ -309,14 +308,14 @@ ScenePanel_Objects::ScenePanel_Objects( wxWindow* parent, wxWindowID id, const w
 	bSizer6 = new wxBoxSizer( wxHORIZONTAL );
 	
 	addObjectButton = new wxBitmapButton( this, ADD_OBJECT_BUTTON, wxBitmap( wxT("images/objectIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxSize( 28,28 ), wxBU_AUTODRAW|wxNO_BORDER );
-	addObjectButton->SetForegroundColour( Theme::darkBackgroundColor );
-	addObjectButton->SetBackgroundColour( Theme::darkBackgroundColor );
+	addObjectButton->SetForegroundColour( wxColour( 51, 51, 51 ) );
+	addObjectButton->SetBackgroundColour( wxColour( 51, 51, 51 ) );
 	
 	bSizer6->Add( addObjectButton, 0, wxALL, 2 );
 	
 	addComponentButton = new wxBitmapButton( this, ADD_COMPONENT_BUTTON, wxBitmap( wxT("images/componentIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxSize( 28,28 ), wxBU_AUTODRAW|wxNO_BORDER );
-	addComponentButton->SetForegroundColour( Theme::darkBackgroundColor );
-	addComponentButton->SetBackgroundColour( Theme::darkBackgroundColor );
+	addComponentButton->SetForegroundColour( wxColour( 51, 51, 51 ) );
+	addComponentButton->SetBackgroundColour( wxColour( 51, 51, 51 ) );
 	addComponentButton->Enable( false );
 	
 	bSizer6->Add( addComponentButton, 0, wxALL, 2 );
@@ -335,7 +334,7 @@ ScenePanel_Objects::ScenePanel_Objects( wxWindow* parent, wxWindowID id, const w
 	
 	objectList = new wxTreeCtrl( this, OBJECT_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT|wxSIMPLE_BORDER );
 	objectList->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_HIGHLIGHTTEXT ) );
-	objectList->SetBackgroundColour( Theme::lightBackgroundColor );
+	objectList->SetBackgroundColour( wxColour( 75, 75, 75 ) );
 	
 	ScenePanel_ObjectsContent->Add( objectList, 1, wxALL|wxEXPAND, 1 );
 	
@@ -360,7 +359,7 @@ ScenePanel_Objects::~ScenePanel_Objects()
 
 MaterialsPanel::MaterialsPanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
 {
-	this->SetBackgroundColour( Theme::lightBackgroundColor );
+	this->SetBackgroundColour( wxColour( 75, 75, 75 ) );
 	m_mgr.SetManagedWindow(this);
 	m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
 	
@@ -381,7 +380,7 @@ MaterialsPanel::MaterialsPanel( wxWindow* parent, wxWindowID id, const wxPoint& 
 	
 	m_materialTree = new wxTreeCtrl( m_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
 	m_materialTree->SetForegroundColour( wxColour( 255, 255, 255 ) );
-	m_materialTree->SetBackgroundColour( Theme::darkBackgroundColor );
+	m_materialTree->SetBackgroundColour( wxColour( 51, 51, 51 ) );
 	
 	bSizer1->Add( m_materialTree, 1, wxALL|wxEXPAND, 1 );
 	
@@ -400,7 +399,7 @@ MaterialsPanel::MaterialsPanel( wxWindow* parent, wxWindowID id, const wxPoint& 
 	m_panel->Layout();
 	bSizer1->Fit( m_panel );
 	m_materialNotebook = new wxAuiNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_DEFAULT_STYLE );
-	m_materialNotebook->SetBackgroundColour( Theme::lightBackgroundColor );
+	m_materialNotebook->SetBackgroundColour( wxColour( 75, 75, 75 ) );
 	
 	m_mgr.AddPane( m_materialNotebook, wxAuiPaneInfo() .Left() .PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ).CentrePane() );
 	
@@ -446,7 +445,7 @@ ProjectPanel::~ProjectPanel()
 
 ProjectPanel_Project::ProjectPanel_Project( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
 {
-	this->SetBackgroundColour( Theme::lightBackgroundColor );
+	this->SetBackgroundColour( wxColour( 75, 75, 75 ) );
 	
 	wxBoxSizer* bSizer5;
 	bSizer5 = new wxBoxSizer( wxVERTICAL );
@@ -462,7 +461,7 @@ ProjectPanel_Project::~ProjectPanel_Project()
 
 ProjectPanel_Assets::ProjectPanel_Assets( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
 {
-	this->SetBackgroundColour( Theme::lightBackgroundColor );
+	this->SetBackgroundColour( wxColour( 75, 75, 75 ) );
 	
 	wxBoxSizer* bSizer51;
 	bSizer51 = new wxBoxSizer( wxVERTICAL );
@@ -471,7 +470,7 @@ ProjectPanel_Assets::ProjectPanel_Assets( wxWindow* parent, wxWindowID id, const
 	bSizer61 = new wxBoxSizer( wxHORIZONTAL );
 	
 	m_bpButton11 = new wxBitmapButton( this, wxID_ANY, wxBitmap( wxT("images/featureIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxSize( 28,28 ), wxBU_AUTODRAW|wxNO_BORDER );
-	m_bpButton11->SetBackgroundColour( Theme::darkBackgroundColor );
+	m_bpButton11->SetBackgroundColour( wxColour( 51, 51, 51 ) );
 	
 	bSizer61->Add( m_bpButton11, 0, wxALL, 2 );
 	
@@ -480,7 +479,7 @@ ProjectPanel_Assets::ProjectPanel_Assets( wxWindow* parent, wxWindowID id, const
 	
 	assetList = new wxTreeCtrl( this, ASSET_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
 	assetList->SetForegroundColour( wxColour( 255, 255, 255 ) );
-	assetList->SetBackgroundColour( Theme::darkBackgroundColor );
+	assetList->SetBackgroundColour( wxColour( 51, 51, 51 ) );
 	
 	bSizer51->Add( assetList, 1, wxALL|wxEXPAND, 1 );
 	

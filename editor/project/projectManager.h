@@ -51,6 +51,9 @@ typedef void (*shutdownFunc)();
 class ProjectManager;
 class MainFrame;
 class wxAuiManager;
+class SelectMaterialDialog;
+class wxTorqueAssetSelectDialog;
+class wxTorqueAssetTree;
 
 // Editor Camera
 class EditorCamera
@@ -156,6 +159,10 @@ class ProjectManager : public wxEvtHandler, public Debug::DebugMode
       Vector<ModuleInfo>   mModuleList;
       wxPGChoices          mTextureAssetChoices;
 
+      // Dialogs
+      wxTorqueAssetSelectDialog* mAssetSelectDialog;
+      wxTorqueAssetSelectDialog* mMaterialSelectDialog;
+
       Graphics::ViewTableEntry* mRenderLayer4View;
       Graphics::ViewTableEntry* mEditorOverlayView;
 
@@ -164,6 +171,9 @@ class ProjectManager : public wxEvtHandler, public Debug::DebugMode
       void runProject();
       void addObjectTemplateAsset(wxString assetID, Point3F position);
       void addMeshAsset(wxString assetID, Point3F position);
+
+      bool selectMaterial(wxString& returnMaterialName);
+      bool selectAsset(wxString& returnValue, const char* filter = NULL);
 
       void refreshChoices();
       void refreshModuleList();
