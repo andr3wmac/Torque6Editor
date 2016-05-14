@@ -35,8 +35,8 @@
 
 #include "consoleTool.h"
 
-ConsoleTool::ConsoleTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
-   : Parent(_projectManager, _frame, _manager),
+ConsoleTool::ConsoleTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+   : Parent(_EditorManager, _frame, _manager),
      mConsolePanel(NULL)
 {
 

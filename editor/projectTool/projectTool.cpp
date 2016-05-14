@@ -43,8 +43,8 @@
 #include <bx/bx.h>
 #include <bx/fpumath.h>
 
-ProjectTool::ProjectTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
-   : Parent(_projectManager, _frame, _manager),
+ProjectTool::ProjectTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+   : Parent(_EditorManager, _frame, _manager),
      mProjectPanel(NULL),
      mSelectedModule(NULL),
      mSelectedAssetDef(NULL),
@@ -85,7 +85,7 @@ void ProjectTool::initTool()
    mProjectPanel->ProjectPanelContent->Add(mTabs, 1, wxEXPAND | wxALL, 5);
 
    // Add TorqueInspector to scene panel objects.
-   mAssetsInspector = new wxTorqueInspector(mProjectManager, mAssetsTab->InspectorWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+   mAssetsInspector = new wxTorqueInspector(mEditorManager, mAssetsTab->InspectorWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize);
    mAssetsTab->InspectorContents->Add(mAssetsInspector, 1, wxALL | wxEXPAND, 1);
 
    // Assets Icons
@@ -124,7 +124,7 @@ void ProjectTool::openTool()
    paneInfo.Show();
    mManager->Update();
 
-   if (mProjectManager->mProjectLoaded)
+   if (mEditorManager->mProjectLoaded)
       refresh();
 }
 
@@ -399,7 +399,7 @@ void ProjectTool::refreshAssetList()
    mAssetsTab->assetList->DeleteAllItems();
    mAssetListRoot = mAssetsTab->assetList->AddRoot("ROOT");
 
-   Vector<ModuleInfo>* modules = mProjectManager->getModuleList();
+   Vector<ModuleInfo>* modules = mEditorManager->getModuleList();
 
    const char* currentModuleID = "";
    wxTreeItemId currentModuleTreeID = mAssetListRoot;

@@ -23,8 +23,8 @@
 #ifndef _GIZMO_H_
 #define _GIZMO_H_
 
-#ifndef _PROJECTMANAGER_H_
-#include "../project/projectManager.h"
+#ifndef EDITORMANAGER_H
+#include "../editorManager.h"
 #endif
 
 #ifndef _SCENE_OBJECT_H_
@@ -55,7 +55,7 @@ class Gizmo
       Point3F  mSelectedScale;
 
    public:
-      ProjectManager*         mProjectManager;
+      EditorManager*         mEditorManager;
       Scene::SceneObject*     mSelectedObject;
       Scene::BaseComponent*   mSelectedComponent;
 

@@ -41,7 +41,7 @@ END_EVENT_TABLE()
 
 void wxTorqueAssetTree::Init()
 {
-   SetImageList(mProjectManager->mCommonIcons);
+   SetImageList(mEditorManager->mCommonIcons);
 }
 
 void wxTorqueAssetTree::ShowAssets(const char* filter)
@@ -54,7 +54,7 @@ void wxTorqueAssetTree::ShowAssets(const char* filter)
    DeleteAllItems();
    wxTreeItemId mAssetListRoot = AddRoot("ROOT");
 
-   Vector<ModuleInfo>* modules = mProjectManager->getModuleList();
+   Vector<ModuleInfo>* modules = mEditorManager->getModuleList();
 
    const char* currentModuleID = "";
    wxTreeItemId currentModuleTreeID = mAssetListRoot;

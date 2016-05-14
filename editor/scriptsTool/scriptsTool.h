@@ -23,8 +23,8 @@
 #ifndef _SCRIPTS_TOOL_H_
 #define _SCRIPTS_TOOL_H_
 
-#ifndef _PROJECTMANAGER_H_
-#include "../project/projectManager.h"
+#ifndef EDITORMANAGER_H
+#include "../editorManager.h"
 #endif
 
 #ifndef __TORQUE6EDITORUI_H__
@@ -57,7 +57,7 @@ class ScriptsTool : public wxEvtHandler, public EditorTool
       wxImageList*      mIconList;
 
    public:
-      ScriptsTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
+      ScriptsTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
       ~ScriptsTool();
 
       void loadProject(const wxString& projectName, const wxString& projectPath);

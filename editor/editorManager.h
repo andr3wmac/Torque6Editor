@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright (c) 2015 Andrew Mac
+// Copyright (c) 2016 Andrew Mac
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to
@@ -20,8 +20,8 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _PROJECTMANAGER_H_
-#define _PROJECTMANAGER_H_
+#ifndef EDITORMANAGER_H
+#define EDITORMANAGER_H
  
 #ifndef _PLUGINS_SHARED_H
 #include <plugins/plugins_shared.h>
@@ -48,7 +48,7 @@
 typedef int (*initFunc)(int argc, const char **argv, HWND windowHWND);
 typedef void (*shutdownFunc)();
 
-class ProjectManager;
+class EditorManager;
 class MainFrame;
 class wxAuiManager;
 class SelectMaterialDialog;
@@ -59,7 +59,7 @@ class wxTorqueAssetTree;
 class EditorCamera
 {
    protected:
-      ProjectManager*            mProjectManager;
+      EditorManager*            mEditorManager;
       Rendering::RenderCamera*   mRenderCamera;
       Transform                  mTransform;
       Point3F                    mWorldPosition;
@@ -73,7 +73,7 @@ class EditorCamera
    public:
       EditorCamera();
 
-      void initialize(ProjectManager* projectManager);
+      void initialize(EditorManager* EditorManager);
       void mainLoop();
       void setForwardVelocity(Point3F velocity);
 
@@ -103,10 +103,10 @@ struct ModuleInfo
 class EditorTool
 {
    public:
-      EditorTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
+      EditorTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
 
       bool              mOpen;
-      ProjectManager*   mProjectManager;
+      EditorManager*   mEditorManager;
       MainFrame*        mFrame;
       wxAuiManager*     mManager;
 
@@ -128,11 +128,11 @@ class EditorTool
       static wxVector<EditorTool*> smEditorTools;
 };
 
-class ProjectManager : public wxEvtHandler, public Debug::DebugMode
+class EditorManager : public wxEvtHandler, public Debug::DebugMode
 {
    public:
-      ProjectManager();
-      ~ProjectManager();
+      EditorManager();
+      ~EditorManager();
 
       void init(wxString runPath, wxAuiManager* manager, MainFrame* frame, wxWindow* window);
       bool isProjectLoaded() { return mProjectLoaded; }
@@ -197,4 +197,4 @@ class ProjectManager : public wxEvtHandler, public Debug::DebugMode
       static void onProjectClosed();
 };
  
-#endif // _PROJECTMANAGER_H_
+#endif // EDITORMANAGER_H

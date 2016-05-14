@@ -23,8 +23,8 @@
 #ifndef _PROFILER_TREE_MODEL_H_
 #define _PROFILER_TREE_MODEL_H_
 
-#ifndef _PROJECTMANAGER_H_
-#include "../project/projectManager.h"
+#ifndef EDITORMANAGER_H
+#include "../editorManager.h"
 #endif
 
 #ifndef __TORQUE6EDITORUI_H__

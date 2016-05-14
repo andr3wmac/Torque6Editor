@@ -31,7 +31,7 @@
 #include "scene/components/physics/physicsSphereComponent.h"
 #include "scene/components/textComponent.h"
 
-#include "../../project/projectManager.h"
+#include "../../editorManager.h"
 #include "../../theme.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxTorqueInspector, wxPanel)
@@ -384,7 +384,7 @@ void wxTorqueInspector::OnMeshAssetFieldSelect(wxCommandEvent& evt)
    if (field)
    {
       wxString returnValue;
-      if (mProjectManager->selectAsset(returnValue, "MeshAsset"))
+      if (mEditorManager->selectAsset(returnValue, "MeshAsset"))
          field->value->SetValue(returnValue);
 
       mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
@@ -441,7 +441,7 @@ void wxTorqueInspector::OnObjectTemplateAssetFieldSelect(wxCommandEvent& evt)
    if (field)
    {
       wxString returnValue;
-      if (mProjectManager->selectAsset(returnValue, "ObjectTemplateAsset"))
+      if (mEditorManager->selectAsset(returnValue, "ObjectTemplateAsset"))
          field->value->SetValue(returnValue);
 
       mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
@@ -498,7 +498,7 @@ void wxTorqueInspector::OnMaterialAssetFieldSelect(wxCommandEvent& evt)
    if (field)
    {
       wxString returnValue;
-      if (mProjectManager->selectMaterial(returnValue))
+      if (mEditorManager->selectMaterial(returnValue))
          field->value->SetValue(returnValue);
 
       mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
@@ -555,7 +555,7 @@ void wxTorqueInspector::OnTextureAssetFieldSelect(wxCommandEvent& evt)
    if (field)
    {
       wxString returnValue;
-      if (mProjectManager->selectAsset(returnValue, "TextureAsset"))
+      if (mEditorManager->selectAsset(returnValue, "TextureAsset"))
          field->value->SetValue(returnValue);
 
       mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());

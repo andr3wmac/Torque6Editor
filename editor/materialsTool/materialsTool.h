@@ -23,8 +23,8 @@
 #ifndef _MATERIALS_TOOL_H_
 #define _MATERIALS_TOOL_H_
 
-#ifndef _PROJECTMANAGER_H_
-#include "../project/projectManager.h"
+#ifndef EDITORMANAGER_H
+#include "../editorManager.h"
 #endif
 
 #ifndef __TORQUE6EDITORUI_H__
@@ -66,7 +66,7 @@ class MaterialsTool : public wxEvtHandler, public EditorTool
       wxTorqueInspector*      mInspector;
       //Vector<MaterialWindow*> mMaterialWindows;
 
-      MaterialsTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
+      MaterialsTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
       ~MaterialsTool();
 
       void refreshMaterialList();

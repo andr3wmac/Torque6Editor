@@ -108,7 +108,7 @@ Point3F getPointOnZPlane(F32 z, Point3F p1, Point3F p2)
 }
 
 Gizmo::Gizmo()
-   :  mProjectManager(NULL),
+   :  mEditorManager(NULL),
       mSelectedObject(NULL),
       mSelectedComponent(NULL),
       mSelectRed(false),
@@ -156,7 +156,7 @@ void Gizmo::selectComponent(Scene::BaseComponent* component)
 
 void Gizmo::render()
 {
-   if (mProjectManager == NULL || mSelectedObject == NULL)
+   if (mEditorManager == NULL || mSelectedObject == NULL)
       return;
 
    Point3F position = Point3F::Zero;
@@ -176,7 +176,7 @@ void Gizmo::render()
       rotation = mSelectedComponent->mTransform.getRotationEuler();
    }
 
-   Point3F editorPos = mProjectManager->mEditorCamera.getWorldPosition();
+   Point3F editorPos = mEditorManager->mEditorCamera.getWorldPosition();
    Point3F camToObject = mSelectedObject->mTransform.getPosition() - editorPos;
 
    // Highlight selected axis
@@ -205,54 +205,54 @@ void Gizmo::render()
    return;
 
    // Translate
-   if (mProjectManager->mEditorMode == 0)
+   if (mEditorManager->mEditorMode == 0)
    {
       F32 size = camToObject.len() / 4.0f;
       F32 length = size / 5.0f;
 
-      Torque::Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, position, position + Point3F(size, 0.0f, 0.0f), redColor, NULL);
-      Torque::Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, position, position + Point3F(0.0f, size, 0.0f), greenColor, NULL);
-      Torque::Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, position, position + Point3F(0.0f, 0.0f, size), blueColor, NULL);
+      Torque::Graphics.drawLine3D(mEditorManager->mEditorOverlayView->id, position, position + Point3F(size, 0.0f, 0.0f), redColor, NULL);
+      Torque::Graphics.drawLine3D(mEditorManager->mEditorOverlayView->id, position, position + Point3F(0.0f, size, 0.0f), greenColor, NULL);
+      Torque::Graphics.drawLine3D(mEditorManager->mEditorOverlayView->id, position, position + Point3F(0.0f, 0.0f, size), blueColor, NULL);
 
       // X Axis
       F32 xTransform[16];
       bx::mtxSRT(xTransform, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.57f, position.x + size, position.y, position.z);
-      Torque::Graphics.drawCone3D(mProjectManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), length, length / 2.0, 24, ColorI(128, 0, 0, 255), redColor, xTransform);
+      Torque::Graphics.drawCone3D(mEditorManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), length, length / 2.0, 24, ColorI(128, 0, 0, 255), redColor, xTransform);
 
       // Y Axis
       F32 yTransform[16];
       bx::mtxSRT(yTransform, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, position.x, position.y + size, position.z);
-      Torque::Graphics.drawCone3D(mProjectManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), length, length / 2.0, 24, ColorI(0, 128, 0, 255), greenColor, yTransform);
+      Torque::Graphics.drawCone3D(mEditorManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), length, length / 2.0, 24, ColorI(0, 128, 0, 255), greenColor, yTransform);
 
       // Z Axis
       F32 zTransform[16];
       bx::mtxSRT(zTransform, 1.0f, 1.0f, 1.0f, -1.57f, 0.0f, 0.0f, position.x, position.y, position.z + size);
-      Torque::Graphics.drawCone3D(mProjectManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), length, length / 2.0, 24, ColorI(0, 0, 128, 255), blueColor, zTransform);
+      Torque::Graphics.drawCone3D(mEditorManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), length, length / 2.0, 24, ColorI(0, 0, 128, 255), blueColor, zTransform);
    }
 
    // Rotate
-   if (mProjectManager->mEditorMode == 1)
+   if (mEditorManager->mEditorMode == 1)
    {
       F32 size = camToObject.len() / 6.0f;
 
       // X Axis
       F32 xTransform[16];
       bx::mtxSRT(xTransform, 1.0f, 1.0f, 1.0f, 0.0f, 1.57f, 0.0f, position.x, position.y, position.z);
-      Torque::Graphics.drawCircle3D(mProjectManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), size, 24, redColor, xTransform);
+      Torque::Graphics.drawCircle3D(mEditorManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), size, 24, redColor, xTransform);
 
       // Y Axis
       F32 yTransform[16];
       bx::mtxSRT(yTransform, 1.0f, 1.0f, 1.0f, 1.57f, 0.0f, 0.0f, position.x, position.y, position.z);
-      Torque::Graphics.drawCircle3D(mProjectManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), size, 24, greenColor, yTransform);
+      Torque::Graphics.drawCircle3D(mEditorManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), size, 24, greenColor, yTransform);
 
       // Z Axis
       F32 zTransform[16];
       bx::mtxSRT(zTransform, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, position.x, position.y, position.z);
-      Torque::Graphics.drawCircle3D(mProjectManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), size, 24, blueColor, zTransform);
+      Torque::Graphics.drawCircle3D(mEditorManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), size, 24, blueColor, zTransform);
    }
 
    // Scale
-   if (mProjectManager->mEditorMode == 2)
+   if (mEditorManager->mEditorMode == 2)
    {
       F32 transform[16];
       bx::mtxSRT(transform,
@@ -261,9 +261,9 @@ void Gizmo::render()
          position.x, position.y, position.z);
 
       F32 size = camToObject.len() / 4.0f;
-      Torque::Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), Point3F(size, 0.0f, 0.0f), redColor, transform);
-      Torque::Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), Point3F(0, size, 0.0f), greenColor, transform);
-      Torque::Graphics.drawLine3D(mProjectManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), Point3F(0.0f, 0.0f, size), blueColor, transform);
+      Torque::Graphics.drawLine3D(mEditorManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), Point3F(size, 0.0f, 0.0f), redColor, transform);
+      Torque::Graphics.drawLine3D(mEditorManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), Point3F(0, size, 0.0f), greenColor, transform);
+      Torque::Graphics.drawLine3D(mEditorManager->mEditorOverlayView->id, Point3F(0.0, 0.0, 0.0), Point3F(0.0f, 0.0f, size), blueColor, transform);
    }
 
 }
@@ -277,7 +277,7 @@ bool Gizmo::onMouseLeftDown(int x, int y)
 
    Point3F position = Point3F::Zero;
    Point3F worldRay = Torque::Rendering.screenToWorld(Point2I(x, y));
-   Point3F editorPos = mProjectManager->mEditorCamera.getWorldPosition();
+   Point3F editorPos = mEditorManager->mEditorCamera.getWorldPosition();
 
    if (mSelectedObject != NULL && mSelectedComponent == NULL)
       position = mSelectedObject->mTransform.getPosition();
@@ -345,7 +345,7 @@ bool Gizmo::onMouseMove(int x, int y)
    // Determine the worldspace points we're closest to.
    Point3F dummyPoint;
    Point3F worldRay = Torque::Rendering.screenToWorld(Point2I(x, y));
-   Point3F editorPos = mProjectManager->mEditorCamera.getWorldPosition();
+   Point3F editorPos = mEditorManager->mEditorCamera.getWorldPosition();
    Torque::Rendering.closestPointsOnTwoLines(mSelectRedPoint, dummyPoint, position, Point3F(1000.0f, 0.0f, 0.0f), editorPos, worldRay * 1000.0f);
    Torque::Rendering.closestPointsOnTwoLines(mSelectGreenPoint, dummyPoint, position, Point3F(0.0, 1000.0f, 0.0f), editorPos, worldRay * 1000.0f);
    Torque::Rendering.closestPointsOnTwoLines(mSelectBluePoint, dummyPoint, position, Point3F(0.0f, 0.0f, 1000.0f), editorPos, worldRay * 1000.0f);
@@ -354,15 +354,15 @@ bool Gizmo::onMouseMove(int x, int y)
    if (mDragging)
    {
       // Translate
-      if (mProjectManager->mEditorMode == 0)
+      if (mEditorManager->mEditorMode == 0)
          dragTranslate(x, y);
 
       // Rotate
-      if (mProjectManager->mEditorMode == 1)
+      if (mEditorManager->mEditorMode == 1)
          dragRotate(x, y);
 
       // Scale
-      if (mProjectManager->mEditorMode == 2)
+      if (mEditorManager->mEditorMode == 2)
          dragScale(x, y);
 
       return true;
@@ -382,7 +382,7 @@ bool Gizmo::onMouseMove(int x, int y)
       return false;
 
    // Translate
-   if (mProjectManager->mEditorMode == 0)
+   if (mEditorManager->mEditorMode == 0)
    {
       Point2I ObjectPointScreen = Torque::Rendering.worldToScreen(position);
       Point2I redPointScreen = Torque::Rendering.worldToScreen(mSelectRedPoint);
@@ -398,7 +398,7 @@ bool Gizmo::onMouseMove(int x, int y)
    }
 
    // Rotate
-   if (mProjectManager->mEditorMode == 1)
+   if (mEditorManager->mEditorMode == 1)
    {
       Point3F xPoint = getPointOnXPlane(position.x, editorPos, editorPos + (worldRay * 1000.0f));
       Point3F yPoint = getPointOnYPlane(position.y, editorPos, editorPos + (worldRay * 1000.0f));
@@ -413,7 +413,7 @@ bool Gizmo::onMouseMove(int x, int y)
    }
 
    // Scale
-   if (mProjectManager->mEditorMode == 2)
+   if (mEditorManager->mEditorMode == 2)
    {
       Point2I ObjectPointScreen = Torque::Rendering.worldToScreen(position);
       Point2I redPointScreen = Torque::Rendering.worldToScreen(mSelectRedPoint);
@@ -483,7 +483,7 @@ void Gizmo::dragRotate(int x, int y)
 {
    F32 dragAngle = 0.0f;
    Point3F worldRay = Torque::Rendering.screenToWorld(Point2I(x, y));
-   Point3F editorPos = mProjectManager->mEditorCamera.getWorldPosition();
+   Point3F editorPos = mEditorManager->mEditorCamera.getWorldPosition();
    
    Point3F position = mSelectedObject->mTransform.getPosition();
 

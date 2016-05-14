@@ -54,8 +54,8 @@
 #include "scriptsTool/scriptsTool.h"
 #endif
 
-#ifndef _PROJECTMANAGER_H_
-#include "project/projectManager.h"
+#ifndef EDITORMANAGER_H
+#include "editorManager.h"
 #endif
 
 #ifndef __TORQUE6EDITORUI_H__
@@ -71,8 +71,8 @@ public:
    MainFrame*        mFrame;
    wxAuiManager*     mManager;
 
-   // Torque 6 Project Manager
-   ProjectManager    mProjectManager;
+   // Editor Manager
+   EditorManager     mEditorManager;
 
    // Dialogs
    AboutDialog*      mAboutDialog;

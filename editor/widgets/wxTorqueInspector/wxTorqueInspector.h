@@ -58,7 +58,7 @@
 #include "../../Torque6EditorUI.h"
 #endif
 
-class ProjectManager;
+class EditorManager;
 
 class wxTorqueGroup : public wxObject
 {
@@ -147,7 +147,7 @@ public:
 class wxTorqueInspector : public wxPanel
 {
    protected:
-      ProjectManager*   mProjectManager;
+      EditorManager*   mEditorManager;
       wxPanel*          mGroupPanel;
       wxBoxSizer*       mContentsSizer;
       wxImageList*      mIconList;
@@ -162,7 +162,7 @@ class wxTorqueInspector : public wxPanel
          Init();
       }
 
-      wxTorqueInspector(ProjectManager* projectManager, 
+      wxTorqueInspector(EditorManager* EditorManager, 
          wxWindow *parent,
          wxWindowID winid = wxID_ANY,
          const wxPoint& pos = wxDefaultPosition,
@@ -171,7 +171,7 @@ class wxTorqueInspector : public wxPanel
          const wxString& name = wxPanelNameStr)
          : wxPanel(parent, winid, pos, size, style, name)
       {
-         mProjectManager = projectManager;
+         mEditorManager = EditorManager;
          Init();
       }
 

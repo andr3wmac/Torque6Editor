@@ -32,9 +32,9 @@
 #include "scene/components/textComponent.h"
 #include "../../theme.h"
 
-wxTorqueAssetSelectDialog::wxTorqueAssetSelectDialog(ProjectManager* projectManager, wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : wxDialog(parent, id, title, pos, size, style)
+wxTorqueAssetSelectDialog::wxTorqueAssetSelectDialog(EditorManager* EditorManager, wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : wxDialog(parent, id, title, pos, size, style)
 {
-   mProjectManager   = projectManager;
+   mEditorManager   = EditorManager;
    mSelectedAsset    = NULL;
 
    this->SetSizeHints(wxDefaultSize, wxDefaultSize);
@@ -43,7 +43,7 @@ wxTorqueAssetSelectDialog::wxTorqueAssetSelectDialog(ProjectManager* projectMana
    wxBoxSizer* bSizer51;
    bSizer51 = new wxBoxSizer(wxVERTICAL);
 
-   assetList = new wxTorqueAssetTree(mProjectManager, this, ASSET_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_HIDE_ROOT);
+   assetList = new wxTorqueAssetTree(mEditorManager, this, ASSET_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_HIDE_ROOT);
    assetList->SetForegroundColour(wxColour(255, 255, 255));
    assetList->SetBackgroundColour(Theme::darkBackgroundColor);
    assetList->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(wxTorqueAssetSelectDialog::OnAssetTreeEvent), NULL, this);

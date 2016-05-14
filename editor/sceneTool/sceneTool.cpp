@@ -50,8 +50,8 @@
 #include "scene/components/textComponent.h"
 #include "../widgets/wxTorqueInspector/wxTorqueInspector.h"
 
-SceneTool::SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
-   : Parent(_projectManager, _frame, _manager),
+SceneTool::SceneTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+   : Parent(_EditorManager, _frame, _manager),
      mScenePanel(NULL),
      mSelectedObject(NULL),
      mSelectedComponent(NULL),
@@ -100,7 +100,7 @@ SceneTool::~SceneTool()
 
 void SceneTool::initTool()
 {
-   mGizmo.mProjectManager = mProjectManager;
+   mGizmo.mEditorManager = mEditorManager;
    mScenePanel = new ScenePanel(mFrame, wxID_ANY);
 
    mScenePanel->Connect(wxID_ANY, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SceneTool::OnMenuEvent), NULL, this);
@@ -123,7 +123,7 @@ void SceneTool::initTool()
    mScenePanelObjects = new ScenePanel_Objects(mTabs, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
    // Add TorqueInspector to scene panel objects.
-   mScenePanelInspector = new wxTorqueInspector(mProjectManager, mScenePanelObjects->InspectorWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+   mScenePanelInspector = new wxTorqueInspector(mEditorManager, mScenePanelObjects->InspectorWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize);
    mScenePanelObjects->InspectorContents->Add(mScenePanelInspector, 1, wxALL | wxEXPAND, 1);
 
    mTabs->AddPage(mScenePanelObjects, "Objects ", true);
@@ -179,7 +179,7 @@ void SceneTool::openTool()
    paneInfo.Show();
    mManager->Update();
 
-   if (mProjectManager->mProjectLoaded)
+   if (mEditorManager->mProjectLoaded)
    {
       refreshObjectList();
       refreshChoices();
@@ -195,7 +195,7 @@ void SceneTool::closeTool()
 
 void SceneTool::renderTool()
 {
-   Point3F editorPos = mProjectManager->mEditorCamera.getWorldPosition();
+   Point3F editorPos = mEditorManager->mEditorCamera.getWorldPosition();
    editorPos = editorPos / 10.0f;
    editorPos.x = mFloor(editorPos.x);
    editorPos.y = mFloor(editorPos.y);
@@ -218,7 +218,7 @@ void SceneTool::renderTool()
       {
          Lighting::LightData* light = lightList[n];
 
-         Torque::Graphics.drawBillboard(mProjectManager->mRenderLayer4View->id,
+         Torque::Graphics.drawBillboard(mEditorManager->mRenderLayer4View->id,
                                               mLightIcon,
                                               light->position,
                                               1.0f, 1.0f,
@@ -231,7 +231,7 @@ void SceneTool::renderTool()
    if (mSelectedObject != NULL && mSelectedComponent == NULL)
    {
       // Bounding Box
-      //Torque::Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, mSelectedObject->mBoundingBox, ColorI(255, 255, 255, 255), NULL);
+      //Torque::Graphics.drawBox3D(mEditorManager->mRenderLayer4View->id, mSelectedObject->mBoundingBox, ColorI(255, 255, 255, 255), NULL);
 
       Aabb debugBox;
       debugBox.m_min[0] = mSelectedObject->mBoundingBox.minExtents.x;
@@ -260,7 +260,7 @@ void SceneTool::renderTool()
       boundingBox.transform(mSelectedObject->mTransform.matrix);
 
       // Bounding Box
-      //Torque::Graphics.drawBox3D(mProjectManager->mRenderLayer4View->id, boundingBox, ColorI(0, 255, 0, 255), NULL);
+      //Torque::Graphics.drawBox3D(mEditorManager->mRenderLayer4View->id, boundingBox, ColorI(0, 255, 0, 255), NULL);
 
       Aabb debugBox;
       debugBox.m_min[0] = boundingBox.minExtents.x;
@@ -284,7 +284,7 @@ void SceneTool::renderTool()
 bool SceneTool::onMouseLeftDown(int x, int y)
 {
    Point3F worldRay = Torque::Rendering.screenToWorld(Point2I(x, y));
-   Point3F editorPos = mProjectManager->mEditorCamera.getWorldPosition();
+   Point3F editorPos = mEditorManager->mEditorCamera.getWorldPosition();
 
    if (!mGizmo.onMouseLeftDown(x, y))
    {
@@ -372,7 +372,7 @@ void SceneTool::openAddObjectMenu()
 
    // From Asset
    wxMenu* fromAssetMenu         = new wxMenu;
-   Vector<ModuleInfo>* modules   = mProjectManager->getModuleList();
+   Vector<ModuleInfo>* modules   = mEditorManager->getModuleList();
    const char* currentModuleID   = "";
    wxMenu* currentModuleMenu     = NULL;
    U32 menuItemID                = 1;
@@ -422,7 +422,7 @@ void SceneTool::OnAddObjectMenuEvent(wxCommandEvent& evt)
 
    if (evt.GetId() > 0)
    {
-      Vector<ModuleInfo>* modules = mProjectManager->getModuleList();
+      Vector<ModuleInfo>* modules = mEditorManager->getModuleList();
       U32 menuItemID = 1;
       for (Vector<ModuleInfo>::iterator modulesItr = modules->begin(); modulesItr != modules->end(); ++modulesItr)
       {
@@ -436,9 +436,9 @@ void SceneTool::OnAddObjectMenuEvent(wxCommandEvent& evt)
                {
                   Point3F editorPos;// = Torque::Scene.getActiveCamera()->getPosition();
                   if ( dStrcmp(pAssetDefinition->mAssetType, "ObjectTemplateAsset") == 0 )
-                     mProjectManager->addObjectTemplateAsset(pAssetDefinition->mAssetId, editorPos);
+                     mEditorManager->addObjectTemplateAsset(pAssetDefinition->mAssetId, editorPos);
                   else if (dStrcmp(pAssetDefinition->mAssetType, "MeshAsset") == 0)
-                     mProjectManager->addMeshAsset(pAssetDefinition->mAssetId, editorPos);
+                     mEditorManager->addMeshAsset(pAssetDefinition->mAssetId, editorPos);
                   return;
                }
                menuItemID++;
@@ -636,7 +636,7 @@ void SceneTool::OnObjectPropChanged(wxPropertyGridEvent& evt)
 
 void SceneTool::refreshObjectList()
 {
-   if (!mProjectManager->isProjectLoaded())
+   if (!mEditorManager->isProjectLoaded())
       return;
 
    mRefreshing = true;
@@ -690,7 +690,7 @@ void SceneTool::refreshObjectList()
 
 void SceneTool::refreshChoices()
 {
-   if (!mProjectManager->isProjectLoaded())
+   if (!mEditorManager->isProjectLoaded())
       return;
 
    mRefreshing = true;
@@ -803,7 +803,7 @@ void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* ob
             propertyGrid->Append(new wxEnumProperty("MeshAsset", wxPG_LABEL, mMeshChoices));
          else if (f->flag.test(AbstractClassRep::ACRFieldFlags::TextureAssetField))
          {
-            propertyGrid->Append(new wxEditEnumProperty(f->pFieldname, wxPG_LABEL, *mProjectManager->getTextureAssetChoices(), val));
+            propertyGrid->Append(new wxEditEnumProperty(f->pFieldname, wxPG_LABEL, *mEditorManager->getTextureAssetChoices(), val));
          }
          else if (f->type == Torque::Con.TypeColorF)
          {

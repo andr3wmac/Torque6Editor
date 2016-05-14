@@ -38,8 +38,8 @@
 #include "module/moduleManager.h"
 #include "../widgets/wxTorqueInspector/wxTorqueInspector.h"
 
-MaterialsTool::MaterialsTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
-   : Parent(_projectManager, _frame, _manager),
+MaterialsTool::MaterialsTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+   : Parent(_EditorManager, _frame, _manager),
      mMaterialsPanel(NULL),
      mSelectedNode(NULL),
      mSelectedNodeParent(NULL),
@@ -70,7 +70,7 @@ void MaterialsTool::initTool()
    mMaterialsPanel->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(MaterialsTool::OnTreeMenu), NULL, this);
 
    // Add TorqueInspector to scene panel objects.
-   mInspector = new wxTorqueInspector(mProjectManager, mMaterialsPanel->InspectorWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+   mInspector = new wxTorqueInspector(mEditorManager, mMaterialsPanel->InspectorWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize);
    mMaterialsPanel->InspectorContents->Add(mInspector, 1, wxALL | wxEXPAND, 1);
 
    // Root for material tree
@@ -229,7 +229,7 @@ void MaterialsTool::OnModuleMenuEvent(wxCommandEvent& evt)
 
 void MaterialsTool::refreshMaterialList()
 {
-   if (!mProjectManager->isProjectLoaded())
+   if (!mEditorManager->isProjectLoaded())
       return;
 
    // Clear list.

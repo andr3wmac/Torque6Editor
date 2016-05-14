@@ -23,8 +23,8 @@
 #ifndef _PROFILER_TOOL_H_
 #define _PROFILER_TOOL_H_
 
-#ifndef _PROJECTMANAGER_H_
-#include "../project/projectManager.h"
+#ifndef EDITORMANAGER_H
+#include "../editorManager.h"
 #endif
 
 #ifndef __TORQUE6EDITORUI_H__
@@ -53,7 +53,7 @@ class ProfilerTool : public wxEvtHandler, public EditorTool
       int                  mFrameCount;
 
    public:
-      ProfilerTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
+      ProfilerTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
       ~ProfilerTool();
 
       void processProfilerCachedData(ProfilerCachedData* data, ProfilerTreeModelNode* node);

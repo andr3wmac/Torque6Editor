@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright (c) 2015 Andrew Mac
+// Copyright (c) 2016 Andrew Mac
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to
@@ -36,13 +36,13 @@
 #include "platform/event.h"
 
 // UI generated from wxFormBuilder
-#include "../Torque6EditorUI.h"
+#include "Torque6EditorUI.h"
 
-#include "../widgets/wxTorqueAssetBrowser/wxTorqueAssetSelectDialog.h"
-#include "../widgets/wxTorqueAssetBrowser/wxTorqueAssetTree.h"
-#include "../theme.h"
+#include "widgets/wxTorqueAssetBrowser/wxTorqueAssetSelectDialog.h"
+#include "widgets/wxTorqueAssetBrowser/wxTorqueAssetTree.h"
+#include "theme.h"
 
-#include "projectManager.h"
+#include "editorManager.h"
 #include "module/moduleManager.h"
 #include "scene/components/meshComponent.h"
 #include "rendering/renderCamera.h"
@@ -52,7 +52,7 @@ class TextDropTarget : public wxTextDropTarget
    virtual bool OnDropText(wxCoord x, wxCoord y, const wxString& text);
 };
 
-ProjectManager::ProjectManager()
+EditorManager::EditorManager()
    :  mManager(NULL),
       mFrame(NULL),
       mWindow(NULL),
@@ -72,14 +72,14 @@ ProjectManager::ProjectManager()
    mCommonIcons = new wxImageList(16, 16);
 }
 
-ProjectManager::~ProjectManager()
+EditorManager::~EditorManager()
 {
    closeProject();
    if (mTorque6Library != NULL)
       FreeLibrary(mTorque6Library);
 }
 
-void ProjectManager::init(wxString runPath, wxAuiManager* manager, MainFrame* frame, wxWindow* window)
+void EditorManager::init(wxString runPath, wxAuiManager* manager, MainFrame* frame, wxWindow* window)
 {
    mRunPath = runPath;
    mManager = manager;
@@ -95,19 +95,19 @@ void ProjectManager::init(wxString runPath, wxAuiManager* manager, MainFrame* fr
    mWindow->SetDropTarget(dropTarget);
 
    // Events
-   mWindow->Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(ProjectManager::OnIdle), NULL, this);
-   mWindow->Connect(wxID_ANY, wxEVT_SIZE, wxSizeEventHandler(ProjectManager::OnSize), NULL, this);
+   mWindow->Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(EditorManager::OnIdle), NULL, this);
+   mWindow->Connect(wxID_ANY, wxEVT_SIZE, wxSizeEventHandler(EditorManager::OnSize), NULL, this);
 
    // Mouse Events
-   mWindow->Connect(wxID_ANY, wxEVT_MOTION, wxMouseEventHandler(ProjectManager::OnMouseMove), NULL, this);
-   mWindow->Connect(wxID_ANY, wxEVT_LEFT_DOWN, wxMouseEventHandler(ProjectManager::OnMouseLeftDown), NULL, this);
-   mWindow->Connect(wxID_ANY, wxEVT_LEFT_UP, wxMouseEventHandler(ProjectManager::OnMouseLeftUp), NULL, this);
-   mWindow->Connect(wxID_ANY, wxEVT_RIGHT_DOWN, wxMouseEventHandler(ProjectManager::OnMouseRightDown), NULL, this);
-   mWindow->Connect(wxID_ANY, wxEVT_RIGHT_UP, wxMouseEventHandler(ProjectManager::OnMouseRightUp), NULL, this);
+   mWindow->Connect(wxID_ANY, wxEVT_MOTION, wxMouseEventHandler(EditorManager::OnMouseMove), NULL, this);
+   mWindow->Connect(wxID_ANY, wxEVT_LEFT_DOWN, wxMouseEventHandler(EditorManager::OnMouseLeftDown), NULL, this);
+   mWindow->Connect(wxID_ANY, wxEVT_LEFT_UP, wxMouseEventHandler(EditorManager::OnMouseLeftUp), NULL, this);
+   mWindow->Connect(wxID_ANY, wxEVT_RIGHT_DOWN, wxMouseEventHandler(EditorManager::OnMouseRightDown), NULL, this);
+   mWindow->Connect(wxID_ANY, wxEVT_RIGHT_UP, wxMouseEventHandler(EditorManager::OnMouseRightUp), NULL, this);
 
    // Keyboard Events
-   mWindow->Connect(wxID_ANY, wxEVT_KEY_DOWN, wxKeyEventHandler(ProjectManager::OnKeyDown), NULL, this);
-   mWindow->Connect(wxID_ANY, wxEVT_KEY_UP, wxKeyEventHandler(ProjectManager::OnKeyUp), NULL, this);
+   mWindow->Connect(wxID_ANY, wxEVT_KEY_DOWN, wxKeyEventHandler(EditorManager::OnKeyDown), NULL, this);
+   mWindow->Connect(wxID_ANY, wxEVT_KEY_UP, wxKeyEventHandler(EditorManager::OnKeyUp), NULL, this);
 
    // Add Tools to toolabr
    mFrame->mainToolbar->AddTool(0, wxT("Run"), wxBitmap(wxT("images/run.png"), wxBITMAP_TYPE_ANY), wxNullBitmap, wxITEM_NORMAL, wxT("Run"), wxEmptyString, NULL);
@@ -115,14 +115,14 @@ void ProjectManager::init(wxString runPath, wxAuiManager* manager, MainFrame* fr
    mFrame->mainToolbar->Realize();
 
    // Toolbar Events
-   mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(ProjectManager::OnToolbarEvent), NULL, this);
+   mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(EditorManager::OnToolbarEvent), NULL, this);
 
    // Dialogs
    mAssetSelectDialog = new wxTorqueAssetSelectDialog(this, mWindow);
    mMaterialSelectDialog = new wxTorqueAssetSelectDialog(this, mWindow);
 }
 
-bool ProjectManager::openProject(wxString projectPath)
+bool EditorManager::openProject(wxString projectPath)
 {
    // Load Torque 6 DLL
    if ( mTorque6Library == NULL )
@@ -173,7 +173,7 @@ bool ProjectManager::openProject(wxString projectPath)
    return false;
 }
 
-void ProjectManager::closeProject()
+void EditorManager::closeProject()
 {
    if (!mProjectLoaded) 
       return;
@@ -188,7 +188,7 @@ void ProjectManager::closeProject()
    onProjectClosed();
 }
 
-void ProjectManager::runProject()
+void EditorManager::runProject()
 {
    wxString command = "";
    command.Append(mRunPath);
@@ -197,7 +197,7 @@ void ProjectManager::runProject()
    wxExecute(command);
 }
 
-void ProjectManager::OnToolbarEvent(wxCommandEvent& evt)
+void EditorManager::OnToolbarEvent(wxCommandEvent& evt)
 {
    switch (evt.GetId())
    {
@@ -222,7 +222,7 @@ void ProjectManager::OnToolbarEvent(wxCommandEvent& evt)
    }
 }
 
-void ProjectManager::OnIdle(wxIdleEvent& evt)
+void EditorManager::OnIdle(wxIdleEvent& evt)
 {
    if (mProjectLoaded)
    {
@@ -232,7 +232,7 @@ void ProjectManager::OnIdle(wxIdleEvent& evt)
    }
 }
 
-void ProjectManager::OnSize(wxSizeEvent& evt)
+void EditorManager::OnSize(wxSizeEvent& evt)
 {
    if (!mProjectLoaded)
       return;
@@ -240,7 +240,7 @@ void ProjectManager::OnSize(wxSizeEvent& evt)
    Torque::Engine.resizeWindow(evt.GetSize().GetX(), evt.GetSize().GetY());
 }
 
-void ProjectManager::OnMouseMove(wxMouseEvent& evt)
+void EditorManager::OnMouseMove(wxMouseEvent& evt)
 {
    if (!mProjectLoaded)
       return;
@@ -252,7 +252,7 @@ void ProjectManager::OnMouseMove(wxMouseEvent& evt)
 
    Torque::Engine.mouseMove(evt.GetPosition().x, evt.GetPosition().y);
 }
-void ProjectManager::OnMouseLeftDown(wxMouseEvent& evt)
+void EditorManager::OnMouseLeftDown(wxMouseEvent& evt)
 {
    mWindow->SetFocus();
 
@@ -266,7 +266,7 @@ void ProjectManager::OnMouseLeftDown(wxMouseEvent& evt)
 
    Torque::Engine.mouseButton(true, true);
 }
-void ProjectManager::OnMouseLeftUp(wxMouseEvent& evt)
+void EditorManager::OnMouseLeftUp(wxMouseEvent& evt)
 {
    if (!mProjectLoaded)
       return;
@@ -278,7 +278,7 @@ void ProjectManager::OnMouseLeftUp(wxMouseEvent& evt)
 
    Torque::Engine.mouseButton(false, true);
 }
-void ProjectManager::OnMouseRightDown(wxMouseEvent& evt)
+void EditorManager::OnMouseRightDown(wxMouseEvent& evt)
 {
    mWindow->SetFocus();
 
@@ -292,7 +292,7 @@ void ProjectManager::OnMouseRightDown(wxMouseEvent& evt)
 
    Torque::Engine.mouseButton(true, false);
 }
-void ProjectManager::OnMouseRightUp(wxMouseEvent& evt)
+void EditorManager::OnMouseRightUp(wxMouseEvent& evt)
 {
    if (!mProjectLoaded)
       return;
@@ -340,7 +340,7 @@ KeyCodes getTorqueKeyCode(int key)
    return KEY_NULL;
 }
 
-void ProjectManager::OnKeyDown(wxKeyEvent& evt)
+void EditorManager::OnKeyDown(wxKeyEvent& evt)
 {
    if (!mProjectLoaded)
       return;
@@ -369,7 +369,7 @@ void ProjectManager::OnKeyDown(wxKeyEvent& evt)
    Torque::Engine.keyDown(torqueKey);
 }
 
-void ProjectManager::OnKeyUp(wxKeyEvent& evt)
+void EditorManager::OnKeyUp(wxKeyEvent& evt)
 {
    if (!mProjectLoaded)
       return;
@@ -398,7 +398,7 @@ void ProjectManager::OnKeyUp(wxKeyEvent& evt)
    Torque::Engine.keyUp(torqueKey);
 }
 
-void ProjectManager::render(Rendering::RenderCamera* camera)
+void EditorManager::render(Rendering::RenderCamera* camera)
 {
    //Torque::bgfx.setViewRect(mEditorOverlayView->id, 0, 0, *Torque::Rendering.windowWidth, *Torque::Rendering.windowHeight);
    //Torque::bgfx.setViewTransform(mEditorOverlayView->id, camera->viewMatrix, camera->projectionMatrix, BGFX_VIEW_STEREO, NULL);
@@ -410,22 +410,22 @@ void ProjectManager::render(Rendering::RenderCamera* camera)
 // Project Tool Management
 wxVector<EditorTool*> EditorTool::smEditorTools;
 
-EditorTool::EditorTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
+EditorTool::EditorTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
    :  mOpen(false),
-      mProjectManager(_projectManager),
+      mEditorManager(_EditorManager),
       mFrame(_frame),
       mManager(_manager)
 {
    //
 }
 
-void ProjectManager::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
+void EditorManager::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
    for(unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->onProjectLoaded(projectName, projectPath);
 }
 
-void ProjectManager::onProjectClosed()
+void EditorManager::onProjectClosed()
 {
    for(unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->onProjectClosed();
@@ -446,9 +446,9 @@ EditorCamera::EditorCamera()
    mTransform.set(Point3F(0.0f, 0.0f, 0.0f), VectorF(0.0f, 0.0f, 0.0f), VectorF(1.0f, 1.0f, 1.0f));
 }
 
-void EditorCamera::initialize(ProjectManager* projectManager)
+void EditorCamera::initialize(EditorManager* EditorManager)
 {
-   mProjectManager   = projectManager;
+   mEditorManager   = EditorManager;
    mRenderCamera     = Torque::Rendering.getPriorityRenderCamera();
 }
 
@@ -592,17 +592,17 @@ bool TextDropTarget::OnDropText(wxCoord x, wxCoord y, const wxString& text)
    return true;
 }
 
-void ProjectManager::addObjectTemplateAsset(wxString assetID, Point3F position)
+void EditorManager::addObjectTemplateAsset(wxString assetID, Point3F position)
 {
    _addObjectTemplateAsset(assetID, position);
 }
 
-void ProjectManager::addMeshAsset(wxString assetID, Point3F position)
+void EditorManager::addMeshAsset(wxString assetID, Point3F position)
 {
    _addMeshAsset(assetID, position);
 }
 
-void ProjectManager::refreshChoices()
+void EditorManager::refreshChoices()
 {
    if (!isProjectLoaded())
       return;
@@ -624,7 +624,7 @@ void ProjectManager::refreshChoices()
    }
 }
 
-void ProjectManager::refreshModuleList()
+void EditorManager::refreshModuleList()
 {
    mModuleList.clear();
    Vector<const AssetDefinition*> assetDefinitions = Torque::AssetDatabaseLink.getDeclaredAssets();
@@ -707,24 +707,24 @@ void ProjectManager::refreshModuleList()
    }
 }
 
-Vector<ModuleInfo>* ProjectManager::getModuleList()
+Vector<ModuleInfo>* EditorManager::getModuleList()
 {
    refreshModuleList();
    return &mModuleList;
 }
 
-wxPGChoices* ProjectManager::getTextureAssetChoices()
+wxPGChoices* EditorManager::getTextureAssetChoices()
 {
    refreshChoices();
    return &mTextureAssetChoices;
 }
 
-bool ProjectManager::selectMaterial(wxString& returnMaterialName)
+bool EditorManager::selectMaterial(wxString& returnMaterialName)
 {
    return mMaterialSelectDialog->SelectAsset(returnMaterialName, "MaterialAsset");
 }
 
-bool ProjectManager::selectAsset(wxString& returnValue, const char* filter)
+bool EditorManager::selectAsset(wxString& returnValue, const char* filter)
 {
    return mAssetSelectDialog->SelectAsset(returnValue, filter);
 }

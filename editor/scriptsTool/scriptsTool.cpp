@@ -42,8 +42,8 @@
 
 #include "scriptsTool.h"
 
-ScriptsTool::ScriptsTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
-   : Parent(_projectManager, _frame, _manager),
+ScriptsTool::ScriptsTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+   : Parent(_EditorManager, _frame, _manager),
      mScriptsPanel( NULL )
 {
    Catalogue::AddLexerModule(&lmTorqueScript);
@@ -89,8 +89,8 @@ void ScriptsTool::openTool()
    paneInfo.Show();
    mManager->Update();
 
-   if ( mProjectManager->isProjectLoaded() )
-      loadProject(mProjectManager->mProjectName, mProjectManager->mProjectPath);
+   if ( mEditorManager->isProjectLoaded() )
+      loadProject(mEditorManager->mProjectName, mEditorManager->mProjectPath);
 }
 
 void ScriptsTool::closeTool()

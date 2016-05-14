@@ -62,21 +62,21 @@
 #include "wxTorqueAssetTree.h"
 #endif
 
-#ifndef _PROJECTMANAGER_H_
-#include "../../project/projectManager.h"
+#ifndef EDITORMANAGER_H
+#include "../../editorManager.h"
 #endif
 
 class wxTorqueAssetSelectDialog : public wxDialog
 {
    protected:
-      ProjectManager*         mProjectManager;
+      EditorManager*         mEditorManager;
       wxButton*               m_button6;
       wxButton*               m_button61;
       wxTorqueAssetTree*      assetList;
       const AssetDefinition*  mSelectedAsset;
 
    public:
-      wxTorqueAssetSelectDialog(ProjectManager* projectManager,
+      wxTorqueAssetSelectDialog(EditorManager* EditorManager,
          wxWindow* parent,
          wxWindowID id = wxID_ANY, 
          const wxString& title = wxT("Select Asset"), 

@@ -56,15 +56,15 @@ bool Torque6Editor::OnInit()
 #endif
 
    // Torque 6 Project Manager
-   mProjectManager.init(runPath, mManager, mFrame, mFrame->mainPanel);
+   mEditorManager.init(runPath, mManager, mFrame, mFrame->mainPanel);
 
    // Tools
-   EditorTool::smEditorTools.push_back(new ProjectTool(&mProjectManager, mFrame, mManager));
-   EditorTool::smEditorTools.push_back(new ConsoleTool(&mProjectManager, mFrame, mManager));
-   EditorTool::smEditorTools.push_back(new MaterialsTool(&mProjectManager, mFrame, mManager));
-   EditorTool::smEditorTools.push_back(new ProfilerTool(&mProjectManager, mFrame, mManager));
-   EditorTool::smEditorTools.push_back(new SceneTool(&mProjectManager, mFrame, mManager));
-   EditorTool::smEditorTools.push_back(new ScriptsTool(&mProjectManager, mFrame, mManager));
+   EditorTool::smEditorTools.push_back(new ProjectTool(&mEditorManager, mFrame, mManager));
+   EditorTool::smEditorTools.push_back(new ConsoleTool(&mEditorManager, mFrame, mManager));
+   EditorTool::smEditorTools.push_back(new MaterialsTool(&mEditorManager, mFrame, mManager));
+   EditorTool::smEditorTools.push_back(new ProfilerTool(&mEditorManager, mFrame, mManager));
+   EditorTool::smEditorTools.push_back(new SceneTool(&mEditorManager, mFrame, mManager));
+   EditorTool::smEditorTools.push_back(new ScriptsTool(&mEditorManager, mFrame, mManager));
 
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->initTool();
@@ -76,14 +76,14 @@ bool Torque6Editor::OnInit()
       if (command == "-project")
       {
          wxString path = argv[2];
-         mProjectManager.openProject(path);
+         mEditorManager.openProject(path);
          mManager->Update();
       }
    }
    else {
       wxDirDialog openFolder(mFrame, wxT("Select Project Folder"), wxGetCwd());
       if (openFolder.ShowModal() == wxID_OK)
-         mProjectManager.openProject(openFolder.GetPath());
+         mEditorManager.openProject(openFolder.GetPath());
 
       mManager->Update();
    }
@@ -103,7 +103,7 @@ Torque6Editor::~Torque6Editor()
    // Dialogs
    //mAboutDialog->Destroy();
 
-   mProjectManager.closeProject();
+   mEditorManager.closeProject();
 }
 
 void Torque6Editor::OnMenuEvent(wxCommandEvent& evt)
@@ -119,15 +119,15 @@ void Torque6Editor::OnMenuEvent(wxCommandEvent& evt)
          break;
 
       case MENU_CAMERA_SLOW:
-         mProjectManager.mEditorCameraSpeed = 0.1f;
+         mEditorManager.mEditorCameraSpeed = 0.1f;
          break;
 
       case MENU_CAMERA_NORMAL:
-         mProjectManager.mEditorCameraSpeed = 0.5f;
+         mEditorManager.mEditorCameraSpeed = 0.5f;
          break;
 
       case MENU_CAMERA_FAST:
-         mProjectManager.mEditorCameraSpeed = 1.0f;
+         mEditorManager.mEditorCameraSpeed = 1.0f;
          break;
 
       case MENU_PROJECT:

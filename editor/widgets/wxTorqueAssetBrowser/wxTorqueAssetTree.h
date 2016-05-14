@@ -58,8 +58,8 @@
 #include "../../Torque6EditorUI.h"
 #endif
 
-#ifndef _PROJECTMANAGER_H_
-#include "../../project/projectManager.h"
+#ifndef EDITORMANAGER_H
+#include "../../editorManager.h"
 #endif
 
 class ModuleTreeItemData : public wxTreeItemData
@@ -98,7 +98,7 @@ public:
 class wxTorqueAssetTree : public wxTreeCtrl
 {
    protected:
-      ProjectManager*   mProjectManager;
+      EditorManager*   mEditorManager;
 
    public:
       wxTorqueAssetTree() : wxTreeCtrl()
@@ -106,7 +106,7 @@ class wxTorqueAssetTree : public wxTreeCtrl
          Init();
       }
 
-      wxTorqueAssetTree(ProjectManager* projectManager,
+      wxTorqueAssetTree(EditorManager* EditorManager,
          wxWindow *parent,
          wxWindowID winid = wxID_ANY,
          const wxPoint& pos = wxDefaultPosition,
@@ -116,7 +116,7 @@ class wxTorqueAssetTree : public wxTreeCtrl
          const wxString& name = wxPanelNameStr)
          : wxTreeCtrl(parent, winid, pos, size, style, validator, name)
       {
-         mProjectManager = projectManager;
+         mEditorManager = EditorManager;
          Init();
       }
 

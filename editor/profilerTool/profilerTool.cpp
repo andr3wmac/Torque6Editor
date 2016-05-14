@@ -35,8 +35,8 @@
 
 #include "profilerTool.h"
 
-ProfilerTool::ProfilerTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager)
-   : Parent(_projectManager, _frame, _manager),
+ProfilerTool::ProfilerTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+   : Parent(_EditorManager, _frame, _manager),
      mProfilerPanel( NULL )
 {
    mFrameCount = 50;

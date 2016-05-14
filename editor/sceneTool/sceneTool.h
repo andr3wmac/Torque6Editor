@@ -23,8 +23,8 @@
 #ifndef _SCENE_TOOL_H_
 #define _SCENE_TOOL_H_
 
-#ifndef _PROJECTMANAGER_H_
-#include "../project/projectManager.h"
+#ifndef EDITORMANAGER_H
+#include "../editorManager.h"
 #endif
 
 #ifndef __TORQUE6EDITORUI_H__
@@ -94,7 +94,7 @@ class SceneTool : public wxEvtHandler, public EditorTool
       TextureObject* mLightIcon;
 
    public:
-      SceneTool(ProjectManager* _projectManager, MainFrame* _frame, wxAuiManager* _manager);
+      SceneTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
       ~SceneTool();
 
       void refreshClassLists();
