@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright (c) 2015 Andrew Mac
+// Copyright (c) 2016 Andrew Mac
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to
@@ -20,57 +20,53 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _SCRIPTS_TOOL_H_
-#define _SCRIPTS_TOOL_H_
-
-#ifndef EDITORMANAGER_H
-#include "../editorManager.h"
+#ifndef EDITORCAMERA_H
+#define EDITORCAMERA_H
+ 
+#ifndef _PLUGINS_SHARED_H
+#include <plugins/plugins_shared.h>
 #endif
 
-#ifndef __TORQUE6EDITORUI_H__
-#include "../Torque6EditorUI.h"
+#ifndef _RENDER_CAMERA_H_
+#include "rendering/renderCamera.h"
 #endif
 
-#ifndef _WX_TREECTRL_H_BASE_
-#include <wx/treectrl.h>
+#ifndef _CAMERA_COMPONENT_H_
+#include "scene/components/cameraComponent.h"
 #endif
 
-class ScriptTreeItemData : public wxTreeItemData
+class EditorManager;
+
+// Editor Camera
+class EditorCamera
 {
-public:
-   wxString scriptPath;
-   wxString scriptName;
-   
-   ScriptTreeItemData(wxString _scriptPath, wxString _scriptName)
-      :  scriptPath(_scriptPath),
-         scriptName(_scriptName)
-   {
-   }
-};
-
-class ScriptsTool : public wxEvtHandler, public EditorTool
-{
-   typedef EditorTool Parent;
-
    protected:
-      ScriptsPanel*     mScriptsPanel;
-      wxImageList*      mIconList;
+      EditorManager*             mEditorManager;
+      Rendering::RenderCamera*   mRenderCamera;
+      Transform                  mTransform;
+      Point3F                    mWorldPosition;
+      Point3F                    mForwardVelocity;
+
+      bool                       mMouseDown;
+      Point2I                    mMouseStart;
+      F32                        mHorizontalAngle;
+      F32                        mVerticalAngle;
 
    public:
-      ScriptsTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
-      ~ScriptsTool();
+      EditorCamera();
 
-      void loadProject(const wxString& projectName, const wxString& projectPath);
-      void findAllScripts(wxTreeItemId treeParent, wxString folder);
+      void initialize(EditorManager* EditorManager);
+      void mainLoop();
+      void setForwardVelocity(Point3F velocity);
 
-      virtual void initTool();
-      virtual void openTool();
-      virtual void closeTool();
+      Rendering::RenderCamera* getRenderCamera() { return mRenderCamera; }
+      Point3F getWorldPosition() { return mWorldPosition; }
 
-      virtual void OnTreeEvent( wxTreeEvent& evt );
-
-      virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
-      virtual void onProjectClosed();
+      bool onMouseLeftDown(int x, int y);
+      bool onMouseLeftUp(int x, int y);
+      bool onMouseRightDown(int x, int y);
+      bool onMouseRightUp(int x, int y);
+      bool onMouseMove(int x, int y);
 };
-
-#endif // _SCRIPTS_TOOL_H_
+ 
+#endif // EDITORCAMERA_H

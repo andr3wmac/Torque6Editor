@@ -20,42 +20,63 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _CONSOLE_TOOL_H_
-#define _CONSOLE_TOOL_H_
+#ifndef _GIZMO_H_
+#define _GIZMO_H_
 
 #ifndef EDITORMANAGER_H
-#include "../editorManager.h"
+#include "editorManager.h"
 #endif
 
-#ifndef __TORQUE6EDITORUI_H__
-#include "../Torque6EditorUI.h"
+#ifndef _SCENE_OBJECT_H_
+#include <scene/object.h>
 #endif
 
-#ifndef _CONSOLEPANEL_H_
-#include "consolePanel.h"
-#endif
-
-#ifndef _WX_TREECTRL_H_BASE_
-#include <wx/treectrl.h>
-#endif
-
-class ConsoleTool : public wxEvtHandler, public EditorTool
+class Gizmo
 {
-   typedef EditorTool Parent;
-
    protected:
-      ConsolePanel*  mConsolePanel;
+      bool     mHovering;
+
+      bool     mSelectRed;
+      bool     mSelectGreen;
+      bool     mSelectBlue;
+      Point3F  mSelectRedPoint;
+      Point3F  mSelectGreenPoint;
+      Point3F  mSelectBluePoint;
+
+      bool     mDragging;
+      bool     mDragRed;
+      bool     mDragBlue;
+      bool     mDragGreen;
+      Point3F  mDownPoint;
+      F32      mDownAngle;
+
+      Point3F  mSelectedPosition;
+      Point3F  mSelectedRotation;
+      Point3F  mSelectedScale;
 
    public:
-      ConsoleTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
-      ~ConsoleTool();
+      EditorManager*         mEditorManager;
+      Scene::SceneObject*     mSelectedObject;
+      Scene::BaseComponent*   mSelectedComponent;
 
-      virtual void initTool();
-      virtual void openTool();
-      virtual void closeTool();
+      F32 mTranslateSnap;
+      F32 mScaleSnap;
+      F32 mRotateSnap;
 
-      virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
-      virtual void onProjectClosed();
+      Gizmo();
+      ~Gizmo();
+
+      void selectObject(Scene::SceneObject* obj);
+      void selectComponent(Scene::BaseComponent* component);
+      void render();
+
+      bool onMouseLeftDown(int x, int y);
+      bool onMouseLeftUp(int x, int y);
+      bool onMouseMove(int x, int y);
+
+      void dragTranslate(int x, int y);
+      void dragRotate(int x, int y);
+      void dragScale(int x, int y);
 };
 
-#endif // _CONSOLE_TOOL_H_
+#endif // _SCENE_TOOL_H_

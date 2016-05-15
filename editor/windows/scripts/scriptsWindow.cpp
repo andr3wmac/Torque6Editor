@@ -32,7 +32,7 @@
 #include <wx/treectrl.h>
 
 // UI generated from wxFormBuilder
-#include "../Torque6EditorUI.h"
+#include "Torque6EditorUI.h"
 
 // Syntax Highlighting
 #include "defsext.h"
@@ -40,9 +40,9 @@
 #include "edit.h"
 #include "TorqueScriptLexer.h"
 
-#include "scriptsTool.h"
+#include "scriptsWindow.h"
 
-ScriptsTool::ScriptsTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+ScriptsWindow::ScriptsWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
    : Parent(_EditorManager, _frame, _manager),
      mScriptsPanel( NULL )
 {
@@ -51,12 +51,12 @@ ScriptsTool::ScriptsTool(EditorManager* _EditorManager, MainFrame* _frame, wxAui
    mIconList = new wxImageList( 16, 16 );
 }
 
-ScriptsTool::~ScriptsTool()
+ScriptsWindow::~ScriptsWindow()
 {
 
 }
 
-void ScriptsTool::initTool()
+void ScriptsWindow::initWindow()
 {
    // Create panel.
    mScriptsPanel = new ScriptsPanel(mFrame, wxID_ANY);
@@ -67,7 +67,7 @@ void ScriptsTool::initTool()
    mScriptsPanel->m_scriptsTree->AssignImageList(mIconList);
 
    // Events
-   mScriptsPanel->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(ScriptsTool::OnTreeEvent), NULL, this);
+   mScriptsPanel->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(ScriptsWindow::OnTreeEvent), NULL, this);
 
    // Add Pane
    mManager->AddPane(mScriptsPanel, wxAuiPaneInfo().Caption("Scripts")
@@ -83,7 +83,7 @@ void ScriptsTool::initTool()
    mManager->Update();
 }
 
-void ScriptsTool::openTool()
+void ScriptsWindow::openWindow()
 {
    wxAuiPaneInfo& paneInfo = mManager->GetPane(mScriptsPanel);
    paneInfo.Show();
@@ -93,20 +93,20 @@ void ScriptsTool::openTool()
       loadProject(mEditorManager->mProjectName, mEditorManager->mProjectPath);
 }
 
-void ScriptsTool::closeTool()
+void ScriptsWindow::closeWindow()
 {
    wxAuiPaneInfo& paneInfo = mManager->GetPane(mScriptsPanel);
    paneInfo.Hide();
    mManager->Update();
 }
 
-void ScriptsTool::loadProject(const wxString& projectName, const wxString& projectPath)
+void ScriptsWindow::loadProject(const wxString& projectName, const wxString& projectPath)
 {
    wxTreeItemId root = mScriptsPanel->m_scriptsTree->AddRoot(projectName, 0);
    findAllScripts(root, projectPath);
 }
 
-void ScriptsTool::findAllScripts(wxTreeItemId treeParent, wxString folder)
+void ScriptsWindow::findAllScripts(wxTreeItemId treeParent, wxString folder)
 {
    wxDir projectDir(folder);
    if ( projectDir.IsOpened() )
@@ -140,7 +140,7 @@ void ScriptsTool::findAllScripts(wxTreeItemId treeParent, wxString folder)
    }
 }
 
-void ScriptsTool::OnTreeEvent( wxTreeEvent& evt )
+void ScriptsWindow::OnTreeEvent( wxTreeEvent& evt )
 {
    //evt.GetItem()
    ScriptTreeItemData* data = dynamic_cast<ScriptTreeItemData*>(mScriptsPanel->m_scriptsTree->GetItemData(evt.GetItem()));
@@ -153,7 +153,7 @@ void ScriptsTool::OnTreeEvent( wxTreeEvent& evt )
    }
 }
 
-void ScriptsTool::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
+void ScriptsWindow::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
    if ( !mOpen ) return;
 
@@ -161,7 +161,7 @@ void ScriptsTool::onProjectLoaded(const wxString& projectName, const wxString& p
    loadProject(projectName, projectPath);
 }
 
-void ScriptsTool::onProjectClosed()
+void ScriptsWindow::onProjectClosed()
 {
    if ( !mOpen ) return;
 

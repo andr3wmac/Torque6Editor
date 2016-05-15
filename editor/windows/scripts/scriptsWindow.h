@@ -20,70 +20,57 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _MATERIALS_TOOL_H_
-#define _MATERIALS_TOOL_H_
+#ifndef SCRIPTS_WINDOW_H
+#define SCRIPTS_WINDOW_H
 
 #ifndef EDITORMANAGER_H
-#include "../editorManager.h"
+#include "editorManager.h"
 #endif
 
 #ifndef __TORQUE6EDITORUI_H__
-#include "../Torque6EditorUI.h"
-#endif
-
-#ifndef _MATERIAL_WINDOW_H_
-#include "materialWindow.h"
+#include "Torque6EditorUI.h"
 #endif
 
 #ifndef _WX_TREECTRL_H_BASE_
 #include <wx/treectrl.h>
 #endif
 
-class wxTorqueInspector;
-
-class MaterialsTreeItemData : public wxTreeItemData
+class ScriptTreeItemData : public wxTreeItemData
 {
 public:
-   StringTableEntry assetId;
+   wxString scriptPath;
+   wxString scriptName;
    
-   MaterialsTreeItemData(StringTableEntry _assetId)
-      :  assetId(_assetId)
+   ScriptTreeItemData(wxString _scriptPath, wxString _scriptName)
+      :  scriptPath(_scriptPath),
+         scriptName(_scriptName)
    {
    }
 };
 
-class MaterialsTool : public wxEvtHandler, public EditorTool
+class ScriptsWindow : public wxEvtHandler, public EditorWindow
 {
-   typedef EditorTool Parent;
+   typedef EditorWindow Parent;
+
+   protected:
+      ScriptsPanel*     mScriptsPanel;
+      wxImageList*      mIconList;
 
    public:
-      MaterialsPanel*         mMaterialsPanel;
-      wxTreeItemId            mMaterialTreeRoot;
-      wxImageList*            mIconList;
-      Node*                   mSelectedNode;
-      MaterialWindow*         mSelectedNodeParent;
-      ModuleDefinition*       mSelectedModule;
-      wxTorqueInspector*      mInspector;
-      //Vector<MaterialWindow*> mMaterialWindows;
+      ScriptsWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
+      ~ScriptsWindow();
 
-      MaterialsTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
-      ~MaterialsTool();
+      void loadProject(const wxString& projectName, const wxString& projectPath);
+      void findAllScripts(wxTreeItemId treeParent, wxString folder);
 
-      void refreshMaterialList();
-      void selectNode(MaterialWindow* parent, Node* node);
+      virtual void initWindow();
+      virtual void openWindow();
+      virtual void closeWindow();
 
-      virtual void OnMenuEvent(wxCommandEvent& evt);
-      virtual void OnTreeEvent(wxTreeEvent& evt);
-      virtual void OnTreeMenu(wxTreeEvent& evt);
-      virtual void OnModuleMenuEvent(wxCommandEvent& evt);
-      virtual void OnPropertyChanged(wxPropertyGridEvent& evt);
-
-      virtual void initTool();
-      virtual void openTool();
-      virtual void closeTool();
+      virtual void OnTreeEvent( wxTreeEvent& evt );
 
       virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
       virtual void onProjectClosed();
 };
 
-#endif // _MATERIALS_TOOL_H_
+#endif // SCRIPTS_WINDOW_H

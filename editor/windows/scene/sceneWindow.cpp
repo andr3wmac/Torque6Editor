@@ -32,10 +32,10 @@
 #include <wx/treectrl.h>
 
 // UI generated from wxFormBuilder
-#include "../Torque6EditorUI.h"
-#include "../theme.h"
+#include "Torque6EditorUI.h"
+#include "theme.h"
 
-#include "sceneTool.h"
+#include "sceneWindow.h"
 #include <bx/bx.h>
 #include <bx/fpumath.h>
 #include <debugdraw/debugdraw.h>
@@ -48,9 +48,9 @@
 #include "scene/components/physics/physicsBoxComponent.h"
 #include "scene/components/physics/physicsSphereComponent.h"
 #include "scene/components/textComponent.h"
-#include "../widgets/wxTorqueInspector/wxTorqueInspector.h"
+#include "widgets/wxTorqueInspector/wxTorqueInspector.h"
 
-SceneTool::SceneTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+SceneWindow::SceneWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
    : Parent(_EditorManager, _frame, _manager),
      mScenePanel(NULL),
      mSelectedObject(NULL),
@@ -69,7 +69,7 @@ SceneTool::SceneTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiMana
    mTranslateMenu->Append(2, wxT("Snap: 0.5"), wxEmptyString, wxITEM_RADIO);
    mTranslateMenu->Append(3, wxT("Snap: 1.0"), wxEmptyString, wxITEM_RADIO);
    mTranslateMenu->Append(4, wxT("Snap: 5.0"), wxEmptyString, wxITEM_RADIO);
-   mTranslateMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnTranslateMenuEvent), NULL, this);
+   mTranslateMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneWindow::OnTranslateMenuEvent), NULL, this);
 
    // Rotate Menu
    mRotateMenu = new wxMenu;
@@ -78,7 +78,7 @@ SceneTool::SceneTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiMana
    mRotateMenu->Append(2, wxT("Snap: 15 Degrees"), wxEmptyString, wxITEM_RADIO);
    mRotateMenu->Append(3, wxT("Snap: 45 Degrees"), wxEmptyString, wxITEM_RADIO);
    mRotateMenu->Append(4, wxT("Snap: 90 Degrees"), wxEmptyString, wxITEM_RADIO);
-   mRotateMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnRotateMenuEvent), NULL, this);
+   mRotateMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneWindow::OnRotateMenuEvent), NULL, this);
 
    // Scale Menu
    mScaleMenu = new wxMenu;
@@ -87,10 +87,10 @@ SceneTool::SceneTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiMana
    mScaleMenu->Append(2, wxT("Snap: 0.5"), wxEmptyString, wxITEM_RADIO);
    mScaleMenu->Append(3, wxT("Snap: 1.0"), wxEmptyString, wxITEM_RADIO);
    mScaleMenu->Append(4, wxT("Snap: 5.0"), wxEmptyString, wxITEM_RADIO);
-   mScaleMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnScaleMenuEvent), NULL, this);
+   mScaleMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneWindow::OnScaleMenuEvent), NULL, this);
 }
 
-SceneTool::~SceneTool()
+SceneWindow::~SceneWindow()
 {
    mRefreshing = true;
    delete mTranslateMenu;
@@ -98,12 +98,12 @@ SceneTool::~SceneTool()
    delete mScaleMenu;
 }
 
-void SceneTool::initTool()
+void SceneWindow::initWindow()
 {
    mGizmo.mEditorManager = mEditorManager;
    mScenePanel = new ScenePanel(mFrame, wxID_ANY);
 
-   mScenePanel->Connect(wxID_ANY, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SceneTool::OnMenuEvent), NULL, this);
+   mScenePanel->Connect(wxID_ANY, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SceneWindow::OnMenuEvent), NULL, this);
 
    // Object Icons.
    mObjectIconList->Add(wxBitmap("images/objectIcon.png", wxBITMAP_TYPE_PNG));
@@ -135,9 +135,9 @@ void SceneTool::initTool()
    mScenePanelObjects->objectList->AssignImageList(mObjectIconList);
 
    // Object Events
-   mScenePanelObjects->objectList->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(SceneTool::OnTreeEvent), NULL, this);
-   mScenePanelObjects->objectList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneTool::OnTreeMenu), NULL, this);
-   /*mScenePanelObjects->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneTool::OnObjectPropChanged), NULL, this);
+   mScenePanelObjects->objectList->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(SceneWindow::OnTreeEvent), NULL, this);
+   mScenePanelObjects->objectList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneWindow::OnTreeMenu), NULL, this);
+   /*mScenePanelObjects->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneWindow::OnObjectPropChanged), NULL, this);
    mScenePanelObjects->propertyGrid->SetEmptySpaceColour(wxColor(51, 51, 51));
    mScenePanelObjects->propertyGrid->SetMarginColour(wxColor(51, 51, 51));
    mScenePanelObjects->propertyGrid->SetCellBackgroundColour(wxColor(75, 75, 75));
@@ -167,13 +167,13 @@ void SceneTool::initTool()
    mFrame->mainToolbar->Realize();
 
    // Toolbar Dropdown Events
-   mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_TOOL_DROPDOWN_CLICKED, wxCommandEventHandler(SceneTool::OnToolbarDropdownEvent), NULL, this);
+   mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_TOOL_DROPDOWN_CLICKED, wxCommandEventHandler(SceneWindow::OnToolbarDropdownEvent), NULL, this);
 
    // Refresh Mesh and Material Choices
    refreshChoices();
 }
 
-void SceneTool::openTool()
+void SceneWindow::openWindow()
 {
    wxAuiPaneInfo& paneInfo = mManager->GetPane(mScenePanel);
    paneInfo.Show();
@@ -186,14 +186,14 @@ void SceneTool::openTool()
    }
 }
 
-void SceneTool::closeTool()
+void SceneWindow::closeWindow()
 {
    wxAuiPaneInfo& paneInfo = mManager->GetPane(mScenePanel);
    paneInfo.Hide();
    mManager->Update();
 }
 
-void SceneTool::renderTool()
+void SceneWindow::renderWindow()
 {
    Point3F editorPos = mEditorManager->mEditorCamera.getWorldPosition();
    editorPos = editorPos / 10.0f;
@@ -281,7 +281,7 @@ void SceneTool::renderTool()
    }
 }
 
-bool SceneTool::onMouseLeftDown(int x, int y)
+bool SceneWindow::onMouseLeftDown(int x, int y)
 {
    Point3F worldRay = Torque::Rendering.screenToWorld(Point2I(x, y));
    Point3F editorPos = mEditorManager->mEditorCamera.getWorldPosition();
@@ -299,30 +299,31 @@ bool SceneTool::onMouseLeftDown(int x, int y)
    return false;
 }
 
-bool SceneTool::onMouseLeftUp(int x, int y)
+bool SceneWindow::onMouseLeftUp(int x, int y)
 {
    mGizmo.onMouseLeftUp(x, y);
 
-   //if ( mSelectedObject != NULL )
-      //loadObjectProperties(mScenePanelObjects->propertyGrid, mSelectedObject);
-   mScenePanelInspector->Inspect(mSelectedObject);
+   if ( mSelectedComponent != NULL )
+      mScenePanelInspector->Inspect(mSelectedComponent);
+   else if ( mSelectedObject != NULL )
+      mScenePanelInspector->Inspect(mSelectedObject);
 
    return false;
 }
 
-bool SceneTool::onMouseMove(int x, int y)
+bool SceneWindow::onMouseMove(int x, int y)
 {
    mGizmo.onMouseMove(x, y);
    return false;
 }
 
-void SceneTool::onSceneChanged()
+void SceneWindow::onSceneChanged()
 {
    refreshObjectList();
    refreshChoices();
 }
 
-void SceneTool::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
+void SceneWindow::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
    refreshObjectList();
    refreshChoices();
@@ -331,12 +332,12 @@ void SceneTool::onProjectLoaded(const wxString& projectName, const wxString& pro
       mLightIcon = Torque::Graphics.loadTexture("light.png", TextureHandle::BitmapKeepTexture, BGFX_TEXTURE_NONE, false, false);
 }
 
-void SceneTool::onProjectClosed()
+void SceneWindow::onProjectClosed()
 {
 
 }
 
-void SceneTool::OnMenuEvent(wxCommandEvent& evt)
+void SceneWindow::OnMenuEvent(wxCommandEvent& evt)
 {
    if (evt.GetId() == SCENE_NEW)
       Torque::Scene.clear();
@@ -365,7 +366,7 @@ void SceneTool::OnMenuEvent(wxCommandEvent& evt)
    refreshChoices();
 }
 
-void SceneTool::openAddObjectMenu()
+void SceneWindow::openAddObjectMenu()
 {
    wxMenu* menu = new wxMenu;
    menu->Append(0, wxT("Empty Object"));
@@ -405,12 +406,12 @@ void SceneTool::openAddObjectMenu()
    }
    menu->AppendSubMenu(fromAssetMenu, wxT("From Asset"));
 
-   menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnAddObjectMenuEvent), NULL, this);
+   menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneWindow::OnAddObjectMenuEvent), NULL, this);
    mFrame->PopupMenu(menu, wxDefaultPosition);
    delete menu;
 }
 
-void SceneTool::OnAddObjectMenuEvent(wxCommandEvent& evt)
+void SceneWindow::OnAddObjectMenuEvent(wxCommandEvent& evt)
 {
    if (evt.GetId() == 0)
    {
@@ -448,7 +449,7 @@ void SceneTool::OnAddObjectMenuEvent(wxCommandEvent& evt)
    }
 }
 
-void SceneTool::openAddComponentMenu()
+void SceneWindow::openAddComponentMenu()
 {
    wxMenu* menu = new wxMenu;
 
@@ -456,17 +457,17 @@ void SceneTool::openAddComponentMenu()
    for (S32 i = 0; i < mComponentClassList.size(); ++i)
       menu->Append(i, mComponentClassList[i]);
 
-   menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnAddComponentMenuEvent), NULL, this);
+   menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneWindow::OnAddComponentMenuEvent), NULL, this);
    mFrame->PopupMenu(menu, wxDefaultPosition);
    delete menu;
 }
 
-void SceneTool::OnAddComponentMenuEvent(wxCommandEvent& evt)
+void SceneWindow::OnAddComponentMenuEvent(wxCommandEvent& evt)
 {
    addComponent(mSelectedObject, mComponentClassList[evt.GetId()]);
 }
 
-void SceneTool::OnTreeEvent( wxTreeEvent& evt )
+void SceneWindow::OnTreeEvent( wxTreeEvent& evt )
 {
    if (mRefreshing)
       return;
@@ -495,7 +496,7 @@ void SceneTool::OnTreeEvent( wxTreeEvent& evt )
    }
 }
 
-void SceneTool::OnTreeMenu( wxTreeEvent& evt ) 
+void SceneWindow::OnTreeMenu( wxTreeEvent& evt ) 
 { 
    if (evt.GetId() == OBJECT_LIST)
    {
@@ -507,7 +508,7 @@ void SceneTool::OnTreeMenu( wxTreeEvent& evt )
          mMenuObject = Object;
 
          wxMenu* menu = new wxMenu;
-         menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnObjectMenuEvent), NULL, this);
+         menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneWindow::OnObjectMenuEvent), NULL, this);
          menu->Append(0, wxT("Delete Object"));
 
          // Find all components in console namespace list then make a menu.
@@ -530,7 +531,7 @@ void SceneTool::OnTreeMenu( wxTreeEvent& evt )
          mMenuComponent = component;
 
          wxMenu* menu = new wxMenu;
-         menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneTool::OnComponentMenuEvent), NULL, this);
+         menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneWindow::OnComponentMenuEvent), NULL, this);
          menu->Append(0, wxT("Delete Component"));
          mFrame->PopupMenu(menu, wxDefaultPosition);
          delete menu;
@@ -541,7 +542,7 @@ void SceneTool::OnTreeMenu( wxTreeEvent& evt )
    }
 } 
 
-void SceneTool::OnObjectMenuEvent(wxCommandEvent& evt)
+void SceneWindow::OnObjectMenuEvent(wxCommandEvent& evt)
 {
    // Delete Object
    if (evt.GetId() == 0)
@@ -563,7 +564,7 @@ void SceneTool::OnObjectMenuEvent(wxCommandEvent& evt)
       addComponent(mMenuObject, mComponentClassList[evt.GetId() - 1]);
 }
 
-void SceneTool::OnComponentMenuEvent(wxCommandEvent& evt)
+void SceneWindow::OnComponentMenuEvent(wxCommandEvent& evt)
 {
    // Delete Object
    if (evt.GetId() == 0)
@@ -579,7 +580,7 @@ void SceneTool::OnComponentMenuEvent(wxCommandEvent& evt)
    }
 }
 
-void SceneTool::OnObjectPropChanged(wxPropertyGridEvent& evt)
+void SceneWindow::OnObjectPropChanged(wxPropertyGridEvent& evt)
 {
    wxString name = evt.GetPropertyName();
    wxVariant val = evt.GetPropertyValue();
@@ -634,7 +635,7 @@ void SceneTool::OnObjectPropChanged(wxPropertyGridEvent& evt)
    mSelectedObject->refresh();
 }
 
-void SceneTool::refreshObjectList()
+void SceneWindow::refreshObjectList()
 {
    if (!mEditorManager->isProjectLoaded())
       return;
@@ -688,7 +689,7 @@ void SceneTool::refreshObjectList()
    mRefreshing = false;
 }
 
-void SceneTool::refreshChoices()
+void SceneWindow::refreshChoices()
 {
    if (!mEditorManager->isProjectLoaded())
       return;
@@ -727,7 +728,7 @@ void SceneTool::refreshChoices()
    mRefreshing = false;
 }
 
-void SceneTool::refreshClassLists()
+void SceneWindow::refreshClassLists()
 {
    mComponentClassList.clear();
 
@@ -736,132 +737,21 @@ void SceneTool::refreshClassLists()
       if (walk->mParent == NULL)
          continue;
 
-      if (dStrcmp(walk->mParent->mName, "BaseComponent") == 0)
-         mComponentClassList.push_back(walk->mName);
+      Namespace* parent = walk->mParent;
+      while (parent != NULL)
+      {
+         if (dStrcmp(parent->mName, "BaseComponent") == 0)
+         {
+            mComponentClassList.push_back(walk->mName);
+            break;
+         }
+
+         parent = parent->mParent;
+      }
    }
 }
 
-static S32 QSORT_CALLBACK compareEntries(const void* a, const void* b)
-{
-   SimFieldDictionary::Entry *fa = *((SimFieldDictionary::Entry **)a);
-   SimFieldDictionary::Entry *fb = *((SimFieldDictionary::Entry **)b);
-   return dStricmp(fa->slotName, fb->slotName);
-}
-
-void SceneTool::loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* obj)
-{
-   /*
-   propertyGrid->Clear();
-
-   Scene::SceneObject* Object = dynamic_cast<Scene::SceneObject*>(obj);
-   if (Object)
-   {
-      propertyGrid->Append(new wxPropertyCategory("SceneObject"));
-      propertyGrid->Append(new wxStringProperty("Name", "Name", Object->getName()));
-   }
-
-   Scene::BaseComponent* component = dynamic_cast<Scene::BaseComponent*>(obj);
-   if (component)
-   {
-      const char* internalName = component->getInternalName();
-      propertyGrid->Append(new wxPropertyCategory("BaseComponent"));
-      propertyGrid->Append(new wxStringProperty("InternalName", "InternalName", internalName));
-   }
-
-   // Add static fields.
-   wxString fieldGroup("");
-   bool addFieldGroup = false;
-   AbstractClassRep::FieldList fieldList = obj->getFieldList();
-   for(Vector<AbstractClassRep::Field>::iterator itr = fieldList.begin(); itr != fieldList.end(); itr++)
-   {
-      const AbstractClassRep::Field* f = itr;
-      if( f->type == AbstractClassRep::DepricatedFieldType ||
-            f->type == AbstractClassRep::EndGroupFieldType) 
-         continue;
-
-      if ( f->type == AbstractClassRep::StartGroupFieldType )
-      {
-         addFieldGroup = true;
-         fieldGroup = f->pGroupname;
-         continue;
-      }
-
-      for (U32 j = 0; S32(j) < f->elementCount; j++)
-      {
-         const char *val = (*f->getDataFn)(obj, Torque::Con.getData(f->type, (void *)(((const char *)obj) + f->offset), j, f->table, f->flag));
-
-         if (!val)
-            continue;
-
-         if (addFieldGroup)
-         {
-            propertyGrid->Append(new wxPropertyCategory(fieldGroup));
-            addFieldGroup = false;
-         }
-
-         if (dStrcmp(f->pFieldname, "MeshAsset") == 0)
-            propertyGrid->Append(new wxEnumProperty("MeshAsset", wxPG_LABEL, mMeshChoices));
-         else if (f->flag.test(AbstractClassRep::ACRFieldFlags::TextureAssetField))
-         {
-            propertyGrid->Append(new wxEditEnumProperty(f->pFieldname, wxPG_LABEL, *mEditorManager->getTextureAssetChoices(), val));
-         }
-         else if (f->type == Torque::Con.TypeColorF)
-         {
-            ColorF colorVal;
-            Torque::Con.setData(Torque::Con.TypeColorF, &colorVal, 0, 1, &val, NULL, 0);
-            wxColour color;
-            color.Set(colorVal.red * 255, colorVal.green * 255, colorVal.blue * 255, 255);
-            propertyGrid->Append(new wxColourProperty(f->pFieldname, f->pFieldname, color));
-         }
-         else if (f->type == Torque::Con.TypeBool)
-         {
-            bool boolVal;
-            Torque::Con.setData(Torque::Con.TypeBool, &boolVal, 0, 1, &val, NULL, 0);
-            propertyGrid->Append(new wxBoolProperty(f->pFieldname, f->pFieldname, boolVal));
-         }
-         else
-            propertyGrid->Append(new wxStringProperty(f->pFieldname, f->pFieldname, val));
-      }
-   }
-
-   // Get list of dynamic fields and sort by name
-   Vector<SimFieldDictionary::Entry *> flist;
-   SimFieldDictionary* fieldDictionary = obj->getFieldDictionary();
-   for (SimFieldDictionaryIterator ditr(fieldDictionary); *ditr; ++ditr)
-      flist.push_back(*ditr);
-   dQsort(flist.address(), flist.size(), sizeof(SimFieldDictionary::Entry *), compareEntries);
-
-   // Add dynamic fields.
-   wxPGProperty* materialsCategory = NULL;
-   wxPGProperty* submeshCategory = NULL;
-   wxPGProperty* otherCategory = NULL;
-   for (U32 i = 0; i < (U32)flist.size(); i++)
-   {
-      SimFieldDictionary::Entry* entry = flist[i];
-
-      if (dStrncmp(entry->slotName, "MaterialAsset", 13) == 0)
-      {
-         if (materialsCategory == NULL)
-            materialsCategory = propertyGrid->Append(new wxPropertyCategory("Materials"));
-         propertyGrid->Append(new wxEnumProperty(entry->slotName, wxPG_LABEL, mMaterialChoices));
-      }
-      else if (dStrncmp(entry->slotName, "SubMesh", 7) == 0)
-      {
-         if (submeshCategory == NULL)
-            submeshCategory = propertyGrid->Append(new wxPropertyCategory("SubMeshes"));
-         propertyGrid->AppendIn(submeshCategory, new wxBoolProperty(entry->slotName, wxPG_LABEL, dAtob(entry->value)));
-      }
-      else
-      {
-         if (otherCategory == NULL)
-            otherCategory = propertyGrid->Append(new wxPropertyCategory("Other"));
-         propertyGrid->AppendIn(otherCategory, new wxStringProperty(entry->slotName, entry->slotName, entry->value));
-      }
-   }
-   */
-}
-
-void SceneTool::selectObject(Scene::SceneObject* obj, bool updateTree)
+void SceneWindow::selectObject(Scene::SceneObject* obj, bool updateTree)
 {
    mSelectedObject = obj;
    mSelectedComponent = NULL;
@@ -892,12 +782,10 @@ void SceneTool::selectObject(Scene::SceneObject* obj, bool updateTree)
       }
    }
 
-   // Property Grid
-   //loadObjectProperties(mScenePanelObjects->propertyGrid, obj);
    mScenePanelInspector->Inspect(obj);
 }
 
-void SceneTool::addComponent(Scene::SceneObject* Object, StringTableEntry componentClassName)
+void SceneWindow::addComponent(Scene::SceneObject* Object, StringTableEntry componentClassName)
 {
    Scene::BaseComponent* newComponent = dynamic_cast<Scene::BaseComponent*>(Torque::Con.createObject(componentClassName));
    if (newComponent)
@@ -910,7 +798,7 @@ void SceneTool::addComponent(Scene::SceneObject* Object, StringTableEntry compon
    }
 }
 
-void SceneTool::selectComponent(Scene::BaseComponent* component, bool updateTree)
+void SceneWindow::selectComponent(Scene::BaseComponent* component, bool updateTree)
 {
    mSelectedObject = component->mOwnerObject;
    mSelectedComponent = component;
@@ -940,13 +828,11 @@ void SceneTool::selectComponent(Scene::BaseComponent* component, bool updateTree
       }
    }
 
-   // Property Grid
-   //loadObjectProperties(mScenePanelObjects->propertyGrid, component);
    mScenePanelInspector->Inspect(component);
    
 }
 
-void SceneTool::OnToolbarDropdownEvent(wxCommandEvent& evt)
+void SceneWindow::OnToolbarDropdownEvent(wxCommandEvent& evt)
 {
    switch (evt.GetId())
    {
@@ -967,7 +853,7 @@ void SceneTool::OnToolbarDropdownEvent(wxCommandEvent& evt)
    }
 }
 
-void SceneTool::OnTranslateMenuEvent(wxCommandEvent& evt)
+void SceneWindow::OnTranslateMenuEvent(wxCommandEvent& evt)
 {
    switch (evt.GetId())
    {
@@ -993,7 +879,7 @@ void SceneTool::OnTranslateMenuEvent(wxCommandEvent& evt)
    }
 }
 
-void SceneTool::OnRotateMenuEvent(wxCommandEvent& evt)
+void SceneWindow::OnRotateMenuEvent(wxCommandEvent& evt)
 {
    switch (evt.GetId())
    {
@@ -1019,7 +905,7 @@ void SceneTool::OnRotateMenuEvent(wxCommandEvent& evt)
    }
 }
 
-void SceneTool::OnScaleMenuEvent(wxCommandEvent& evt)
+void SceneWindow::OnScaleMenuEvent(wxCommandEvent& evt)
 {
    switch (evt.GetId())
    {

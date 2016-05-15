@@ -20,39 +20,8 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _MAIN_H_
-#define _MAIN_H_
-
-// For compilers that don't support precompilation, include "wx/wx.h"
-#include "wx/wxprec.h"
- 
-#ifndef WX_PRECOMP
-#	include "wx/wx.h"
-#endif
-
-#ifndef PROJECT_WINDOW_H
-#include "windows/project/projectWindow.h"
-#endif
-
 #ifndef CONSOLE_WINDOW_H
-#include "windows/console/consoleWindow.h"
-#endif
-
-#ifndef MATERIALS_WINDOW_H
-#include "windows/materials/materialsWindow.h"
-#endif
-
-#ifndef PROFILER_WINDOW_H
-#include "windows/profiler/profilerWindow.h"
-#endif
-
-#ifndef SCENE_WINDOW_H
-#include "windows/scene/sceneWindow.h"
-#endif
-
-#ifndef _SCRIPTS_TOOL_H_
-#include "windows/scripts/scriptsWindow.h"
-#endif
+#define CONSOLE_WINDOW_H
 
 #ifndef EDITORMANAGER_H
 #include "editorManager.h"
@@ -62,26 +31,31 @@
 #include "Torque6EditorUI.h"
 #endif
 
-class Torque6Editor : public wxApp
+#ifndef _CONSOLEPANEL_H_
+#include "consolePanel.h"
+#endif
+
+#ifndef _WX_TREECTRL_H_BASE_
+#include <wx/treectrl.h>
+#endif
+
+class ConsoleWindow : public wxEvtHandler, public EditorWindow
 {
-public:
-   ~Torque6Editor();
+   typedef EditorWindow Parent;
 
-   // Window Management
-   MainFrame*        mFrame;
-   wxAuiManager*     mManager;
+   protected:
+      ConsolePanel*  mConsolePanel;
 
-   // Editor Manager
-   EditorManager     mEditorManager;
+   public:
+      ConsoleWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
+      ~ConsoleWindow();
 
-   // Dialogs
-   AboutDialog*      mAboutDialog;
+      virtual void initWindow();
+      virtual void openWindow();
+      virtual void closeWindow();
 
-   // Events
-	virtual bool OnInit();
-   virtual void OnMenuEvent( wxCommandEvent& evt );
+      virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
+      virtual void onProjectClosed();
 };
- 
-DECLARE_APP(Torque6Editor)
- 
-#endif // _MAIN_H_
+
+#endif // CONSOLE_WINDOW_H

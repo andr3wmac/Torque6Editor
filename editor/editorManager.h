@@ -35,57 +35,25 @@
 #include "wx/propgrid/property.h"
 #endif
 
-#ifndef _RENDER_CAMERA_H_
-#include "rendering/renderCamera.h"
+#ifndef EDITORCAMERA_H
+#include "editorCamera.h"
 #endif
 
-#ifndef _CAMERA_COMPONENT_H_
-#include "scene/components/cameraComponent.h"
+#ifndef EDITORWINDOW_H
+#include "editorWindow.h"
 #endif
 
+#ifndef _DEBUG_MODE_H_
 #include "debug/debugMode.h"
+#endif
 
 typedef int (*initFunc)(int argc, const char **argv, HWND windowHWND);
 typedef void (*shutdownFunc)();
 
-class EditorManager;
-class MainFrame;
-class wxAuiManager;
 class SelectMaterialDialog;
 class wxTorqueAssetSelectDialog;
 class wxTorqueAssetTree;
-
-// Editor Camera
-class EditorCamera
-{
-   protected:
-      EditorManager*            mEditorManager;
-      Rendering::RenderCamera*   mRenderCamera;
-      Transform                  mTransform;
-      Point3F                    mWorldPosition;
-      Point3F                    mForwardVelocity;
-
-      bool                       mMouseDown;
-      Point2I                    mMouseStart;
-      F32                        mHorizontalAngle;
-      F32                        mVerticalAngle;
-
-   public:
-      EditorCamera();
-
-      void initialize(EditorManager* EditorManager);
-      void mainLoop();
-      void setForwardVelocity(Point3F velocity);
-
-      Rendering::RenderCamera* getRenderCamera() { return mRenderCamera; }
-      Point3F getWorldPosition() { return mWorldPosition; }
-
-      bool onMouseLeftDown(int x, int y);
-      bool onMouseLeftUp(int x, int y);
-      bool onMouseRightDown(int x, int y);
-      bool onMouseRightUp(int x, int y);
-      bool onMouseMove(int x, int y);
-};
+class wxWizard;
 
 struct AssetCategoryInfo
 {
@@ -100,32 +68,10 @@ struct ModuleInfo
    Vector<AssetCategoryInfo> assets;
 };
 
-class EditorTool
+class wxWizardCallback : public wxObject
 {
    public:
-      EditorTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
-
-      bool              mOpen;
-      EditorManager*   mEditorManager;
-      MainFrame*        mFrame;
-      wxAuiManager*     mManager;
-
-      virtual void initTool() { }
-      virtual void destroyTool() { }
-      virtual void openTool() { mOpen = true; }
-      virtual void closeTool() { mOpen = false; }
-      virtual void renderTool() { }
-      virtual void onSceneChanged() { }
-      virtual void onProjectLoaded(wxString projectName, wxString path) {}
-      virtual void onProjectClosed() {}
-
-      virtual bool onMouseLeftDown(int x, int y) { return false; }
-      virtual bool onMouseLeftUp(int x, int y) { return false; }
-      virtual bool onMouseRightDown(int x, int y) { return false; }
-      virtual bool onMouseRightUp(int x, int y) { return false; }
-      virtual bool onMouseMove(int x, int y) { return false; }
-      
-      static wxVector<EditorTool*> smEditorTools;
+      wxWizard*   wizard;
 };
 
 class EditorManager : public wxEvtHandler, public Debug::DebugMode
@@ -172,8 +118,16 @@ class EditorManager : public wxEvtHandler, public Debug::DebugMode
       void addObjectTemplateAsset(wxString assetID, Point3F position);
       void addMeshAsset(wxString assetID, Point3F position);
 
-      bool selectMaterial(wxString& returnMaterialName);
-      bool selectAsset(wxString& returnValue, const char* filter = NULL);
+      // New Material Wizard
+      bool newMaterialWizard(wxString& returnMaterialName, const char* moduleId = NULL);
+      void OnNewMaterialSelectModule(wxCommandEvent& evt);
+
+      // Material selection dialog
+      bool selectMaterial(wxString& returnMaterialName, const char* defaultAsset = NULL);
+      void OnNewMaterialButton(wxCommandEvent& evt);
+      void OnOpenInMaterialEditorButton(wxCommandEvent& evt);
+
+      bool selectAsset(wxString& returnValue, const char* filter = NULL, const char* defaultAsset = NULL);
 
       void refreshChoices();
       void refreshModuleList();

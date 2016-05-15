@@ -121,7 +121,7 @@ class wxTorqueAssetTree : public wxTreeCtrl
       }
 
       void Init();
-      void ShowAssets(const char* filter = NULL);
+      void ShowAssets(const char* filter = NULL, const char* selectedAsset = NULL);
 
    private:
       DECLARE_DYNAMIC_CLASS(wxTorqueAssetTree);

@@ -23,9 +23,9 @@
 #include "wx/graphics.h"
 #include <wx/socket.h>
 #include "materialWindow.h"
-#include "materialsTool.h"
+#include "materialsWindow.h"
 #include "materials/materialAsset.h"
-#include "../theme.h"
+#include "theme.h"
 
 wxBEGIN_EVENT_TABLE(MaterialWindow, wxScrolledWindow)
     EVT_PAINT                    (MaterialWindow::OnPaint)
@@ -36,9 +36,9 @@ wxBEGIN_EVENT_TABLE(MaterialWindow, wxScrolledWindow)
     EVT_LEFT_UP                  (MaterialWindow::OnMouseUp)
 wxEND_EVENT_TABLE()
 
-MaterialWindow::MaterialWindow(wxWindow* parent, MaterialsTool* matTool)
+MaterialWindow::MaterialWindow(wxWindow* parent, MaterialsWindow* matTool)
    : wxScrolledWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL | wxVSCROLL | wxNO_FULL_REPAINT_ON_RESIZE),
-     mMaterialsTool(matTool),
+     mMaterialsWindow(matTool),
      mMaterialAsset(NULL),
      mRightMouseDown(false),
      mRightMouseDrag(false),
@@ -246,7 +246,7 @@ void MaterialWindow::OnMouseDown(wxMouseEvent &evt)
             }
          }
 
-         mMaterialsTool->selectNode(this, node);
+         mMaterialsWindow->selectNode(this, node);
          mSelectedNode = node;
          return;
       }

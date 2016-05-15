@@ -20,15 +20,15 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _SCENE_TOOL_H_
-#define _SCENE_TOOL_H_
+#ifndef SCENE_WINDOW_H
+#define SCENE_WINDOW_H
 
 #ifndef EDITORMANAGER_H
-#include "../editorManager.h"
+#include "editorManager.h"
 #endif
 
 #ifndef __TORQUE6EDITORUI_H__
-#include "../Torque6EditorUI.h"
+#include "Torque6EditorUI.h"
 #endif
 
 #ifndef _WX_TREECTRL_H_BASE_
@@ -44,7 +44,7 @@
 #endif
 
 #ifndef WXFLATNOTEBOOK_H
-#include "../widgets/wxFlatNotebook/wxFlatNotebook.h"
+#include "widgets/wxFlatNotebook/wxFlatNotebook.h"
 #endif
 
 class ObjectTreeItemData : public wxTreeItemData
@@ -60,9 +60,9 @@ public:
 
 class wxTorqueInspector;
 
-class SceneTool : public wxEvtHandler, public EditorTool
+class SceneWindow : public wxEvtHandler, public EditorWindow
 {
-   typedef EditorTool Parent;
+   typedef EditorWindow Parent;
 
    protected:
       ScenePanel*          mScenePanel;
@@ -94,13 +94,12 @@ class SceneTool : public wxEvtHandler, public EditorTool
       TextureObject* mLightIcon;
 
    public:
-      SceneTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
-      ~SceneTool();
+      SceneWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
+      ~SceneWindow();
 
       void refreshClassLists();
       void refreshObjectList();
       void refreshChoices();
-      void loadObjectProperties(wxPropertyGrid* propertyGrid, SimObject* obj);
       void selectObject(Scene::SceneObject* obj, bool updateTree = false);
       void addComponent(Scene::SceneObject* obj, StringTableEntry componentClassName);
       void selectComponent(Scene::BaseComponent* componenty, bool updateTree = false);
@@ -120,10 +119,10 @@ class SceneTool : public wxEvtHandler, public EditorTool
       void OnObjectMenuEvent(wxCommandEvent& evt);
       void OnComponentMenuEvent(wxCommandEvent& evt);
 
-      virtual void initTool();
-      virtual void openTool();
-      virtual void closeTool();
-      virtual void renderTool();
+      virtual void initWindow();
+      virtual void openWindow();
+      virtual void closeWindow();
+      virtual void renderWindow();
 
       virtual bool onMouseLeftDown(int x, int y);
       virtual bool onMouseLeftUp(int x, int y);
@@ -134,4 +133,4 @@ class SceneTool : public wxEvtHandler, public EditorTool
       virtual void onProjectClosed();
 };
 
-#endif // _SCENE_TOOL_H_
+#endif // SCENE_WINDOW_H

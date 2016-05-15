@@ -44,7 +44,7 @@ void wxTorqueAssetTree::Init()
    SetImageList(mEditorManager->mCommonIcons);
 }
 
-void wxTorqueAssetTree::ShowAssets(const char* filter)
+void wxTorqueAssetTree::ShowAssets(const char* filter, const char* selectedAsset)
 {
    bool performFilter = false;
    if (filter != NULL && dStrlen(filter) > 0)
@@ -53,6 +53,7 @@ void wxTorqueAssetTree::ShowAssets(const char* filter)
    // Clear list.
    DeleteAllItems();
    wxTreeItemId mAssetListRoot = AddRoot("ROOT");
+   wxTreeItemId selectedItem = mAssetListRoot;
 
    Vector<ModuleInfo>* modules = mEditorManager->getModuleList();
 
@@ -80,11 +81,15 @@ void wxTorqueAssetTree::ShowAssets(const char* filter)
             dStrcpy(buf, pAssetDefinition->mAssetId);
             const char* moduleName = dStrtok(buf, ":");
             const char* assetName = dStrtok(NULL, ":");
-            AppendItem(categoryTreeID, assetName, 2, -1, new AssetTreeItemData(pAssetDefinition));
+            wxTreeItemId itemId = AppendItem(categoryTreeID, assetName, 2, -1, new AssetTreeItemData(pAssetDefinition));
+
+            if (selectedAsset != NULL && dStrcmp(selectedAsset, pAssetDefinition->mAssetId) == 0)
+               selectedItem = itemId;
          }
       }
    }
 
    // Sort Modules by Name
    SortChildren(mAssetListRoot);
+   SelectItem(selectedItem);
 }

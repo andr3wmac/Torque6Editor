@@ -28,7 +28,7 @@
 #endif
 
 // UI generated from wxFormBuilder
-#include "../Torque6EditorUI.h"
+#include "Torque6EditorUI.h"
 
 #include "gizmo.h"
 #include <bx/bx.h>
@@ -149,7 +149,7 @@ void Gizmo::selectComponent(Scene::BaseComponent* component)
 {
    mSelectedObject      = component->mOwnerObject;
    mSelectedComponent   = component;
-   mSelectedPosition    = component->mTransform.getPosition();
+   mSelectedPosition    = mSelectedObject->mTransform.getPosition() + component->mTransform.getPosition();
    mSelectedRotation    = component->mTransform.getRotationEuler();
    mSelectedScale       = component->mTransform.getScale();
 }
@@ -172,7 +172,7 @@ void Gizmo::render()
    // Selected Component
    if (mSelectedObject != NULL && mSelectedComponent != NULL)
    {
-      position = mSelectedComponent->mTransform.getPosition();
+      position = mSelectedObject->mTransform.getPosition() + mSelectedComponent->mTransform.getPosition();
       rotation = mSelectedComponent->mTransform.getRotationEuler();
    }
 
@@ -340,7 +340,7 @@ bool Gizmo::onMouseMove(int x, int y)
 
    // Selected Component
    if (mSelectedObject != NULL && mSelectedComponent != NULL)
-      position = mSelectedComponent->mTransform.getPosition();
+      position = mSelectedObject->mTransform.getPosition() + mSelectedComponent->mTransform.getPosition();
 
    // Determine the worldspace points we're closest to.
    Point3F dummyPoint;
@@ -474,7 +474,7 @@ void Gizmo::dragTranslate(int x, int y)
    // Selected Component
    if (mSelectedObject != NULL && mSelectedComponent != NULL)
    {
-      mSelectedComponent->mTransform.setPosition(newPosition);
+      mSelectedComponent->mTransform.setPosition(newPosition - mSelectedObject->mTransform.getPosition());
       mSelectedObject->refresh();
    }
 }

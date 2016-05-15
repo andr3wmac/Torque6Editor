@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright (c) 2015 Andrew Mac
+// Copyright (c) 2016 Andrew Mac
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to
@@ -20,52 +20,22 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _PROFILER_TOOL_H_
-#define _PROFILER_TOOL_H_
+// For compilers that don't support precompilation, include "wx/wx.h"
+#include "wx/wxprec.h"
 
-#ifndef EDITORMANAGER_H
-#include "../editorManager.h"
+#ifndef WX_PRECOMP
+#	include "wx/wx.h"
 #endif
 
-#ifndef __TORQUE6EDITORUI_H__
-#include "../Torque6EditorUI.h"
-#endif
+#include "editorWindow.h"
 
-#ifndef _WX_TREECTRL_H_BASE_
-#include <wx/treectrl.h>
-#endif
+wxVector<EditorWindow*> EditorWindow::smEditorWindows;
 
-#ifndef _PROFILER_TREE_MODEL_H_
-#include "profilerTreeModel.h"
-#endif
-
-#ifndef _PLUGINS_SHARED_H
-#include <plugins/plugins_shared.h>
-#endif
-
-class ProfilerTool : public wxEvtHandler, public EditorTool
+EditorWindow::EditorWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+   :  mOpen(false),
+      mEditorManager(_EditorManager),
+      mFrame(_frame),
+      mManager(_manager)
 {
-   typedef EditorTool Parent;
-
-   protected:
-      ProfilerPanel*       mProfilerPanel;
-      ProfilerTreeModel    mProfilerData;
-      int                  mFrameCount;
-
-   public:
-      ProfilerTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
-      ~ProfilerTool();
-
-      void processProfilerCachedData(ProfilerCachedData* data, ProfilerTreeModelNode* node);
-
-      virtual void initTool();
-      virtual void openTool();
-      virtual void closeTool();
-
-      virtual void OnButtonEvent( wxCommandEvent& evt );
-
-      virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
-      virtual void onProjectClosed();
-};
-
-#endif // _CONSOLE_TOOL_H_
+   //
+}

@@ -49,6 +49,13 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	
 	mainMenuBar->Append( m_menu7, wxT("Camera") ); 
 	
+	m_menu71 = new wxMenu();
+	wxMenuItem* m_menuItem24;
+	m_menuItem24 = new wxMenuItem( m_menu71, MENU_REMOTERY, wxString( wxT("Remotery Profiler") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu71->Append( m_menuItem24 );
+	
+	mainMenuBar->Append( m_menu71, wxT("Debug") ); 
+	
 	m_menu2 = new wxMenu();
 	wxMenuItem* m_menuItem5;
 	m_menuItem5 = new wxMenuItem( m_menu2, MENU_PROJECT, wxString( wxT("Project") ) , wxEmptyString, wxITEM_NORMAL );
@@ -70,14 +77,7 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	m_menuItem9 = new wxMenuItem( m_menu2, MENU_MATERIALS, wxString( wxT("Materials") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menu2->Append( m_menuItem9 );
 	
-	mainMenuBar->Append( m_menu2, wxT("Tools") ); 
-	
-	m_menu71 = new wxMenu();
-	wxMenuItem* m_menuItem24;
-	m_menuItem24 = new wxMenuItem( m_menu71, MENU_REMOTERY, wxString( wxT("Remotery Profiler") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menu71->Append( m_menuItem24 );
-	
-	mainMenuBar->Append( m_menu71, wxT("Debug") ); 
+	mainMenuBar->Append( m_menu2, wxT("Window") ); 
 	
 	m_menu6 = new wxMenu();
 	wxMenuItem* m_menuItem26;
@@ -364,6 +364,8 @@ MaterialsPanel::MaterialsPanel( wxWindow* parent, wxWindowID id, const wxPoint& 
 	m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
 	
 	m_panel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_panel->SetBackgroundColour( wxColour( 75, 75, 75 ) );
+	
 	m_mgr.AddPane( m_panel, wxAuiPaneInfo() .Left() .PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ).MinSize( wxSize( 200,-1 ) ) );
 	
 	wxBoxSizer* bSizer1;
@@ -372,7 +374,10 @@ MaterialsPanel::MaterialsPanel( wxWindow* parent, wxWindowID id, const wxPoint& 
 	wxBoxSizer* bSizer2;
 	bSizer2 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_bpButton1 = new wxBitmapButton( m_panel, MATERIAL_SAVE, wxBitmap( wxT("images/saveIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_bpButton1 = new wxBitmapButton( m_panel, MATERIAL_SAVE, wxBitmap( wxT("images/saveIcon.png"), wxBITMAP_TYPE_ANY ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|wxNO_BORDER );
+	m_bpButton1->SetBackgroundColour( wxColour( 51, 51, 51 ) );
+	m_bpButton1->SetMinSize( wxSize( 28,28 ) );
+	
 	bSizer2->Add( m_bpButton1, 0, wxALL, 2 );
 	
 	
@@ -506,6 +511,8 @@ ImportMeshWizard::ImportMeshWizard( wxWindow* parent, wxWindowID id, const wxStr
 {
 	this->Create( parent, id, title, bitmap, pos, style );
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	this->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	this->SetBackgroundColour( wxColour( 75, 75, 75 ) );
 	
 	wxWizardPageSimple* m_wizPage2 = new wxWizardPageSimple( this );
 	m_pages.Add( m_wizPage2 );
@@ -515,16 +522,25 @@ ImportMeshWizard::ImportMeshWizard( wxWindow* parent, wxWindowID id, const wxStr
 	
 	m_staticText1 = new wxStaticText( m_wizPage2, wxID_ANY, wxT("Mesh File:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText1->Wrap( -1 );
+	m_staticText1->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
 	bSizer16->Add( m_staticText1, 0, wxALL, 5 );
 	
 	meshFilePath = new wxFilePickerCtrl( m_wizPage2, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	meshFilePath->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	meshFilePath->SetBackgroundColour( wxColour( 51, 51, 51 ) );
+	
 	bSizer16->Add( meshFilePath, 0, wxALL|wxEXPAND, 5 );
 	
 	m_checkBox2 = new wxCheckBox( m_wizPage2, wxID_ANY, wxT("Import Animations"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_checkBox2->SetValue(true); 
+	m_checkBox2->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
 	bSizer16->Add( m_checkBox2, 0, wxALL, 5 );
 	
 	m_checkBox3 = new wxCheckBox( m_wizPage2, wxID_ANY, wxT("Y-Up"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_checkBox3->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
 	bSizer16->Add( m_checkBox3, 0, wxALL, 5 );
 	
 	
@@ -539,19 +555,31 @@ ImportMeshWizard::ImportMeshWizard( wxWindow* parent, wxWindowID id, const wxStr
 	
 	m_staticText111 = new wxStaticText( m_wizPage21, wxID_ANY, wxT("Asset ID (no spaces):"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText111->Wrap( -1 );
+	m_staticText111->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
 	bSizer161->Add( m_staticText111, 0, wxALL, 5 );
 	
 	assetID = new wxTextCtrl( m_wizPage21, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	assetID->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	assetID->SetBackgroundColour( wxColour( 51, 51, 51 ) );
+	
 	bSizer161->Add( assetID, 0, wxALL|wxEXPAND, 5 );
 	
 	m_staticText121 = new wxStaticText( m_wizPage21, wxID_ANY, wxT("Import To Path:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText121->Wrap( -1 );
+	m_staticText121->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
 	bSizer161->Add( m_staticText121, 0, wxALL, 5 );
 	
 	importPath = new wxDirPickerCtrl( m_wizPage21, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	importPath->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	importPath->SetBackgroundColour( wxColour( 51, 51, 51 ) );
+	
 	bSizer161->Add( importPath, 0, wxALL|wxEXPAND, 5 );
 	
 	copyMeshCheck = new wxCheckBox( m_wizPage21, wxID_ANY, wxT("Copy Mesh File"), wxDefaultPosition, wxDefaultSize, 0 );
+	copyMeshCheck->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
 	bSizer161->Add( copyMeshCheck, 0, wxALL, 5 );
 	
 	
@@ -577,6 +605,7 @@ ImportTextureWizard::ImportTextureWizard( wxWindow* parent, wxWindowID id, const
 {
 	this->Create( parent, id, title, bitmap, pos, style );
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	this->SetBackgroundColour( wxColour( 75, 75, 75 ) );
 	
 	wxWizardPageSimple* m_wizPage2 = new wxWizardPageSimple( this );
 	m_pages.Add( m_wizPage2 );
@@ -586,6 +615,8 @@ ImportTextureWizard::ImportTextureWizard( wxWindow* parent, wxWindowID id, const
 	
 	m_staticText1 = new wxStaticText( m_wizPage2, wxID_ANY, wxT("Texture File:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText1->Wrap( -1 );
+	m_staticText1->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
 	bSizer16->Add( m_staticText1, 0, wxALL, 5 );
 	
 	textureFilePath = new wxFilePickerCtrl( m_wizPage2, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
@@ -593,6 +624,8 @@ ImportTextureWizard::ImportTextureWizard( wxWindow* parent, wxWindowID id, const
 	
 	generateMipsCheck = new wxCheckBox( m_wizPage2, wxID_ANY, wxT("Generate Mip-Maps"), wxDefaultPosition, wxDefaultSize, 0 );
 	generateMipsCheck->SetValue(true); 
+	generateMipsCheck->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
 	bSizer16->Add( generateMipsCheck, 0, wxALL, 5 );
 	
 	
@@ -607,19 +640,28 @@ ImportTextureWizard::ImportTextureWizard( wxWindow* parent, wxWindowID id, const
 	
 	m_staticText111 = new wxStaticText( m_wizPage21, wxID_ANY, wxT("Asset ID (no spaces):"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText111->Wrap( -1 );
+	m_staticText111->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
 	bSizer161->Add( m_staticText111, 0, wxALL, 5 );
 	
 	assetID = new wxTextCtrl( m_wizPage21, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	assetID->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	assetID->SetBackgroundColour( wxColour( 51, 51, 51 ) );
+	
 	bSizer161->Add( assetID, 0, wxALL|wxEXPAND, 5 );
 	
 	m_staticText121 = new wxStaticText( m_wizPage21, wxID_ANY, wxT("Import To Path:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText121->Wrap( -1 );
+	m_staticText121->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
 	bSizer161->Add( m_staticText121, 0, wxALL, 5 );
 	
 	importPath = new wxDirPickerCtrl( m_wizPage21, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
 	bSizer161->Add( importPath, 0, wxALL|wxEXPAND, 5 );
 	
 	copyTextureCheck = new wxCheckBox( m_wizPage21, wxID_ANY, wxT("Copy Texture File"), wxDefaultPosition, wxDefaultSize, 0 );
+	copyTextureCheck->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
 	bSizer161->Add( copyTextureCheck, 0, wxALL, 5 );
 	
 	
@@ -645,6 +687,7 @@ NewMaterialWizard::NewMaterialWizard( wxWindow* parent, wxWindowID id, const wxS
 {
 	this->Create( parent, id, title, bitmap, pos, style );
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	this->SetBackgroundColour( wxColour( 75, 75, 75 ) );
 	
 	wxWizardPageSimple* m_wizPage21 = new wxWizardPageSimple( this );
 	m_pages.Add( m_wizPage21 );
@@ -652,19 +695,45 @@ NewMaterialWizard::NewMaterialWizard( wxWindow* parent, wxWindowID id, const wxS
 	wxBoxSizer* bSizer161;
 	bSizer161 = new wxBoxSizer( wxVERTICAL );
 	
+	m_staticText1111 = new wxStaticText( m_wizPage21, wxID_ANY, wxT("Module:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText1111->Wrap( -1 );
+	m_staticText1111->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
+	bSizer161->Add( m_staticText1111, 0, wxALL, 5 );
+	
+	wxArrayString moduleSelectionChoices;
+	moduleSelection = new wxChoice( m_wizPage21, wxID_ANY, wxDefaultPosition, wxDefaultSize, moduleSelectionChoices, 0 );
+	moduleSelection->SetSelection( 0 );
+	moduleSelection->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	moduleSelection->SetBackgroundColour( wxColour( 51, 51, 51 ) );
+	
+	bSizer161->Add( moduleSelection, 0, wxALL|wxEXPAND, 5 );
+	
 	m_staticText111 = new wxStaticText( m_wizPage21, wxID_ANY, wxT("Asset ID (no spaces):"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText111->Wrap( -1 );
+	m_staticText111->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
 	bSizer161->Add( m_staticText111, 0, wxALL, 5 );
 	
 	assetID = new wxTextCtrl( m_wizPage21, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	assetID->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	assetID->SetBackgroundColour( wxColour( 51, 51, 51 ) );
+	
 	bSizer161->Add( assetID, 0, wxALL|wxEXPAND, 5 );
 	
 	m_staticText121 = new wxStaticText( m_wizPage21, wxID_ANY, wxT("Save To Path:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText121->Wrap( -1 );
+	m_staticText121->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
 	bSizer161->Add( m_staticText121, 0, wxALL, 5 );
 	
 	savePath = new wxDirPickerCtrl( m_wizPage21, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
 	bSizer161->Add( savePath, 0, wxALL|wxEXPAND, 5 );
+	
+	openInMaterialEditor = new wxCheckBox( m_wizPage21, wxID_ANY, wxT("Open in Material Editor"), wxDefaultPosition, wxDefaultSize, 0 );
+	openInMaterialEditor->SetForegroundColour( wxColour( 255, 255, 255 ) );
+	
+	bSizer161->Add( openInMaterialEditor, 0, wxALL, 5 );
 	
 	
 	m_wizPage21->SetSizer( bSizer161 );

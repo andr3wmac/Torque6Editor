@@ -31,23 +31,23 @@
 #include <wx/treectrl.h>
 
 // UI generated from wxFormBuilder
-#include "../Torque6EditorUI.h"
+#include "Torque6EditorUI.h"
 
-#include "consoleTool.h"
+#include "consoleWindow.h"
 
-ConsoleTool::ConsoleTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+ConsoleWindow::ConsoleWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
    : Parent(_EditorManager, _frame, _manager),
      mConsolePanel(NULL)
 {
 
 }
 
-ConsoleTool::~ConsoleTool()
+ConsoleWindow::~ConsoleWindow()
 {
 
 }
 
-void ConsoleTool::initTool()
+void ConsoleWindow::initWindow()
 {
    // Create panel.
    mConsolePanel = new ConsolePanel(mFrame, wxID_ANY);
@@ -64,26 +64,26 @@ void ConsoleTool::initTool()
    mManager->Update();
 }
 
-void ConsoleTool::openTool()
+void ConsoleWindow::openWindow()
 {
    wxAuiPaneInfo& paneInfo = mManager->GetPane(mConsolePanel);
    paneInfo.Show();
    mManager->Update();
 }
 
-void ConsoleTool::closeTool()
+void ConsoleWindow::closeWindow()
 {
    wxAuiPaneInfo& paneInfo = mManager->GetPane(mConsolePanel);
    paneInfo.Hide();
    mManager->Update();
 }
 
-void ConsoleTool::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
+void ConsoleWindow::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
    if ( !mOpen ) return;
 }
 
-void ConsoleTool::onProjectClosed()
+void ConsoleWindow::onProjectClosed()
 {
    if ( !mOpen ) return;
 }

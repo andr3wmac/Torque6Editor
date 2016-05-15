@@ -69,13 +69,17 @@
 class wxTorqueAssetSelectDialog : public wxDialog
 {
    protected:
-      EditorManager*         mEditorManager;
-      wxButton*               m_button6;
-      wxButton*               m_button61;
-      wxTorqueAssetTree*      assetList;
-      const AssetDefinition*  mSelectedAsset;
+      EditorManager*          mEditorManager;
+      wxButton*               mSelectButton;
+      wxButton*               mCancelButton;
+      wxTorqueAssetTree*      mAssetTree;
 
    public:
+      const AssetDefinition*  SelectedAsset;
+      wxBoxSizer*             TopBarSizer;
+      wxBoxSizer*             ContentSizer;
+      wxBoxSizer*             BottomBarSizer;
+
       wxTorqueAssetSelectDialog(EditorManager* EditorManager,
          wxWindow* parent,
          wxWindowID id = wxID_ANY, 
@@ -89,7 +93,9 @@ class wxTorqueAssetSelectDialog : public wxDialog
       void OnSelectButton(wxCommandEvent& evt);
       void OnCancelButton(wxCommandEvent& evt);
       void OnAssetTreeEvent(wxTreeEvent& evt);
-      bool SelectAsset(wxString &returnValue, const char* filter = NULL);
+      bool SelectAsset(wxString &returnValue, const char* filter = NULL, const char* defaultAsset = NULL);
+      void SetSelectedAsset(wxString assetId);
+      void RefreshAssetList(const char* filter = NULL, const char* defaultAsset = NULL);
 };
 
 #endif // WXTORQUEASSETSELECTDIALOG_H

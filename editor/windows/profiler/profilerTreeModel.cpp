@@ -31,7 +31,7 @@
 #include <wx/treectrl.h>
 
 // UI generated from wxFormBuilder
-#include "../Torque6EditorUI.h"
+#include "Torque6EditorUI.h"
 
 #include "profilerTreeModel.h"
 

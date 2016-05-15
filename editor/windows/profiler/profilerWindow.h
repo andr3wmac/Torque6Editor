@@ -20,63 +20,52 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _GIZMO_H_
-#define _GIZMO_H_
+#ifndef PROFILER_WINDOW_H
+#define PROFILER_WINDOW_H
 
 #ifndef EDITORMANAGER_H
-#include "../editorManager.h"
+#include "editorManager.h"
 #endif
 
-#ifndef _SCENE_OBJECT_H_
-#include <scene/object.h>
+#ifndef __TORQUE6EDITORUI_H__
+#include "Torque6EditorUI.h"
 #endif
 
-class Gizmo
+#ifndef _WX_TREECTRL_H_BASE_
+#include <wx/treectrl.h>
+#endif
+
+#ifndef _PROFILER_TREE_MODEL_H_
+#include "profilerTreeModel.h"
+#endif
+
+#ifndef _PLUGINS_SHARED_H
+#include <plugins/plugins_shared.h>
+#endif
+
+class ProfilerWindow : public wxEvtHandler, public EditorWindow
 {
+   typedef EditorWindow Parent;
+
    protected:
-      bool     mHovering;
-
-      bool     mSelectRed;
-      bool     mSelectGreen;
-      bool     mSelectBlue;
-      Point3F  mSelectRedPoint;
-      Point3F  mSelectGreenPoint;
-      Point3F  mSelectBluePoint;
-
-      bool     mDragging;
-      bool     mDragRed;
-      bool     mDragBlue;
-      bool     mDragGreen;
-      Point3F  mDownPoint;
-      F32      mDownAngle;
-
-      Point3F  mSelectedPosition;
-      Point3F  mSelectedRotation;
-      Point3F  mSelectedScale;
+      ProfilerPanel*       mProfilerPanel;
+      ProfilerTreeModel    mProfilerData;
+      int                  mFrameCount;
 
    public:
-      EditorManager*         mEditorManager;
-      Scene::SceneObject*     mSelectedObject;
-      Scene::BaseComponent*   mSelectedComponent;
+      ProfilerWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
+      ~ProfilerWindow();
 
-      F32 mTranslateSnap;
-      F32 mScaleSnap;
-      F32 mRotateSnap;
+      void processProfilerCachedData(ProfilerCachedData* data, ProfilerTreeModelNode* node);
 
-      Gizmo();
-      ~Gizmo();
+      virtual void initWindow();
+      virtual void openWindow();
+      virtual void closeWindow();
 
-      void selectObject(Scene::SceneObject* obj);
-      void selectComponent(Scene::BaseComponent* component);
-      void render();
+      virtual void OnButtonEvent( wxCommandEvent& evt );
 
-      bool onMouseLeftDown(int x, int y);
-      bool onMouseLeftUp(int x, int y);
-      bool onMouseMove(int x, int y);
-
-      void dragTranslate(int x, int y);
-      void dragRotate(int x, int y);
-      void dragScale(int x, int y);
+      virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
+      virtual void onProjectClosed();
 };
 
-#endif // _SCENE_TOOL_H_
+#endif // PROFILER_WINDOW_H

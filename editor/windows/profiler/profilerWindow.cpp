@@ -31,29 +31,29 @@
 #include <wx/treectrl.h>
 
 // UI generated from wxFormBuilder
-#include "../Torque6EditorUI.h"
+#include "Torque6EditorUI.h"
 
-#include "profilerTool.h"
+#include "profilerWindow.h"
 
-ProfilerTool::ProfilerTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+ProfilerWindow::ProfilerWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
    : Parent(_EditorManager, _frame, _manager),
      mProfilerPanel( NULL )
 {
    mFrameCount = 50;
 }
 
-ProfilerTool::~ProfilerTool()
+ProfilerWindow::~ProfilerWindow()
 {
 
 }
 
-void ProfilerTool::initTool()
+void ProfilerWindow::initWindow()
 {
    // Create panel.
    mProfilerPanel = new ProfilerPanel(mFrame, wxID_ANY);
 
    // Events
-   mProfilerPanel->Connect(wxID_ANY, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(ProfilerTool::OnButtonEvent), NULL, this);
+   mProfilerPanel->Connect(wxID_ANY, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(ProfilerWindow::OnButtonEvent), NULL, this);
 
    // Add Pane
    mManager->AddPane(mProfilerPanel, wxAuiPaneInfo().Caption("Profiler")
@@ -92,21 +92,21 @@ void ProfilerTool::initTool()
    mProfilerPanel->ProfilerDataView->AppendProgressColumn( "Percent", 3, wxDATAVIEW_CELL_INERT, 100 );
 }
 
-void ProfilerTool::openTool()
+void ProfilerWindow::openWindow()
 {
    wxAuiPaneInfo& paneInfo = mManager->GetPane(mProfilerPanel);
    paneInfo.Show();
    mManager->Update();
 }
 
-void ProfilerTool::closeTool()
+void ProfilerWindow::closeWindow()
 {
    wxAuiPaneInfo& paneInfo = mManager->GetPane(mProfilerPanel);
    paneInfo.Hide();
    mManager->Update();
 }
 
-void ProfilerTool::processProfilerCachedData(ProfilerCachedData* data, ProfilerTreeModelNode* node)
+void ProfilerWindow::processProfilerCachedData(ProfilerCachedData* data, ProfilerTreeModelNode* node)
 {
    wxString node_name(data->name);
    if ( strcmp(data->name, "ROOT") == 0 )
@@ -118,7 +118,7 @@ void ProfilerTool::processProfilerCachedData(ProfilerCachedData* data, ProfilerT
       processProfilerCachedData(&data->children[i], child_node);
 }
 
-void ProfilerTool::OnButtonEvent( wxCommandEvent& evt )
+void ProfilerWindow::OnButtonEvent( wxCommandEvent& evt )
 {
    if ( evt.GetId() == PROFILER_START )
    {
@@ -137,12 +137,12 @@ void ProfilerTool::OnButtonEvent( wxCommandEvent& evt )
    }
 }
 
-void ProfilerTool::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
+void ProfilerWindow::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
    if ( !mOpen ) return;
 }
 
-void ProfilerTool::onProjectClosed()
+void ProfilerWindow::onProjectClosed()
 {
    if ( !mOpen ) return;
 }

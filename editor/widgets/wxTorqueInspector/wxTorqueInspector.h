@@ -28,6 +28,7 @@
 #include <wx/dynarray.h>
 #include <wx/collpane.h>
 #include <wx/hyperlink.h>
+#include <wx/clrpicker.h>
 
 #ifdef __WXMSW__
 #ifdef _DEBUG
@@ -104,6 +105,15 @@ public:
    wxTextCtrl*    zValue;
 };
 
+class wxTorqueColorFField: public wxObject
+{
+public:
+   const char*    fieldName;
+
+   wxColourPickerCtrl*  colorValue;
+};
+
+
 class wxTorqueMeshAssetField : public wxObject
 {
 public:
@@ -144,17 +154,24 @@ public:
    wxTextCtrl*    value;
 };
 
+class wxTorqueInspectorDelegate
+{
+   public:
+      virtual void OnFieldChanged(wxString name, wxVariant value) {}
+};
+
 class wxTorqueInspector : public wxPanel
 {
    protected:
-      EditorManager*   mEditorManager;
+      EditorManager*    mEditorManager;
       wxPanel*          mGroupPanel;
       wxBoxSizer*       mContentsSizer;
       wxImageList*      mIconList;
 
-      SimObject*              mObject;
-      Scene::SceneObject*     mSceneObject;
-      Scene::BaseComponent*   mComponent;
+      SimObject*                 mObject;
+      Scene::SceneObject*        mSceneObject;
+      Scene::BaseComponent*      mComponent;
+      wxTorqueInspectorDelegate* mDelegate;
 
    public:
       wxTorqueInspector() : wxPanel()
@@ -177,6 +194,8 @@ class wxTorqueInspector : public wxPanel
 
       void Init();
       void Clear();
+      void SetDelegate(wxTorqueInspectorDelegate* _delegate);
+      void OnFieldChanged(wxString name, wxVariant value);
 
       // Groups
       wxPanel* AddGroup(wxPanel* panel, const wxString& label);
@@ -197,6 +216,10 @@ class wxTorqueInspector : public wxPanel
       // Point3F Field
       void AddPoint3FField(wxPanel* panel, const char* fieldName, const wxString& label, const Point3F& value);
       void OnPoint3FFieldChanged(wxCommandEvent& evt);
+
+      // ColorF Field
+      void AddColorFField(wxPanel* panel, const char* fieldName, const wxString& label, const ColorF &value);
+      void OnColorFFieldChanged(wxCommandEvent& evt);
 
       // MeshAsset Field
       void AddMeshAssetField(wxPanel* panel, const char* fieldName, const wxString& label, const wxString& value);
@@ -222,6 +245,9 @@ class wxTorqueInspector : public wxPanel
       void Inspect(Scene::SceneObject* sceneObject);
       void Inspect(Scene::BaseComponent* component);
       void Inspect(const AssetDefinition* assetDef);
+
+      // 
+      void UpdateInspector();
 
    private:
       DECLARE_DYNAMIC_CLASS(wxTorqueInspector);

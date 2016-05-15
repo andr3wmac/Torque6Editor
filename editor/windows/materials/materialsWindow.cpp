@@ -31,14 +31,13 @@
 #include <wx/treectrl.h>
 
 // UI generated from wxFormBuilder
-#include "../Torque6EditorUI.h"
+#include "Torque6EditorUI.h"
 
-#include "materialsTool.h"
+#include "materialsWindow.h"
 #include "plugins/plugins_shared.h"
 #include "module/moduleManager.h"
-#include "../widgets/wxTorqueInspector/wxTorqueInspector.h"
 
-MaterialsTool::MaterialsTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+MaterialsWindow::MaterialsWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
    : Parent(_EditorManager, _frame, _manager),
      mMaterialsPanel(NULL),
      mSelectedNode(NULL),
@@ -49,12 +48,12 @@ MaterialsTool::MaterialsTool(EditorManager* _EditorManager, MainFrame* _frame, w
       
 }
 
-MaterialsTool::~MaterialsTool()
+MaterialsWindow::~MaterialsWindow()
 {
 
 }
 
-void MaterialsTool::initTool()
+void MaterialsWindow::initWindow()
 {
    // Create panel.
    mMaterialsPanel = new MaterialsPanel(mFrame);
@@ -65,12 +64,13 @@ void MaterialsTool::initTool()
    mMaterialsPanel->m_materialTree->AssignImageList(mIconList);
 
    // Events
-   mMaterialsPanel->Connect(wxID_ANY, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MaterialsTool::OnMenuEvent), NULL, this);
-   mMaterialsPanel->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(MaterialsTool::OnTreeEvent), NULL, this);
-   mMaterialsPanel->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(MaterialsTool::OnTreeMenu), NULL, this);
+   mMaterialsPanel->Connect(wxID_ANY, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MaterialsWindow::OnMenuEvent), NULL, this);
+   mMaterialsPanel->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(MaterialsWindow::OnTreeEvent), NULL, this);
+   mMaterialsPanel->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(MaterialsWindow::OnTreeMenu), NULL, this);
 
    // Add TorqueInspector to scene panel objects.
    mInspector = new wxTorqueInspector(mEditorManager, mMaterialsPanel->InspectorWindow, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+   mInspector->SetDelegate(this);
    mMaterialsPanel->InspectorContents->Add(mInspector, 1, wxALL | wxEXPAND, 1);
 
    // Root for material tree
@@ -93,7 +93,7 @@ void MaterialsTool::initTool()
    mManager->Update();
 }
 
-void MaterialsTool::openTool()
+void MaterialsWindow::openWindow()
 {
    wxAuiPaneInfo& paneInfo = mManager->GetPane(mMaterialsPanel);
    paneInfo.Show();
@@ -101,24 +101,24 @@ void MaterialsTool::openTool()
    refreshMaterialList();
 }
 
-void MaterialsTool::closeTool()
+void MaterialsWindow::closeWindow()
 {
    wxAuiPaneInfo& paneInfo = mManager->GetPane(mMaterialsPanel);
    paneInfo.Hide();
    mManager->Update();
 }
 
-void MaterialsTool::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
+void MaterialsWindow::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
    refreshMaterialList();
 }
 
-void MaterialsTool::onProjectClosed()
+void MaterialsWindow::onProjectClosed()
 {
    //
 }
 
-void MaterialsTool::OnMenuEvent(wxCommandEvent& evt)
+void MaterialsWindow::OnMenuEvent(wxCommandEvent& evt)
 {
    if (evt.GetId() == MATERIAL_SAVE)
    {
@@ -128,36 +128,16 @@ void MaterialsTool::OnMenuEvent(wxCommandEvent& evt)
    }
 }
 
-void MaterialsTool::OnTreeEvent(wxTreeEvent& evt)
+void MaterialsWindow::OnTreeEvent(wxTreeEvent& evt)
 {
    MaterialsTreeItemData* data = dynamic_cast<MaterialsTreeItemData*>(mMaterialsPanel->m_materialTree->GetItemData(evt.GetItem()));
    if ( data )
    {
-      MaterialAsset* mat = Torque::Scene.getMaterialAsset(data->assetId);
-      if ( mat )
-      {
-         // See if we've already opened a tab for this one, if so then set focus to it.
-         for (unsigned int i = 0; i < mMaterialsPanel->m_materialNotebook->GetPageCount(); ++i)
-         {
-            MaterialWindow* window = dynamic_cast<MaterialWindow*>(mMaterialsPanel->m_materialNotebook->GetPage(i));
-            MaterialAsset* asset = window->getMaterialAsset();
-            if (asset == mat)
-            {
-               mMaterialsPanel->m_materialNotebook->SetSelection(i);
-               return;
-            }
-         }
-
-         // If not then create a new MaterialWindow and add it to the collection.
-         MaterialWindow* materialWindow = new MaterialWindow(mFrame, this);
-         materialWindow->loadMaterial(mat);
-         mMaterialsPanel->m_materialNotebook->AddPage(materialWindow, wxString(data->assetId));
-         mMaterialsPanel->m_materialNotebook->SetSelection(mMaterialsPanel->m_materialNotebook->GetPageCount() - 1);
-      }
+      openMaterial(data->assetId);
    }
 }
 
-void MaterialsTool::OnTreeMenu(wxTreeEvent& evt)
+void MaterialsWindow::OnTreeMenu(wxTreeEvent& evt)
 {
    MaterialsTreeItemData* data = dynamic_cast<MaterialsTreeItemData*>(mMaterialsPanel->m_materialTree->GetItemData(evt.GetItem()));
    if (data)
@@ -180,54 +160,24 @@ void MaterialsTool::OnTreeMenu(wxTreeEvent& evt)
       {
          wxMenu* menu = new wxMenu;
          menu->Append(0, wxT("New Material"));
-         menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MaterialsTool::OnModuleMenuEvent), NULL, this);
+         menu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MaterialsWindow::OnModuleMenuEvent), NULL, this);
          mFrame->PopupMenu(menu, wxDefaultPosition);
          delete menu;
       }
    }
 }
 
-void MaterialsTool::OnModuleMenuEvent(wxCommandEvent& evt)
+void MaterialsWindow::OnModuleMenuEvent(wxCommandEvent& evt)
 {
    if (evt.GetId() == 0)
    {
-      NewMaterialWizard* wizard = new NewMaterialWizard(mFrame);
-
-      // Set initial import path, the user can change it.
-      wxString defaultSavePath = mSelectedModule->getModulePath();
-      defaultSavePath.Append("/materials");
-      wizard->savePath->SetPath(defaultSavePath);
-
-      if (wizard->RunWizard(wizard->m_pages[0]))
-      {
-         wxString assetID = wizard->assetID->GetValue();
-         wxString savePath = wizard->savePath->GetPath();
-
-         wxString assetPath("");
-         assetPath.Append(savePath);
-         assetPath.Append("/");
-         assetPath.Append(assetID);
-         assetPath.Append(".asset.taml");
-
-         wxString templateFileName("");
-         templateFileName.Append(assetID);
-         templateFileName.Append(".taml");
-
-         wxString templatePath("");
-         templatePath.Append(savePath);
-         templatePath.Append("/");
-         templatePath.Append(templateFileName);
-
-         // Create material template and then asset.
-         Torque::Scene.createMaterialTemplate(templatePath.c_str());
-         Torque::Scene.createMaterialAsset(assetID.c_str(), templateFileName.c_str(), assetPath.c_str());
-         Torque::AssetDatabaseLink.addDeclaredAsset(mSelectedModule, assetPath.c_str());
+      wxString newMaterialName;
+      if (mEditorManager->newMaterialWizard(newMaterialName, mSelectedModule->getModuleId()))
          refreshMaterialList();
-      }
    }
 }
 
-void MaterialsTool::refreshMaterialList()
+void MaterialsWindow::refreshMaterialList()
 {
    if (!mEditorManager->isProjectLoaded())
       return;
@@ -280,7 +230,7 @@ void MaterialsTool::refreshMaterialList()
    }
 }
 
-void MaterialsTool::selectNode(MaterialWindow* parent, Node* node)
+void MaterialsWindow::selectNode(MaterialWindow* parent, Node* node)
 {
    mSelectedNode = node;
    mSelectedNodeParent = parent;
@@ -288,105 +238,130 @@ void MaterialsTool::selectNode(MaterialWindow* parent, Node* node)
    mInspector->Clear();
 
    // Standard for all nodes.
-   mInspector->AddGroup(mInspector, wxT("Material Node"));
+   wxPanel* group = mInspector->AddGroup(mInspector, wxT("Material Node"));
+   mInspector->AddStringField(group, "Name", wxT("Name"), node->name);
 
-   /*grid->Append(new wxPropertyCategory());
-   grid->Append(new wxStringProperty("Name", "Name", node->name));
-   grid->Append(new wxPropertyCategory(node->type));
+   wxPanel* typeGroup = mInspector->AddGroup(mInspector, wxString(node->type));
 
    // Opaque
    if (node->type == "Opaque")
-      grid->Append(new wxFloatProperty("AlphaThreshold", "AlphaThreshold", node->alphaThreshold));
+      mInspector->AddStringField(typeGroup, "AlphaThreshold", wxT("AlphaThreshold"), wxString::Format(wxT("%f"), node->alphaThreshold));
 
    // Texture
    if (node->type == "Texture")
-      grid->Append(new wxIntProperty("Slot", "Slot", node->textureSlot));
+      mInspector->AddStringField(typeGroup, "Slot", wxT("Slot"), wxString::Format(wxT("%d"), node->textureSlot));
 
    // Float
    if (node->type == "Float")
-      grid->Append(new wxFloatProperty("Value", "Value", node->color.red));
+      mInspector->AddStringField(typeGroup, "Value", wxT("Value"), wxString::Format(wxT("%f"), node->color.red));
 
    // Time
    if (node->type == "Time")
-      grid->Append(new wxFloatProperty("Multiplier", "Multiplier", node->color.red));
+      mInspector->AddStringField(typeGroup, "Multiplier", wxT("Multiplier"), wxString::Format(wxT("%f"), node->color.red));
 
    // Lerp
    if (node->type == "Lerp")
-      grid->Append(new wxFloatProperty("Amount", "Amount", node->color.red));
+      mInspector->AddStringField(typeGroup, "Amount", wxT("Amount"), wxString::Format(wxT("%f"), node->color.red));
 
    // Vec2
    if (node->type == "Vec2")
    {
-      grid->Append(new wxFloatProperty("X", "X", node->color.red));
-      grid->Append(new wxFloatProperty("Y", "Y", node->color.green));
+      mInspector->AddStringField(typeGroup, "X", wxT("X"), wxString::Format(wxT("%f"), node->color.red));
+      mInspector->AddStringField(typeGroup, "Y", wxT("Y"), wxString::Format(wxT("%f"), node->color.green));
    }
 
    // Vec3, Vec4
    if (node->type == "Vec3" || node->type == "Vec4")
    {
-      wxColour color;
-      color.Set(node->color.red * 255, node->color.green * 255, node->color.blue * 255, 255);
-      grid->Append(new wxColourProperty("Color", "Color", color));
+      mInspector->AddColorFField(typeGroup, "Color", wxT("Color"), node->color);
    }
    if (node->type == "Vec4")
    {
-      grid->Append(new wxFloatProperty("Alpha", "Alpha", node->color.alpha));
-   }*/
+      mInspector->AddStringField(typeGroup, "Alpha", wxT("Alpha"), wxString::Format(wxT("%f"), node->color.alpha));
+   }
+
+   mInspector->UpdateInspector();
 }
 
-void MaterialsTool::OnPropertyChanged(wxPropertyGridEvent& evt)
+void MaterialsWindow::OnFieldChanged(wxString name, wxVariant val)
 {
    if (mSelectedNode == NULL)
       return;
-   /*
-   wxString name = evt.GetPropertyName();
-   wxVariant val = evt.GetPropertyValue();
 
-   // Name
+   wxString strVal = val.GetString();
+   double dblVal;
+   strVal.ToDouble(&dblVal);
+   long longVal;
+   strVal.ToLong(&longVal);
+
    if (name == "Name")
    {
-      mSelectedNode->name = val.GetString();
+      mSelectedNode->name = strVal;
       if (mSelectedNode->materialNode != NULL)
          mSelectedNode->materialNode->setInternalName(mSelectedNode->name);
    }
 
    // Slot is for Opaque
    if (name == "AlphaThreshold")
-      mSelectedNode->alphaThreshold = val.GetDouble();
+      mSelectedNode->alphaThreshold = dblVal;
 
    // Slot is for Textures
    if (name == "Slot")
-      mSelectedNode->textureSlot = val.GetInteger();
+      mSelectedNode->textureSlot = longVal;
 
    // Value is for Float
    if (name == "Value")
-      mSelectedNode->color.red = val.GetDouble();
+      mSelectedNode->color.red = dblVal;
 
    // Multiplier is for Time
    if (name == "Multiplier")
-      mSelectedNode->color.red = val.GetDouble();
+      mSelectedNode->color.red = dblVal;
 
    // X, Y are for Vec2
    if (name == "X")
-      mSelectedNode->color.red = val.GetDouble();
+      mSelectedNode->color.red = dblVal;
    if (name == "Y")
-      mSelectedNode->color.green = val.GetDouble();
+      mSelectedNode->color.green = dblVal;
 
    // Color covers Vec3 and Vec4.
    if (name == "Color")
    {
       wxColour color;
       color << val;
-      mSelectedNode->color.red   = color.Red() / 255.0f;
+      mSelectedNode->color.red = color.Red() / 255.0f;
       mSelectedNode->color.green = color.Green() / 255.0f;
-      mSelectedNode->color.blue  = color.Blue() / 255.0f;
+      mSelectedNode->color.blue = color.Blue() / 255.0f;
    }
 
    // Alpha for Vec4
    if (name == "Alpha")
-      mSelectedNode->color.alpha = val.GetDouble();
+      mSelectedNode->color.alpha = dblVal;
 
    if (mSelectedNodeParent != NULL)
       mSelectedNodeParent->Refresh(false);
-      */
+}
+
+void MaterialsWindow::openMaterial(StringTableEntry assetId)
+{
+   MaterialAsset* mat = Torque::Scene.getMaterialAsset(assetId);
+   if (mat)
+   {
+      // See if we've already opened a tab for this one, if so then set focus to it.
+      for (unsigned int i = 0; i < mMaterialsPanel->m_materialNotebook->GetPageCount(); ++i)
+      {
+         MaterialWindow* window = dynamic_cast<MaterialWindow*>(mMaterialsPanel->m_materialNotebook->GetPage(i));
+         MaterialAsset* asset = window->getMaterialAsset();
+         if (asset == mat)
+         {
+            mMaterialsPanel->m_materialNotebook->SetSelection(i);
+            return;
+         }
+      }
+
+      // If not then create a new MaterialWindow and add it to the collection.
+      MaterialWindow* materialWindow = new MaterialWindow(mFrame, this);
+      materialWindow->loadMaterial(mat);
+      mMaterialsPanel->m_materialNotebook->AddPage(materialWindow, wxString(assetId));
+      mMaterialsPanel->m_materialNotebook->SetSelection(mMaterialsPanel->m_materialNotebook->GetPageCount() - 1);
+   }
 }

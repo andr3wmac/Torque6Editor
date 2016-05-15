@@ -55,19 +55,19 @@ bool Torque6Editor::OnInit()
    runPath.Append("/Torque6App.exe");
 #endif
 
-   // Torque 6 Project Manager
+   // Editor Manager
    mEditorManager.init(runPath, mManager, mFrame, mFrame->mainPanel);
 
    // Tools
-   EditorTool::smEditorTools.push_back(new ProjectTool(&mEditorManager, mFrame, mManager));
-   EditorTool::smEditorTools.push_back(new ConsoleTool(&mEditorManager, mFrame, mManager));
-   EditorTool::smEditorTools.push_back(new MaterialsTool(&mEditorManager, mFrame, mManager));
-   EditorTool::smEditorTools.push_back(new ProfilerTool(&mEditorManager, mFrame, mManager));
-   EditorTool::smEditorTools.push_back(new SceneTool(&mEditorManager, mFrame, mManager));
-   EditorTool::smEditorTools.push_back(new ScriptsTool(&mEditorManager, mFrame, mManager));
+   EditorWindow::smEditorWindows.push_back(new ProjectWindow(&mEditorManager, mFrame, mManager));
+   EditorWindow::smEditorWindows.push_back(new ConsoleWindow(&mEditorManager, mFrame, mManager));
+   EditorWindow::smEditorWindows.push_back(new MaterialsWindow(&mEditorManager, mFrame, mManager));
+   EditorWindow::smEditorWindows.push_back(new ProfilerWindow(&mEditorManager, mFrame, mManager));
+   EditorWindow::smEditorWindows.push_back(new SceneWindow(&mEditorManager, mFrame, mManager));
+   EditorWindow::smEditorWindows.push_back(new ScriptsWindow(&mEditorManager, mFrame, mManager));
 
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->initTool();
+   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+      EditorWindow::smEditorWindows[i]->initWindow();
 
    // Specified project.
    if (argc == 3)
@@ -93,10 +93,10 @@ bool Torque6Editor::OnInit()
 
 Torque6Editor::~Torque6Editor()
 {
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
    {
-      EditorTool* tool = EditorTool::smEditorTools[i];
-      tool->destroyTool();
+      EditorWindow* tool = EditorWindow::smEditorWindows[i];
+      tool->destroyWindow();
       //delete tool;
    }
 
@@ -131,23 +131,23 @@ void Torque6Editor::OnMenuEvent(wxCommandEvent& evt)
          break;
 
       case MENU_PROJECT:
-         EditorTool::smEditorTools[0]->openTool();
+         EditorWindow::smEditorWindows[0]->openWindow();
          break;
 
       case MENU_CONSOLE:
-         EditorTool::smEditorTools[1]->openTool();
+         EditorWindow::smEditorWindows[1]->openWindow();
          break;
 
       case MENU_MATERIALS:
-         EditorTool::smEditorTools[2]->openTool();
+         EditorWindow::smEditorWindows[2]->openWindow();
          break;
 
       case MENU_SCENE:
-         EditorTool::smEditorTools[4]->openTool();
+         EditorWindow::smEditorWindows[4]->openWindow();
          break;
 
       case MENU_SCRIPTS:
-         EditorTool::smEditorTools[5]->openTool();
+         EditorWindow::smEditorWindows[5]->openWindow();
          break;
 
 		case MENU_REMOTERY:

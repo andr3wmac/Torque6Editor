@@ -24,11 +24,11 @@
 #define _PROFILER_TREE_MODEL_H_
 
 #ifndef EDITORMANAGER_H
-#include "../editorManager.h"
+#include "editorManager.h"
 #endif
 
 #ifndef __TORQUE6EDITORUI_H__
-#include "../Torque6EditorUI.h"
+#include "Torque6EditorUI.h"
 #endif
 
 #ifndef _WX_TREECTRL_H_BASE_

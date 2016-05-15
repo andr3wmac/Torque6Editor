@@ -45,6 +45,7 @@ void wxTorqueInspector::Init()
    mObject        = NULL;
    mSceneObject   = NULL;
    mComponent     = NULL;
+   mDelegate      = NULL;
 
    // Icons
    mIconList = new wxImageList(16, 16);
@@ -60,6 +61,19 @@ void wxTorqueInspector::Clear()
 {
    if (mContentsSizer->GetChildren().size() > 0)
       mContentsSizer->Clear(true);
+}
+
+void wxTorqueInspector::SetDelegate(wxTorqueInspectorDelegate* _delegate)
+{
+   mDelegate = _delegate;
+}
+
+void wxTorqueInspector::OnFieldChanged(wxString name, wxVariant value)
+{
+   if (mDelegate != NULL)
+   {
+      mDelegate->OnFieldChanged(name, value);
+   }
 }
 
 // -----------------------
@@ -149,7 +163,11 @@ void wxTorqueInspector::OnStringFieldChanged(wxCommandEvent& evt)
    wxTorqueStringField* stringField = dynamic_cast<wxTorqueStringField*>(evt.GetEventUserData());
    if (stringField)
    {
-      mObject->setDataField(Torque::StringTableLink->insert(stringField->fieldName), NULL, stringField->value->GetValue());
+      // Callback
+      OnFieldChanged(wxString(stringField->fieldName), wxVariant(stringField->value->GetValue()));
+
+      if (mObject != NULL)
+         mObject->setDataField(Torque::StringTableLink->insert(stringField->fieldName), NULL, stringField->value->GetValue());
 
       if (mSceneObject != NULL)
          mSceneObject->refresh();
@@ -322,6 +340,58 @@ void wxTorqueInspector::OnPoint3FFieldChanged(wxCommandEvent& evt)
 }
 
 // -----------------------
+//  ColorF Field
+// -----------------------
+
+void wxTorqueInspector::AddColorFField(wxPanel* panel, const char* fieldName, const wxString& label, const ColorF& value)
+{
+   wxTorqueColorFField* field = new wxTorqueColorFField();
+   field->fieldName = fieldName;
+
+   wxSizer* panelSizer = panel->GetSizer();
+
+   wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+
+   wxStaticText* labelCtrl = new wxStaticText(panel, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, 0);
+   labelCtrl->Wrap(-1);
+   labelCtrl->SetForegroundColour(wxColour(255, 255, 255));
+   sizer->Add(labelCtrl, 1, wxALL, 5);
+   
+   // Color Value
+   field->colorValue = new wxColourPickerCtrl(panel, wxID_ANY, wxColour(value.red * 255, value.green * 255, value.blue * 255), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   field->colorValue->SetBackgroundColour(Theme::darkBackgroundColor);
+   field->colorValue->SetForegroundColour(Theme::darkBackgroundColor);
+   field->colorValue->SetMinSize(wxSize(10, 20));
+   field->colorValue->Bind(wxEVT_COLOURPICKER_CHANGED, &wxTorqueInspector::OnColorFFieldChanged, this, -1, -1, field);
+   sizer->Add(field->colorValue, 1, wxALL, 2);
+
+   panelSizer->Add(sizer, 0, wxEXPAND, 5);
+}
+
+void wxTorqueInspector::OnColorFFieldChanged(wxCommandEvent& evt)
+{
+   wxTorqueColorFField* field = dynamic_cast<wxTorqueColorFField*>(evt.GetEventUserData());
+   if (field)
+   {
+      wxColour wxcolor     = field->colorValue->GetColour();
+      ColorF torquecolor   = ColorF(wxcolor.Red() / 255.0f, wxcolor.Green() / 255.0f, wxcolor.Blue() / 255.0f, wxcolor.Alpha() / 255.0f);
+      wxString value       = wxString::Format(wxT("%f %f %f %f"), torquecolor.red, torquecolor.green, torquecolor.blue, torquecolor.alpha);
+
+      // Callback
+      OnFieldChanged(wxString(field->fieldName), wxVariant(wxcolor));
+
+      if (mObject != NULL)
+         mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, value);
+
+      if (mSceneObject != NULL)
+         mSceneObject->refresh();
+
+      if (mComponent != NULL)
+         mComponent->mOwnerObject->refresh();
+   }
+}
+
+// -----------------------
 //  Button Field
 // -----------------------
 
@@ -384,7 +454,7 @@ void wxTorqueInspector::OnMeshAssetFieldSelect(wxCommandEvent& evt)
    if (field)
    {
       wxString returnValue;
-      if (mEditorManager->selectAsset(returnValue, "MeshAsset"))
+      if (mEditorManager->selectAsset(returnValue, "MeshAsset", field->value->GetValue().c_str()))
          field->value->SetValue(returnValue);
 
       mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
@@ -441,7 +511,7 @@ void wxTorqueInspector::OnObjectTemplateAssetFieldSelect(wxCommandEvent& evt)
    if (field)
    {
       wxString returnValue;
-      if (mEditorManager->selectAsset(returnValue, "ObjectTemplateAsset"))
+      if (mEditorManager->selectAsset(returnValue, "ObjectTemplateAsset", field->value->GetValue().c_str()))
          field->value->SetValue(returnValue);
 
       mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
@@ -498,7 +568,7 @@ void wxTorqueInspector::OnMaterialAssetFieldSelect(wxCommandEvent& evt)
    if (field)
    {
       wxString returnValue;
-      if (mEditorManager->selectMaterial(returnValue))
+      if (mEditorManager->selectMaterial(returnValue, field->value->GetValue().c_str()))
          field->value->SetValue(returnValue);
 
       mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
@@ -555,7 +625,7 @@ void wxTorqueInspector::OnTextureAssetFieldSelect(wxCommandEvent& evt)
    if (field)
    {
       wxString returnValue;
-      if (mEditorManager->selectAsset(returnValue, "TextureAsset"))
+      if (mEditorManager->selectAsset(returnValue, "TextureAsset", field->value->GetValue().c_str()))
          field->value->SetValue(returnValue);
 
       mObject->setDataField(Torque::StringTableLink->insert(field->fieldName), NULL, field->value->GetValue());
@@ -656,9 +726,7 @@ void wxTorqueInspector::Inspect(SimObject* obj)
          {
             ColorF colorVal;
             Torque::Con.setData(Torque::Con.TypeColorF, &colorVal, 0, 1, &val, NULL, 0);
-            wxColour color;
-            color.Set(colorVal.red * 255, colorVal.green * 255, colorVal.blue * 255, 255);
-            //propertyGrid->Append(new wxColourProperty(f->pFieldname, f->pFieldname, color));
+            AddColorFField(group, f->pFieldname, wxString(f->pFieldname), colorVal);
          }
          
          // MeshAsset Field
@@ -726,9 +794,7 @@ void wxTorqueInspector::Inspect(SimObject* obj)
       }
    }
 
-   wxSize size = this->GetParent()->GetBestVirtualSize();
-   this->GetParent()->SetVirtualSize(size);
-   this->SetVirtualSize(size);
+   UpdateInspector();
 }
 
 void wxTorqueInspector::Inspect(Scene::SceneObject* sceneObject)
@@ -883,6 +949,11 @@ void wxTorqueInspector::Inspect(const AssetDefinition* assetDef)
       }
    }
 
+   UpdateInspector();
+}
+
+void wxTorqueInspector::UpdateInspector()
+{
    wxSize size = this->GetParent()->GetBestVirtualSize();
    this->GetParent()->SetVirtualSize(size);
    this->SetVirtualSize(size);

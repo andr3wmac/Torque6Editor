@@ -20,15 +20,15 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _PROJECT_TOOL_H_
-#define _PROJECT_TOOL_H_
+#ifndef PROJECT_WINDOW_H
+#define PROJECT_WINDOW_H
 
 #ifndef EDITORMANAGER_H
-#include "../editorManager.h"
+#include "editorManager.h"
 #endif
 
 #ifndef __TORQUE6EDITORUI_H__
-#include "../Torque6EditorUI.h"
+#include "Torque6EditorUI.h"
 #endif
 
 #ifndef _WX_TREECTRL_H_BASE_
@@ -40,7 +40,7 @@
 #endif
 
 #ifndef WXFLATNOTEBOOK_H
-#include "../widgets/wxFlatNotebook/wxFlatNotebook.h"
+#include "widgets/wxFlatNotebook/wxFlatNotebook.h"
 #endif
 
 class ModuleTreeItemData : public wxTreeItemData
@@ -79,9 +79,9 @@ public:
 class ModuleDefinition;
 class wxTorqueInspector;
 
-class ProjectTool : public wxEvtHandler, public EditorTool
+class ProjectWindow : public wxEvtHandler, public EditorWindow
 {
-   typedef EditorTool Parent;
+   typedef EditorWindow Parent;
 
    protected:
       wxFlatNotebook*         mTabs;
@@ -98,8 +98,8 @@ class ProjectTool : public wxEvtHandler, public EditorTool
       MaterialAsset*          mSelectedMaterialAsset;
 
    public:
-      ProjectTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
-      ~ProjectTool();
+      ProjectWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
+      ~ProjectWindow();
 
       const char* getAssetCategoryName(const char* _name);
 
@@ -112,12 +112,12 @@ class ProjectTool : public wxEvtHandler, public EditorTool
       void OnMenuEvent(wxCommandEvent& evt);
       void OnPropertyChanged(wxPropertyGridEvent& evt);
 
-      virtual void initTool();
-      virtual void openTool();
-      virtual void closeTool();
+      virtual void initWindow();
+      virtual void openWindow();
+      virtual void closeWindow();
 
       virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
       virtual void onProjectClosed();
 };
 
-#endif // _PROJECT_TOOL_H_
+#endif // PROJECT_WINDOW_H

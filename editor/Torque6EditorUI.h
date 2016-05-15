@@ -48,12 +48,12 @@ WX_DEFINE_ARRAY_PTR( wxWizardPageSimple*, WizardPages );
 #define MENU_CAMERA_SLOW 1001
 #define MENU_CAMERA_NORMAL 1002
 #define MENU_CAMERA_FAST 1003
-#define MENU_PROJECT 1004
-#define MENU_CONSOLE 1005
-#define MENU_SCENE 1006
-#define MENU_SCRIPTS 1007
-#define MENU_MATERIALS 1008
-#define MENU_REMOTERY 1009
+#define MENU_REMOTERY 1004
+#define MENU_PROJECT 1005
+#define MENU_CONSOLE 1006
+#define MENU_SCENE 1007
+#define MENU_SCRIPTS 1008
+#define MENU_MATERIALS 1009
 #define MENU_WEBSITE 1010
 #define MENU_GITHUB 1011
 #define MENU_FORUMS 1012
@@ -86,8 +86,8 @@ class MainFrame : public wxFrame
 	protected:
 		wxMenu* m_menu1;
 		wxMenu* m_menu7;
-		wxMenu* m_menu2;
 		wxMenu* m_menu71;
+		wxMenu* m_menu2;
 		wxMenu* m_menu6;
 	
 	public:
@@ -354,12 +354,15 @@ class NewMaterialWizard : public wxWizard
 	private:
 	
 	protected:
+		wxStaticText* m_staticText1111;
 		wxStaticText* m_staticText111;
 		wxStaticText* m_staticText121;
 	
 	public:
+		wxChoice* moduleSelection;
 		wxTextCtrl* assetID;
 		wxDirPickerCtrl* savePath;
+		wxCheckBox* openInMaterialEditor;
 		
 		NewMaterialWizard( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Material"), const wxBitmap& bitmap = wxNullBitmap, const wxPoint& pos = wxDefaultPosition, long style = wxDEFAULT_DIALOG_STYLE );
 		WizardPages m_pages;

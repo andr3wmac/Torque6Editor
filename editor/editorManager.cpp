@@ -41,6 +41,7 @@
 #include "widgets/wxTorqueAssetBrowser/wxTorqueAssetSelectDialog.h"
 #include "widgets/wxTorqueAssetBrowser/wxTorqueAssetTree.h"
 #include "theme.h"
+#include "windows/materials/materialsWindow.h"
 
 #include "editorManager.h"
 #include "module/moduleManager.h"
@@ -119,7 +120,25 @@ void EditorManager::init(wxString runPath, wxAuiManager* manager, MainFrame* fra
 
    // Dialogs
    mAssetSelectDialog = new wxTorqueAssetSelectDialog(this, mWindow);
+
+   // Dialogs - Material Selection Dialog
    mMaterialSelectDialog = new wxTorqueAssetSelectDialog(this, mWindow);
+
+   // New Material Button
+   mMaterialSelectDialog->TopBarSizer->Add(0, 0, 1, wxEXPAND, 5);
+   wxButton* newMatButton = new wxButton(mMaterialSelectDialog, wxID_ANY, wxT("New Material"), wxDefaultPosition, wxDefaultSize, 0 | wxNO_BORDER);
+   newMatButton->SetForegroundColour(wxColour(255, 255, 255));
+   newMatButton->SetBackgroundColour(Theme::darkBackgroundColor);
+   newMatButton->Bind(wxEVT_BUTTON, &EditorManager::OnNewMaterialButton, this, -1, -1, NULL);
+   mMaterialSelectDialog->TopBarSizer->Add(newMatButton, 0, wxALL, 5);
+
+   // Open in Material Editor Button
+   wxButton* openMatButton = new wxButton(mMaterialSelectDialog, wxID_ANY, wxT("Open in Material Editor"), wxDefaultPosition, wxDefaultSize, 0 | wxNO_BORDER);
+   openMatButton->SetForegroundColour(wxColour(255, 255, 255));
+   openMatButton->SetBackgroundColour(Theme::darkBackgroundColor);
+   openMatButton->Bind(wxEVT_BUTTON, &EditorManager::OnOpenInMaterialEditorButton, this, -1, -1, NULL);
+   mMaterialSelectDialog->TopBarSizer->Add(openMatButton, 0, wxALL, 5);
+   mMaterialSelectDialog->TopBarSizer->Add(0, 0, 1, wxEXPAND, 5);
 }
 
 bool EditorManager::openProject(wxString projectPath)
@@ -247,8 +266,8 @@ void EditorManager::OnMouseMove(wxMouseEvent& evt)
 
    mEditorCamera.onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
+   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+      EditorWindow::smEditorWindows[i]->onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
 
    Torque::Engine.mouseMove(evt.GetPosition().x, evt.GetPosition().y);
 }
@@ -261,8 +280,8 @@ void EditorManager::OnMouseLeftDown(wxMouseEvent& evt)
 
    mEditorCamera.onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
+   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+      EditorWindow::smEditorWindows[i]->onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
 
    Torque::Engine.mouseButton(true, true);
 }
@@ -273,8 +292,8 @@ void EditorManager::OnMouseLeftUp(wxMouseEvent& evt)
 
    mEditorCamera.onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
+   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+      EditorWindow::smEditorWindows[i]->onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
 
    Torque::Engine.mouseButton(false, true);
 }
@@ -287,8 +306,8 @@ void EditorManager::OnMouseRightDown(wxMouseEvent& evt)
 
    mEditorCamera.onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
+   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+      EditorWindow::smEditorWindows[i]->onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
 
    Torque::Engine.mouseButton(true, false);
 }
@@ -299,8 +318,8 @@ void EditorManager::OnMouseRightUp(wxMouseEvent& evt)
 
    mEditorCamera.onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
+   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+      EditorWindow::smEditorWindows[i]->onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
 
    Torque::Engine.mouseButton(false, false);
 }
@@ -403,129 +422,20 @@ void EditorManager::render(Rendering::RenderCamera* camera)
    //Torque::bgfx.setViewRect(mEditorOverlayView->id, 0, 0, *Torque::Rendering.windowWidth, *Torque::Rendering.windowHeight);
    //Torque::bgfx.setViewTransform(mEditorOverlayView->id, camera->viewMatrix, camera->projectionMatrix, BGFX_VIEW_STEREO, NULL);
 
-   for(unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->renderTool();
-}
-
-// Project Tool Management
-wxVector<EditorTool*> EditorTool::smEditorTools;
-
-EditorTool::EditorTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
-   :  mOpen(false),
-      mEditorManager(_EditorManager),
-      mFrame(_frame),
-      mManager(_manager)
-{
-   //
+   for(unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+      EditorWindow::smEditorWindows[i]->renderWindow();
 }
 
 void EditorManager::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
-   for(unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->onProjectLoaded(projectName, projectPath);
+   for(unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+      EditorWindow::smEditorWindows[i]->onProjectLoaded(projectName, projectPath);
 }
 
 void EditorManager::onProjectClosed()
 {
-   for(unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->onProjectClosed();
-}
-
-// ---------------------------------------------------------------
-
-EditorCamera::EditorCamera()
-{
-   mRenderCamera     = NULL;
-   mForwardVelocity  = Point3F::Zero;
-   mWorldPosition    = Point3F(0.0f, 0.0f, 0.0f);
-   mMouseDown        = false;
-   mMouseStart       = Point2I(0, 0);
-   mHorizontalAngle  = 0.0f;
-   mVerticalAngle    = 0.0f;
-
-   mTransform.set(Point3F(0.0f, 0.0f, 0.0f), VectorF(0.0f, 0.0f, 0.0f), VectorF(1.0f, 1.0f, 1.0f));
-}
-
-void EditorCamera::initialize(EditorManager* EditorManager)
-{
-   mEditorManager   = EditorManager;
-   mRenderCamera     = Torque::Rendering.getPriorityRenderCamera();
-}
-
-void EditorCamera::mainLoop()
-{
-   if (mRenderCamera == NULL)
-      return;
-
-   mVerticalAngle = mClampF(mVerticalAngle, -4.7f, -1.7f);
-   VectorF rotation = mTransform.getRotationEuler();
-   rotation.y = mVerticalAngle;
-   rotation.z = mHorizontalAngle;
-   mTransform.setRotation(rotation);
-
-   VectorF up(0.0f, 0.0f, 1.0f);
-   Point3F look;
-   Point3F cameraForward(1.0f, 0.0f, 0.0f);
-
-   bx::vec3MulMtx(look, cameraForward, mTransform.matrix);
-
-   if (mForwardVelocity.len() > 0.01f)
-   {
-      MatrixF lookMatrix;
-      bx::mtxLookAt(lookMatrix, mWorldPosition, look, up);
-      mWorldPosition += (lookMatrix.getForwardVector() * mForwardVelocity.x);
-      mWorldPosition -= (lookMatrix.getRightVector() * mForwardVelocity.y);
-      mTransform.setPosition(mWorldPosition);
-   }
-
-   bx::vec3MulMtx(look, cameraForward, mTransform.matrix);
-   bx::mtxLookAt(mRenderCamera->viewMatrix, mWorldPosition, look, up);
-   mRenderCamera->position = mWorldPosition;
-}
-
-void EditorCamera::setForwardVelocity(Point3F velocity)
-{
-   mForwardVelocity = velocity;
-}
-
-bool EditorCamera::onMouseLeftDown(int x, int y)
-{
-   return false;
-}
-
-bool EditorCamera::onMouseLeftUp(int x, int y)
-{
-   return false;
-}
-
-bool EditorCamera::onMouseRightDown(int x, int y)
-{
-   mMouseDown = true;
-   mMouseStart = Point2I(x, y);
-   return false;
-}
-
-bool EditorCamera::onMouseRightUp(int x, int y)
-{
-   mMouseDown = false;
-   return false;
-}
-
-bool EditorCamera::onMouseMove(int x, int y)
-{
-   if (!mMouseDown)
-      return false;
-
-   Point2I pos = Point2I(x, y);
-   Point2I delta = mMouseStart - pos;
-   mMouseStart = pos;
-
-   if (delta.isZero()) return false;
-
-   mHorizontalAngle += delta.x * 0.01f;
-   mVerticalAngle -= delta.y * 0.01f;
-   mVerticalAngle = mClampF(mVerticalAngle, -4.7f, -1.7f);
-   return false;
+   for(unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+      EditorWindow::smEditorWindows[i]->onProjectClosed();
 }
 
 // ---------------------------------------------------------------
@@ -585,8 +495,8 @@ bool TextDropTarget::OnDropText(wxCoord x, wxCoord y, const wxString& text)
       }
 
       // Inform the tools the scene has changed.
-      for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-         EditorTool::smEditorTools[i]->onSceneChanged();
+      for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+         EditorWindow::smEditorWindows[i]->onSceneChanged();
    }
 
    return true;
@@ -719,12 +629,119 @@ wxPGChoices* EditorManager::getTextureAssetChoices()
    return &mTextureAssetChoices;
 }
 
-bool EditorManager::selectMaterial(wxString& returnMaterialName)
+bool EditorManager::selectMaterial(wxString& returnMaterialName, const char* defaultAsset)
 {
-   return mMaterialSelectDialog->SelectAsset(returnMaterialName, "MaterialAsset");
+   return mMaterialSelectDialog->SelectAsset(returnMaterialName, "MaterialAsset", defaultAsset);
 }
 
-bool EditorManager::selectAsset(wxString& returnValue, const char* filter)
+bool EditorManager::selectAsset(wxString& returnValue, const char* filter, const char* defaultAsset)
 {
-   return mAssetSelectDialog->SelectAsset(returnValue, filter);
+   return mAssetSelectDialog->SelectAsset(returnValue, filter, defaultAsset);
+}
+
+void EditorManager::OnNewMaterialButton(wxCommandEvent& evt)
+{
+   wxString newMaterialName;
+   if (newMaterialWizard(newMaterialName))
+   {
+      mMaterialSelectDialog->SetSelectedAsset(newMaterialName);
+      mMaterialSelectDialog->EndModal(1);
+   }
+}
+
+void EditorManager::OnOpenInMaterialEditorButton(wxCommandEvent& evt)
+{
+   if (mMaterialSelectDialog->SelectedAsset != NULL)
+   {
+      mMaterialSelectDialog->EndModal(1);
+      MaterialsWindow* materialsWindow = EditorWindow::findTool<MaterialsWindow>();
+      materialsWindow->openWindow();
+      materialsWindow->openMaterial(mMaterialSelectDialog->SelectedAsset->mAssetId);
+   }
+}
+
+void _materialWizardSelectModule(NewMaterialWizard* wizard)
+{
+   wxString selection = wizard->moduleSelection->GetString(wizard->moduleSelection->GetSelection());
+   ModuleDefinition* module = Torque::ModuleDatabaseLink->findLoadedModule(selection.c_str());
+
+   wxString defaultSavePath = module->getModulePath();
+   defaultSavePath.Append("/materials");
+   wizard->savePath->SetPath(defaultSavePath);
+}
+
+bool EditorManager::newMaterialWizard(wxString& returnMaterialName, const char* moduleId)
+{
+   NewMaterialWizard* wizard = new NewMaterialWizard(mFrame);
+   wxWizardCallback* wizardCallback = new wxWizardCallback();
+   wizardCallback->wizard = wizard;
+   wizard->moduleSelection->Bind(wxEVT_CHOICE, &EditorManager::OnNewMaterialSelectModule, this, -1, -1, wizardCallback);
+
+   // Populate module list.
+   int selection = 0;
+   for (S32 n = 0; n < mModuleList.size(); ++n)
+   {
+      if (moduleId != NULL && dStrcmp(mModuleList[n].moduleID, moduleId) == 0)
+         selection = n;
+
+      wizard->moduleSelection->AppendString(wxString(mModuleList[n].moduleID));
+   }
+   wizard->moduleSelection->Select(selection);
+   _materialWizardSelectModule(wizard);
+
+   if (wizard->RunWizard(wizard->m_pages[0]))
+   {
+      wxString assetID = wizard->assetID->GetValue();
+      wxString savePath = wizard->savePath->GetPath();
+
+      wxString selection = wizard->moduleSelection->GetString(wizard->moduleSelection->GetSelection());
+      ModuleDefinition* module = Torque::ModuleDatabaseLink->findLoadedModule(selection.c_str());
+
+      wxString assetPath("");
+      assetPath.Append(savePath);
+      assetPath.Append("/");
+      assetPath.Append(assetID);
+      assetPath.Append(".asset.taml");
+
+      wxString templateFileName("");
+      templateFileName.Append(assetID);
+      templateFileName.Append(".taml");
+
+      wxString templatePath("");
+      templatePath.Append(savePath);
+      templatePath.Append("/");
+      templatePath.Append(templateFileName);
+
+      // Create material template and then asset.
+      Torque::Scene.createMaterialTemplate(templatePath.c_str());
+      Torque::Scene.createMaterialAsset(assetID.c_str(), templateFileName.c_str(), assetPath.c_str());
+      Torque::AssetDatabaseLink.addDeclaredAsset(module, assetPath.c_str());
+
+      returnMaterialName = wxString("");
+      returnMaterialName.Append(module->getModuleId());
+      returnMaterialName.Append(":");
+      returnMaterialName.Append(assetID);
+
+      // Open new material in editor?
+      if (wizard->openInMaterialEditor->GetValue())
+      {
+         MaterialsWindow* materialsWindow = EditorWindow::findTool<MaterialsWindow>();
+         materialsWindow->openWindow();
+         materialsWindow->openMaterial(returnMaterialName.c_str());
+      }
+
+      return true;
+   }
+
+   return false;
+}
+
+void EditorManager::OnNewMaterialSelectModule(wxCommandEvent& evt)
+{
+   wxWizardCallback* callback = dynamic_cast<wxWizardCallback*>(evt.GetEventUserData());
+   NewMaterialWizard* wizard = dynamic_cast<NewMaterialWizard*>(callback->wizard);
+   if (!wizard)
+      return;
+
+   _materialWizardSelectModule(wizard);
 }

@@ -101,7 +101,7 @@
 #include "materials/nodes/vec4Node.h"
 #endif
 
-class MaterialsTool;
+class MaterialsWindow;
 
 class MaterialWindow: public wxScrolledWindow
 {
@@ -111,7 +111,7 @@ class MaterialWindow: public wxScrolledWindow
       Connection*    mActiveConnection;
       Node*          mHoverNode;
       Node*          mSelectedNode;
-      MaterialsTool* mMaterialsTool;
+      MaterialsWindow* mMaterialsWindow;
       MaterialAsset* mMaterialAsset;
       bool           mRightMouseDown;
       bool           mRightMouseDrag;
@@ -123,7 +123,7 @@ class MaterialWindow: public wxScrolledWindow
       Vector<Node> nodeList;
       Vector<Connection> connectionList;
 
-      MaterialWindow(wxWindow* parent, MaterialsTool* matTool);
+      MaterialWindow(wxWindow* parent, MaterialsWindow* matTool);
 
       void loadMaterial(MaterialAsset* mat);
       void saveMaterial();

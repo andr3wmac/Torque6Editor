@@ -34,52 +34,48 @@
 
 wxTorqueAssetSelectDialog::wxTorqueAssetSelectDialog(EditorManager* EditorManager, wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : wxDialog(parent, id, title, pos, size, style)
 {
-   mEditorManager   = EditorManager;
-   mSelectedAsset    = NULL;
+   mEditorManager    = EditorManager;
+   SelectedAsset     = NULL;
 
    this->SetSizeHints(wxDefaultSize, wxDefaultSize);
    this->SetBackgroundColour(Theme::lightBackgroundColor);
 
-   wxBoxSizer* bSizer51;
-   bSizer51 = new wxBoxSizer(wxVERTICAL);
+   ContentSizer = new wxBoxSizer(wxVERTICAL);
 
-   assetList = new wxTorqueAssetTree(mEditorManager, this, ASSET_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_HIDE_ROOT);
-   assetList->SetForegroundColour(wxColour(255, 255, 255));
-   assetList->SetBackgroundColour(Theme::darkBackgroundColor);
-   assetList->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(wxTorqueAssetSelectDialog::OnAssetTreeEvent), NULL, this);
+   // Top Bar
+   TopBarSizer = new wxBoxSizer(wxHORIZONTAL);
+   ContentSizer->Add(TopBarSizer, 0, wxEXPAND, 5);
 
-   bSizer51->Add(assetList, 1, wxALL | wxEXPAND, 1);
+   // Asset Tree
+   mAssetTree = new wxTorqueAssetTree(mEditorManager, this, ASSET_LIST, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_HIDE_ROOT);
+   mAssetTree->SetForegroundColour(wxColour(255, 255, 255));
+   mAssetTree->SetBackgroundColour(Theme::darkBackgroundColor);
+   mAssetTree->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(wxTorqueAssetSelectDialog::OnAssetTreeEvent), NULL, this);
+   ContentSizer->Add(mAssetTree, 1, wxALL | wxEXPAND, 1);
 
-   wxBoxSizer* bSizer611;
-   bSizer611 = new wxBoxSizer(wxHORIZONTAL);
+   // Bottom Bar
+   BottomBarSizer = new wxBoxSizer(wxHORIZONTAL);
+   BottomBarSizer->Add(0, 0, 1, wxEXPAND, 5);
 
+   // Select Button
+   mSelectButton = new wxButton(this, wxID_ANY, wxT("Select"), wxDefaultPosition, wxDefaultSize, 0 | wxNO_BORDER);
+   mSelectButton->SetForegroundColour(wxColour(255, 255, 255));
+   mSelectButton->SetBackgroundColour(Theme::darkBackgroundColor);
+   mSelectButton->Bind(wxEVT_BUTTON, &wxTorqueAssetSelectDialog::OnSelectButton, this, -1, -1, NULL);
+   BottomBarSizer->Add(mSelectButton, 0, wxALL, 5);
 
-   bSizer611->Add(0, 0, 1, wxEXPAND, 5);
+   // Cancel Button
+   mCancelButton = new wxButton(this, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 | wxNO_BORDER);
+   mCancelButton->SetForegroundColour(wxColour(255, 255, 255));
+   mCancelButton->SetBackgroundColour(Theme::darkBackgroundColor);
+   mCancelButton->Bind(wxEVT_BUTTON, &wxTorqueAssetSelectDialog::OnCancelButton, this, -1, -1, NULL);
+   BottomBarSizer->Add(mCancelButton, 0, wxALL, 5);
+   BottomBarSizer->Add(0, 0, 1, wxEXPAND, 5);
 
-   m_button6 = new wxButton(this, wxID_ANY, wxT("Select"), wxDefaultPosition, wxDefaultSize, 0 | wxNO_BORDER);
-   m_button6->SetForegroundColour(wxColour(255, 255, 255));
-   m_button6->SetBackgroundColour(Theme::darkBackgroundColor);
-   m_button6->Bind(wxEVT_BUTTON, &wxTorqueAssetSelectDialog::OnSelectButton, this, -1, -1, NULL);
+   ContentSizer->Add(BottomBarSizer, 0, wxEXPAND, 5);
 
-   bSizer611->Add(m_button6, 0, wxALL, 5);
-
-   m_button61 = new wxButton(this, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 | wxNO_BORDER);
-   m_button61->SetForegroundColour(wxColour(255, 255, 255));
-   m_button61->SetBackgroundColour(Theme::darkBackgroundColor);
-   m_button61->Bind(wxEVT_BUTTON, &wxTorqueAssetSelectDialog::OnCancelButton, this, -1, -1, NULL);
-
-   bSizer611->Add(m_button61, 0, wxALL, 5);
-
-
-   bSizer611->Add(0, 0, 1, wxEXPAND, 5);
-
-
-   bSizer51->Add(bSizer611, 0, wxEXPAND, 5);
-
-
-   this->SetSizer(bSizer51);
+   this->SetSizer(ContentSizer);
    this->Layout();
-
    this->Centre(wxCENTER_ON_SCREEN);
 }
 
@@ -90,10 +86,10 @@ wxTorqueAssetSelectDialog::~wxTorqueAssetSelectDialog()
 
 void wxTorqueAssetSelectDialog::OnAssetTreeEvent(wxTreeEvent& evt)
 {
-   AssetTreeItemData* data = dynamic_cast<AssetTreeItemData*>(assetList->GetItemData(evt.GetItem()));
+   AssetTreeItemData* data = dynamic_cast<AssetTreeItemData*>(mAssetTree->GetItemData(evt.GetItem()));
    if (data)
    {
-      mSelectedAsset = data->objPtr;
+      SelectedAsset = data->objPtr;
       return;
    }
 }
@@ -105,20 +101,30 @@ void wxTorqueAssetSelectDialog::OnSelectButton(wxCommandEvent& evt)
 
 void wxTorqueAssetSelectDialog::OnCancelButton(wxCommandEvent& evt)
 {
-   mSelectedAsset = NULL;
+   SelectedAsset = NULL;
    EndModal(0);
 }
 
-bool wxTorqueAssetSelectDialog::SelectAsset(wxString& returnValue, const char* filter)
+bool wxTorqueAssetSelectDialog::SelectAsset(wxString& returnValue, const char* filter, const char* defaultAsset)
 {
-   assetList->ShowAssets(filter);
+   mAssetTree->ShowAssets(filter, defaultAsset);
    ShowModal();
 
-   if (mSelectedAsset != NULL)
+   if (SelectedAsset != NULL)
    {
-      returnValue = wxString(mSelectedAsset->mAssetId);
+      returnValue = wxString(SelectedAsset->mAssetId);
       return true;
    }
 
    return false;
+}
+
+void wxTorqueAssetSelectDialog::SetSelectedAsset(wxString assetId)
+{
+   SelectedAsset = Torque::AssetDatabaseLink.getAssetDefinition(assetId.c_str());
+}
+
+void wxTorqueAssetSelectDialog::RefreshAssetList(const char* filter, const char* defaultAsset)
+{
+   mAssetTree->ShowAssets(filter, defaultAsset);
 }

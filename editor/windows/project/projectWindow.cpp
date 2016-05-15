@@ -32,18 +32,18 @@
 #include <wx/treectrl.h>
 
 // UI generated from wxFormBuilder
-#include "../Torque6EditorUI.h"
+#include "Torque6EditorUI.h"
 
-#include "../widgets/wxTorqueInspector/wxTorqueInspector.h"
-#include "../theme.h"
+#include "widgets/wxTorqueInspector/wxTorqueInspector.h"
+#include "theme.h"
 
-#include "projectTool.h"
+#include "projectWindow.h"
 #include "module/moduleManager.h"
 #include "materials/materialAsset.h"
 #include <bx/bx.h>
 #include <bx/fpumath.h>
 
-ProjectTool::ProjectTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+ProjectWindow::ProjectWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
    : Parent(_EditorManager, _frame, _manager),
      mProjectPanel(NULL),
      mSelectedModule(NULL),
@@ -54,12 +54,12 @@ ProjectTool::ProjectTool(EditorManager* _EditorManager, MainFrame* _frame, wxAui
    mAssetIconList = new wxImageList(16, 16);
 }
 
-ProjectTool::~ProjectTool()
+ProjectWindow::~ProjectWindow()
 {
 
 }
 
-void ProjectTool::initTool()
+void ProjectWindow::initWindow()
 {
    mProjectPanel = new ProjectPanel(mFrame, wxID_ANY);
 
@@ -95,12 +95,12 @@ void ProjectTool::initTool()
    mAssetsTab->assetList->AssignImageList(mAssetIconList);
 
    // Assets Events
-   mAssetsTab->assetList->Connect(wxID_ANY, wxEVT_TREE_BEGIN_DRAG, wxTreeEventHandler(ProjectTool::OnTreeDrag), NULL, this);
-   mAssetsTab->assetList->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(ProjectTool::OnTreeEvent), NULL, this);
-   mAssetsTab->assetList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(ProjectTool::OnTreeMenu), NULL, this);
+   mAssetsTab->assetList->Connect(wxID_ANY, wxEVT_TREE_BEGIN_DRAG, wxTreeEventHandler(ProjectWindow::OnTreeDrag), NULL, this);
+   mAssetsTab->assetList->Connect(wxID_ANY, wxEVT_TREE_ITEM_ACTIVATED, wxTreeEventHandler(ProjectWindow::OnTreeEvent), NULL, this);
+   mAssetsTab->assetList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(ProjectWindow::OnTreeMenu), NULL, this);
    
    // Assets Menu Events
-   mProjectPanel->moduleMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(ProjectTool::OnMenuEvent), NULL, this);
+   mProjectPanel->moduleMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(ProjectWindow::OnMenuEvent), NULL, this);
 
    // Assets List
    mAssetListRoot = mAssetsTab->assetList->AddRoot("ROOT");
@@ -118,7 +118,7 @@ void ProjectTool::initTool()
    mManager->Update();
 }
 
-void ProjectTool::openTool()
+void ProjectWindow::openWindow()
 {
    wxAuiPaneInfo& paneInfo = mManager->GetPane(mProjectPanel);
    paneInfo.Show();
@@ -128,24 +128,24 @@ void ProjectTool::openTool()
       refresh();
 }
 
-void ProjectTool::closeTool()
+void ProjectWindow::closeWindow()
 {
    wxAuiPaneInfo& paneInfo = mManager->GetPane(mProjectPanel);
    paneInfo.Hide();
    mManager->Update();
 }
 
-void ProjectTool::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
+void ProjectWindow::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
 {
    refresh();
 }
 
-void ProjectTool::onProjectClosed()
+void ProjectWindow::onProjectClosed()
 {
    //
 }
 
-void ProjectTool::OnTreeDrag(wxTreeEvent& evt)
+void ProjectWindow::OnTreeDrag(wxTreeEvent& evt)
 {
    if (evt.GetId() == ASSET_LIST)
    {
@@ -168,7 +168,7 @@ void ProjectTool::OnTreeDrag(wxTreeEvent& evt)
    }
 }
 
-void ProjectTool::OnTreeEvent( wxTreeEvent& evt )
+void ProjectWindow::OnTreeEvent( wxTreeEvent& evt )
 {
    if (evt.GetId() == ASSET_LIST)
    {
@@ -181,7 +181,7 @@ void ProjectTool::OnTreeEvent( wxTreeEvent& evt )
    }
 }
 
-void ProjectTool::OnTreeMenu( wxTreeEvent& evt )
+void ProjectWindow::OnTreeMenu( wxTreeEvent& evt )
 { 
    mSelectedModule = NULL;
 
@@ -199,7 +199,7 @@ void ProjectTool::OnTreeMenu( wxTreeEvent& evt )
    }
 } 
 
-void ProjectTool::OnMenuEvent(wxCommandEvent& evt)
+void ProjectWindow::OnMenuEvent(wxCommandEvent& evt)
 {
    if (evt.GetId() == MENU_IMPORT_MESH)
    {
@@ -297,43 +297,13 @@ void ProjectTool::OnMenuEvent(wxCommandEvent& evt)
 
    if (evt.GetId() == MENU_NEW_MATERIAL)
    {
-      NewMaterialWizard* wizard = new NewMaterialWizard(mFrame);
-
-      // Set initial import path, the user can change it.
-      wxString defaultSavePath = mSelectedModule->getModulePath();
-      defaultSavePath.Append("/materials");
-      wizard->savePath->SetPath(defaultSavePath);
-
-      if (wizard->RunWizard(wizard->m_pages[0]))
-      {
-         wxString assetID = wizard->assetID->GetValue();
-         wxString savePath = wizard->savePath->GetPath();
-
-         wxString assetPath("");
-         assetPath.Append(savePath);
-         assetPath.Append("/");
-         assetPath.Append(assetID);
-         assetPath.Append(".asset.taml");
-
-         wxString templateFileName("");
-         templateFileName.Append(assetID);
-         templateFileName.Append(".taml");
-
-         wxString templatePath("");
-         templatePath.Append(savePath);
-         templatePath.Append("/");
-         templatePath.Append(templateFileName);
-
-         // Create material template and then asset.
-         Torque::Scene.createMaterialTemplate(templatePath.c_str());
-         Torque::Scene.createMaterialAsset(assetID.c_str(), templateFileName.c_str(), assetPath.c_str());
-         Torque::AssetDatabaseLink.addDeclaredAsset(mSelectedModule, assetPath.c_str());
+      wxString newMaterialName;
+      if (mEditorManager->newMaterialWizard(newMaterialName, mSelectedModule->getModuleId()))
          refresh();
-      }
    }
 }
 
-void ProjectTool::OnPropertyChanged( wxPropertyGridEvent& evt )
+void ProjectWindow::OnPropertyChanged( wxPropertyGridEvent& evt )
 { 
    if (!mSelectedAssetDef || !mSelectedAsset)
       return;
@@ -365,7 +335,7 @@ void ProjectTool::OnPropertyChanged( wxPropertyGridEvent& evt )
    mAssetsInspector->Inspect(mSelectedAssetDef);
 }
 
-const char* ProjectTool::getAssetCategoryName(const char* _name)
+const char* ProjectWindow::getAssetCategoryName(const char* _name)
 {
    if (dStrcmp(_name, "ObjectTemplateAsset") == 0)
       return "Object Templates";
@@ -388,12 +358,12 @@ const char* ProjectTool::getAssetCategoryName(const char* _name)
    return _name;
 }
 
-void ProjectTool::refresh()
+void ProjectWindow::refresh()
 {
    refreshAssetList();
 }
 
-void ProjectTool::refreshAssetList()
+void ProjectWindow::refreshAssetList()
 {
    // Clear list.
    mAssetsTab->assetList->DeleteAllItems();
