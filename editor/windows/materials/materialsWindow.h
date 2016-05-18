@@ -54,7 +54,7 @@ public:
    }
 };
 
-class MaterialsWindow : public wxEvtHandler, public EditorWindow, public wxTorqueInspectorDelegate
+class MaterialsWindow : public EditorWindow, public wxTorqueInspectorDelegate
 {
    typedef EditorWindow Parent;
 

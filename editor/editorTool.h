@@ -20,8 +20,8 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef EDITORWINDOW_H
-#define EDITORWINDOW_H
+#ifndef EDITORTOOL_H
+#define EDITORTOOL_H
  
 #ifndef _PLUGINS_SHARED_H
 #include <plugins/plugins_shared.h>
@@ -39,21 +39,22 @@ class EditorManager;
 class MainFrame;
 class wxAuiManager;
 
-class EditorWindow : public wxEvtHandler
+class EditorTool : public wxEvtHandler
 {
    public:
-      EditorWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
+      EditorTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
 
-      bool              mOpen;
+      bool              mActive;
       EditorManager*    mEditorManager;
       MainFrame*        mFrame;
       wxAuiManager*     mManager;
 
-      virtual void initWindow() { }
-      virtual void destroyWindow() { }
-      virtual void openWindow() { mOpen = true; }
-      virtual void closeWindow() { mOpen = false; }
-      virtual void renderWindow() { }
+      virtual void initTool() { }
+      virtual void destroyTool() { }
+      virtual void activateTool() { mActive = true; }
+      virtual void deactivateTool() { mActive = false; }
+      virtual void renderTool() { }
+
       virtual void onSceneChanged() { }
       virtual void onProjectLoaded(wxString projectName, wxString path) {}
       virtual void onProjectClosed() {}
@@ -64,13 +65,13 @@ class EditorWindow : public wxEvtHandler
       virtual bool onMouseRightUp(int x, int y) { return false; }
       virtual bool onMouseMove(int x, int y) { return false; }
       
-      static wxVector<EditorWindow*> smEditorWindows;
+      static wxVector<EditorTool*> smEditorTools;
       template <typename T>
-      static T* findWindow()
+      static T* findTool()
       {
-         for (S32 n = 0; n < smEditorWindows.size(); ++n)
+         for (S32 n = 0; n < smEditorTools.size(); ++n)
          {
-            T* result = dynamic_cast<T*>(smEditorWindows[n]);
+            T* result = dynamic_cast<T*>(smEditorTools[n]);
             if (result)
                return result;
          }
@@ -79,4 +80,4 @@ class EditorWindow : public wxEvtHandler
       }
 };
  
-#endif // EDITORWINDOW_H
+#endif // EDITORTOOL_H

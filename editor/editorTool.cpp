@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright (c) 2015 Andrew Mac
+// Copyright (c) 2016 Andrew Mac
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to
@@ -20,44 +20,22 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _MAIN_H_
-#define _MAIN_H_
-
 // For compilers that don't support precompilation, include "wx/wx.h"
 #include "wx/wxprec.h"
- 
+
 #ifndef WX_PRECOMP
 #	include "wx/wx.h"
 #endif
 
-#ifndef EDITORMANAGER_H
-#include "editorManager.h"
-#endif
+#include "editorTool.h"
 
-#ifndef __TORQUE6EDITORUI_H__
-#include "Torque6EditorUI.h"
-#endif
+wxVector<EditorTool*> EditorTool::smEditorTools;
 
-class Torque6Editor : public wxApp
+EditorTool::EditorTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+   :  mActive(false),
+      mEditorManager(_EditorManager),
+      mFrame(_frame),
+      mManager(_manager)
 {
-public:
-   ~Torque6Editor();
-
-   // Window Management
-   MainFrame*        mFrame;
-   wxAuiManager*     mManager;
-
-   // Editor Manager
-   EditorManager     mEditorManager;
-
-   // Dialogs
-   AboutDialog*      mAboutDialog;
-
-   // Events
-	virtual bool OnInit();
-   virtual void OnMenuEvent( wxCommandEvent& evt );
-};
- 
-DECLARE_APP(Torque6Editor)
- 
-#endif // _MAIN_H_
+   //
+}

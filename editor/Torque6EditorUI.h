@@ -19,13 +19,12 @@
 #include <wx/font.h>
 #include <wx/colour.h>
 #include <wx/settings.h>
-#include <wx/toolbar.h>
+#include <wx/sizer.h>
 #include <wx/panel.h>
 #include <wx/frame.h>
 #include <wx/aui/aui.h>
 #include <wx/statbmp.h>
 #include <wx/stattext.h>
-#include <wx/sizer.h>
 #include <wx/dialog.h>
 #include <wx/treectrl.h>
 #include <wx/aui/auibook.h>
@@ -92,10 +91,12 @@ class MainFrame : public wxFrame
 	
 	public:
 		wxMenuBar* mainMenuBar;
-		wxToolBar* mainToolbar;
+		wxPanel* toolbar;
+		wxBoxSizer* toolbarContents;
+		wxPanel* gamePanel;
 		wxPanel* mainPanel;
 		
-		MainFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Torque 6 Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1024,768 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		MainFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Torque 6 Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1017,802 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		wxAuiManager m_mgr;
 		
 		~MainFrame();

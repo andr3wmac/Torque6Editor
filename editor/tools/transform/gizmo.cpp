@@ -109,6 +109,7 @@ Point3F getPointOnZPlane(F32 z, Point3F p1, Point3F p2)
 
 Gizmo::Gizmo()
    :  mEditorManager(NULL),
+      mMode(0),
       mSelectedObject(NULL),
       mSelectedComponent(NULL),
       mSelectRed(false),
@@ -205,7 +206,7 @@ void Gizmo::render()
    return;
 
    // Translate
-   if (mEditorManager->mEditorMode == 0)
+   if (mMode == 0)
    {
       F32 size = camToObject.len() / 4.0f;
       F32 length = size / 5.0f;
@@ -231,7 +232,7 @@ void Gizmo::render()
    }
 
    // Rotate
-   if (mEditorManager->mEditorMode == 1)
+   if (mMode == 1)
    {
       F32 size = camToObject.len() / 6.0f;
 
@@ -252,7 +253,7 @@ void Gizmo::render()
    }
 
    // Scale
-   if (mEditorManager->mEditorMode == 2)
+   if (mMode == 2)
    {
       F32 transform[16];
       bx::mtxSRT(transform,
@@ -354,15 +355,15 @@ bool Gizmo::onMouseMove(int x, int y)
    if (mDragging)
    {
       // Translate
-      if (mEditorManager->mEditorMode == 0)
+      if (mMode == 0)
          dragTranslate(x, y);
 
       // Rotate
-      if (mEditorManager->mEditorMode == 1)
+      if (mMode == 1)
          dragRotate(x, y);
 
       // Scale
-      if (mEditorManager->mEditorMode == 2)
+      if (mMode == 2)
          dragScale(x, y);
 
       return true;
@@ -382,7 +383,7 @@ bool Gizmo::onMouseMove(int x, int y)
       return false;
 
    // Translate
-   if (mEditorManager->mEditorMode == 0)
+   if (mMode == 0)
    {
       Point2I ObjectPointScreen = Torque::Rendering.worldToScreen(position);
       Point2I redPointScreen = Torque::Rendering.worldToScreen(mSelectRedPoint);
@@ -398,7 +399,7 @@ bool Gizmo::onMouseMove(int x, int y)
    }
 
    // Rotate
-   if (mEditorManager->mEditorMode == 1)
+   if (mMode == 1)
    {
       Point3F xPoint = getPointOnXPlane(position.x, editorPos, editorPos + (worldRay * 1000.0f));
       Point3F yPoint = getPointOnYPlane(position.y, editorPos, editorPos + (worldRay * 1000.0f));
@@ -413,7 +414,7 @@ bool Gizmo::onMouseMove(int x, int y)
    }
 
    // Scale
-   if (mEditorManager->mEditorMode == 2)
+   if (mMode == 2)
    {
       Point2I ObjectPointScreen = Torque::Rendering.worldToScreen(position);
       Point2I redPointScreen = Torque::Rendering.worldToScreen(mSelectRedPoint);

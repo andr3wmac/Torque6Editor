@@ -102,17 +102,32 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	
 	this->SetMenuBar( mainMenuBar );
 	
-	mainToolbar = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_HORIZONTAL ); 
-	mainToolbar->SetForegroundColour( wxColour( 75, 75, 75 ) );
-	mainToolbar->SetBackgroundColour( wxColour( 75, 75, 75 ) );
+	toolbar = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
+	toolbar->SetBackgroundColour( wxColour( 51, 51, 51 ) );
+	toolbar->SetMinSize( wxSize( -1,36 ) );
+	toolbar->SetMaxSize( wxSize( -1,36 ) );
 	
-	mainToolbar->Realize();
-	m_mgr.AddPane( mainToolbar, wxAuiPaneInfo() .Top() .CaptionVisible( false ).CloseButton( false ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( 37,57 ) ).MinSize( wxSize( -1,39 ) ).Layer( 1 ) );
+	m_mgr.AddPane( toolbar, wxAuiPaneInfo() .Top() .CaptionVisible( false ).CloseButton( false ).PaneBorder( false ).Movable( false ).Dock().Fixed().DockFixed( true ).MinSize( wxSize( -1,36 ) ).MaxSize( wxSize( -1,36 ) ) );
+	
+	toolbarContents = new wxBoxSizer( wxHORIZONTAL );
 	
 	
-	mainPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	m_mgr.AddPane( mainPanel, wxAuiPaneInfo() .Left() .CaptionVisible( false ).CloseButton( false ).PinButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxDefaultSize ).CentrePane() );
+	toolbar->SetSizer( toolbarContents );
+	toolbar->Layout();
+	toolbarContents->Fit( toolbar );
+	gamePanel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxTAB_TRAVERSAL );
+	m_mgr.AddPane( gamePanel, wxAuiPaneInfo() .Center() .CaptionVisible( false ).CloseButton( false ).PinButton( true ).PaneBorder( false ).Movable( false ).Dock().Resizable().FloatingSize( wxDefaultSize ).DockFixed( true ).CentrePane() );
 	
+	wxBoxSizer* bSizer221;
+	bSizer221 = new wxBoxSizer( wxVERTICAL );
+	
+	mainPanel = new wxPanel( gamePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxTAB_TRAVERSAL );
+	bSizer221->Add( mainPanel, 1, wxEXPAND | wxALL, 0 );
+	
+	
+	gamePanel->SetSizer( bSizer221 );
+	gamePanel->Layout();
+	bSizer221->Fit( gamePanel );
 	
 	m_mgr.Update();
 	this->Centre( wxBOTH );

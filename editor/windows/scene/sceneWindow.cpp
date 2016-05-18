@@ -61,46 +61,16 @@ SceneWindow::SceneWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAui
      mRefreshing(false)
 {
    mObjectIconList = new wxImageList(16, 16);
-
-   // Translate Menu
-   mTranslateMenu = new wxMenu;
-   mTranslateMenu->Append(0, wxT("Snap: None"), wxEmptyString, wxITEM_RADIO);
-   mTranslateMenu->Append(1, wxT("Snap: 0.1"), wxEmptyString, wxITEM_RADIO);
-   mTranslateMenu->Append(2, wxT("Snap: 0.5"), wxEmptyString, wxITEM_RADIO);
-   mTranslateMenu->Append(3, wxT("Snap: 1.0"), wxEmptyString, wxITEM_RADIO);
-   mTranslateMenu->Append(4, wxT("Snap: 5.0"), wxEmptyString, wxITEM_RADIO);
-   mTranslateMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneWindow::OnTranslateMenuEvent), NULL, this);
-
-   // Rotate Menu
-   mRotateMenu = new wxMenu;
-   mRotateMenu->Append(0, wxT("Snap: None"), wxEmptyString, wxITEM_RADIO);
-   mRotateMenu->Append(1, wxT("Snap: 5 Degrees"), wxEmptyString, wxITEM_RADIO);
-   mRotateMenu->Append(2, wxT("Snap: 15 Degrees"), wxEmptyString, wxITEM_RADIO);
-   mRotateMenu->Append(3, wxT("Snap: 45 Degrees"), wxEmptyString, wxITEM_RADIO);
-   mRotateMenu->Append(4, wxT("Snap: 90 Degrees"), wxEmptyString, wxITEM_RADIO);
-   mRotateMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneWindow::OnRotateMenuEvent), NULL, this);
-
-   // Scale Menu
-   mScaleMenu = new wxMenu;
-   mScaleMenu->Append(0, wxT("Snap: None"), wxEmptyString, wxITEM_RADIO);
-   mScaleMenu->Append(1, wxT("Snap: 0.1"), wxEmptyString, wxITEM_RADIO);
-   mScaleMenu->Append(2, wxT("Snap: 0.5"), wxEmptyString, wxITEM_RADIO);
-   mScaleMenu->Append(3, wxT("Snap: 1.0"), wxEmptyString, wxITEM_RADIO);
-   mScaleMenu->Append(4, wxT("Snap: 5.0"), wxEmptyString, wxITEM_RADIO);
-   mScaleMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SceneWindow::OnScaleMenuEvent), NULL, this);
+   Bind(wxTORQUE_SELECT_OBJECT, &SceneWindow::OnObjectSelected, this);
 }
 
 SceneWindow::~SceneWindow()
 {
    mRefreshing = true;
-   delete mTranslateMenu;
-   delete mRotateMenu;
-   delete mScaleMenu;
 }
 
 void SceneWindow::initWindow()
 {
-   mGizmo.mEditorManager = mEditorManager;
    mScenePanel = new ScenePanel(mFrame, wxID_ANY);
 
    mScenePanel->Connect(wxID_ANY, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SceneWindow::OnMenuEvent), NULL, this);
@@ -137,13 +107,6 @@ void SceneWindow::initWindow()
    // Object Events
    mScenePanelObjects->objectList->Connect(wxID_ANY, wxEVT_TREE_SEL_CHANGED, wxTreeEventHandler(SceneWindow::OnTreeEvent), NULL, this);
    mScenePanelObjects->objectList->Connect(wxID_ANY, wxEVT_TREE_ITEM_MENU, wxTreeEventHandler(SceneWindow::OnTreeMenu), NULL, this);
-   /*mScenePanelObjects->propertyGrid->Connect(wxID_ANY, wxEVT_PG_CHANGED, wxPropertyGridEventHandler(SceneWindow::OnObjectPropChanged), NULL, this);
-   mScenePanelObjects->propertyGrid->SetEmptySpaceColour(wxColor(51, 51, 51));
-   mScenePanelObjects->propertyGrid->SetMarginColour(wxColor(51, 51, 51));
-   mScenePanelObjects->propertyGrid->SetCellBackgroundColour(wxColor(75, 75, 75));
-   mScenePanelObjects->propertyGrid->SetCellTextColour(wxColor(255, 255, 255));
-   mScenePanelObjects->propertyGrid->SetCaptionBackgroundColour(wxColor(51, 51, 51));
-   mScenePanelObjects->propertyGrid->SetCaptionTextColour(wxColor(255, 255, 255));*/
 
    mObjectListRoot = mScenePanelObjects->objectList->AddRoot("ROOT");
 
@@ -158,16 +121,6 @@ void SceneWindow::initWindow()
                                                   .Left()
                                                   .Hide());
    mManager->Update();
-
-   // Add Tools to toolabr
-   mFrame->mainToolbar->AddTool(1, wxT("Move"), wxBitmap(wxT("images/translate.png"), wxBITMAP_TYPE_ANY), wxNullBitmap, wxITEM_DROPDOWN, wxT("Move"), wxEmptyString, NULL);
-   mFrame->mainToolbar->AddTool(2, wxT("Rotate"), wxBitmap(wxT("images/rotate.png"), wxBITMAP_TYPE_ANY), wxNullBitmap, wxITEM_DROPDOWN, wxT("Rotate"), wxEmptyString, NULL);
-   mFrame->mainToolbar->AddTool(3, wxT("Scale"), wxBitmap(wxT("images/scale.png"), wxBITMAP_TYPE_ANY), wxNullBitmap, wxITEM_DROPDOWN, wxT("Scale"), wxEmptyString, NULL);
-   mFrame->mainToolbar->AddSeparator();
-   mFrame->mainToolbar->Realize();
-
-   // Toolbar Dropdown Events
-   mFrame->mainToolbar->Connect(wxID_ANY, wxEVT_COMMAND_TOOL_DROPDOWN_CLICKED, wxCommandEventHandler(SceneWindow::OnToolbarDropdownEvent), NULL, this);
 
    // Refresh Mesh and Material Choices
    refreshChoices();
@@ -191,130 +144,6 @@ void SceneWindow::closeWindow()
    wxAuiPaneInfo& paneInfo = mManager->GetPane(mScenePanel);
    paneInfo.Hide();
    mManager->Update();
-}
-
-void SceneWindow::renderWindow()
-{
-   Point3F editorPos = mEditorManager->mEditorCamera.getWorldPosition();
-   editorPos = editorPos / 10.0f;
-   editorPos.x = mFloor(editorPos.x);
-   editorPos.y = mFloor(editorPos.y);
-   editorPos = editorPos * 10.0f;
-
-   Torque::Debug.ddPush();
-   Torque::Debug.ddSetState(true, false, true);
-
-   Torque::Debug.ddSetWireframe(true);
-   Torque::Debug.ddSetColor(BGFXCOLOR_RGBA(255, 255, 255, 255));
-   F32 gridNormal[3] = { 0.0f, 0.0f, 1.0f };
-   F32 gridPos[3]    = { editorPos.x, editorPos.y, -0.01f };
-   Torque::Debug.ddDrawGrid(gridNormal, gridPos, 100, 10.0f);
-
-   // Draw Light Icons
-   /*if (mLightIcon != NULL)
-   {
-      Vector<Lighting::LightData*> lightList = Torque::Lighting.getLightList();
-      for (S32 n = 0; n < lightList.size(); ++n)
-      {
-         Lighting::LightData* light = lightList[n];
-
-         Torque::Graphics.drawBillboard(mEditorManager->mRenderLayer4View->id,
-                                              mLightIcon,
-                                              light->position,
-                                              1.0f, 1.0f,
-                                              ColorI(light->color[0] * 255, light->color[1] * 255, light->color[2] * 255, 255),
-                                              NULL);
-      }
-   }*/
-
-   // Object Selected
-   if (mSelectedObject != NULL && mSelectedComponent == NULL)
-   {
-      // Bounding Box
-      //Torque::Graphics.drawBox3D(mEditorManager->mRenderLayer4View->id, mSelectedObject->mBoundingBox, ColorI(255, 255, 255, 255), NULL);
-
-      Aabb debugBox;
-      debugBox.m_min[0] = mSelectedObject->mBoundingBox.minExtents.x;
-      debugBox.m_min[1] = mSelectedObject->mBoundingBox.minExtents.y;
-      debugBox.m_min[2] = mSelectedObject->mBoundingBox.minExtents.z;
-      debugBox.m_max[0] = mSelectedObject->mBoundingBox.maxExtents.x;
-      debugBox.m_max[1] = mSelectedObject->mBoundingBox.maxExtents.y;
-      debugBox.m_max[2] = mSelectedObject->mBoundingBox.maxExtents.z;
-
-      Torque::Debug.ddSetWireframe(true);
-      Torque::Debug.ddSetColor(BGFXCOLOR_RGBA(255, 255, 255, 255));
-      Torque::Debug.ddDrawAabb(debugBox);
-
-      Torque::Debug.ddPop();
-
-      // Render Gizmo
-      mGizmo.render();
-
-      return;
-   }
-
-   // Component Selected
-   if (mSelectedObject != NULL && mSelectedComponent != NULL)
-   {
-      Box3F boundingBox = mSelectedComponent->getBoundingBox();
-      boundingBox.transform(mSelectedObject->mTransform.matrix);
-
-      // Bounding Box
-      //Torque::Graphics.drawBox3D(mEditorManager->mRenderLayer4View->id, boundingBox, ColorI(0, 255, 0, 255), NULL);
-
-      Aabb debugBox;
-      debugBox.m_min[0] = boundingBox.minExtents.x;
-      debugBox.m_min[1] = boundingBox.minExtents.y;
-      debugBox.m_min[2] = boundingBox.minExtents.z;
-      debugBox.m_max[0] = boundingBox.maxExtents.x;
-      debugBox.m_max[1] = boundingBox.maxExtents.y;
-      debugBox.m_max[2] = boundingBox.maxExtents.z;
-
-      Torque::Debug.ddSetWireframe(true);
-      Torque::Debug.ddSetColor(BGFXCOLOR_RGBA(255, 255, 0, 255));
-      Torque::Debug.ddDrawAabb(debugBox);
-
-      Torque::Debug.ddPop();
-
-      // Render Gizmo
-      mGizmo.render();
-   }
-}
-
-bool SceneWindow::onMouseLeftDown(int x, int y)
-{
-   Point3F worldRay = Torque::Rendering.screenToWorld(Point2I(x, y));
-   Point3F editorPos = mEditorManager->mEditorCamera.getWorldPosition();
-
-   if (!mGizmo.onMouseLeftDown(x, y))
-   {
-      Scene::SceneObject* hit = Torque::Scene.raycast(editorPos, editorPos + (worldRay * 1000.0f));
-      if (mSelectedObject != hit)
-      {
-         if (hit)
-            selectObject(hit, true);
-      }
-   }
-
-   return false;
-}
-
-bool SceneWindow::onMouseLeftUp(int x, int y)
-{
-   mGizmo.onMouseLeftUp(x, y);
-
-   if ( mSelectedComponent != NULL )
-      mScenePanelInspector->Inspect(mSelectedComponent);
-   else if ( mSelectedObject != NULL )
-      mScenePanelInspector->Inspect(mSelectedObject);
-
-   return false;
-}
-
-bool SceneWindow::onMouseMove(int x, int y)
-{
-   mGizmo.onMouseMove(x, y);
-   return false;
 }
 
 void SceneWindow::onSceneChanged()
@@ -580,61 +409,6 @@ void SceneWindow::OnComponentMenuEvent(wxCommandEvent& evt)
    }
 }
 
-void SceneWindow::OnObjectPropChanged(wxPropertyGridEvent& evt)
-{
-   wxString name = evt.GetPropertyName();
-   wxVariant val = evt.GetPropertyValue();
-   wxString strVal = val.GetString();
-
-   SimObject* selected = mSelectedObject;
-   if (mSelectedComponent != NULL)
-      selected = mSelectedComponent;
-
-   // Special Name Handling.
-   if (name == "Name" && mSelectedObject)
-   {
-      mSelectedObject->assignUniqueName(strVal);
-      refreshObjectList();
-      return;
-   }
-   else if (name == "InternalName" && mSelectedComponent)
-   {
-      mSelectedComponent->setInternalName(strVal);
-      refreshObjectList();
-      return;
-   }
-
-   // Special Field Handling by Name
-   if (name == "MeshAsset")
-   {
-      long intVal = val.GetInteger();
-      strVal = mMeshChoices.GetLabel(intVal);
-   }
-   else if (name.StartsWith("MaterialAsset"))
-   {
-      long intVal = val.GetInteger();
-      strVal = mMaterialChoices.GetLabel(intVal);
-   }
-   else if (name.StartsWith("SubMesh"))
-   {
-      strVal = val.GetBool() ? "true" : "false";
-   }
-
-   // Special Field Handling by Type
-   U32 type = selected->getDataFieldType(Torque::StringTableLink->insert(name), NULL);
-   if (type == Torque::Con.TypeColorF)
-   {
-      wxColour color;
-      color << val;
-      strVal.Printf("%f %f %f 1.0", color.Red() / 255.0f, color.Green() / 255.0f, color.Blue() / 255.0f);
-   }
-
-   // Assign the value and refresh the Object. 
-   // Note: No need to refresh a selected component, better to refresh the whole Object.
-   selected->setDataField(Torque::StringTableLink->insert(name), NULL, strVal);
-   mSelectedObject->refresh();
-}
-
 void SceneWindow::refreshObjectList()
 {
    if (!mEditorManager->isProjectLoaded())
@@ -757,9 +531,6 @@ void SceneWindow::selectObject(Scene::SceneObject* obj, bool updateTree)
    mSelectedComponent = NULL;
    mScenePanelObjects->addComponentButton->Enable(true);
 
-   // Update the gizmo.
-   mGizmo.selectObject(obj);
-
    // Update the tree selection.
    if (updateTree)
    {
@@ -803,9 +574,6 @@ void SceneWindow::selectComponent(Scene::BaseComponent* component, bool updateTr
    mSelectedObject = component->mOwnerObject;
    mSelectedComponent = component;
 
-   // Update the gizmo.
-   mGizmo.selectComponent(component);
-
    // Update the tree selection.
    if (updateTree)
    {
@@ -832,101 +600,19 @@ void SceneWindow::selectComponent(Scene::BaseComponent* component, bool updateTr
    
 }
 
-void SceneWindow::OnToolbarDropdownEvent(wxCommandEvent& evt)
+void SceneWindow::OnObjectSelected(wxTorqueObjectEvent& evt)
 {
-   switch (evt.GetId())
+   Scene::SceneObject* obj = evt.GetSceneObject();
+   if (obj)
    {
-      case 1:
-         mFrame->PopupMenu(mTranslateMenu, wxDefaultPosition);
-         break;
-
-      case 2:
-         mFrame->PopupMenu(mRotateMenu, wxDefaultPosition);
-         break;
-
-      case 3:
-         mFrame->PopupMenu(mScaleMenu, wxDefaultPosition);
-         break;
-
-      default:
-         break;
+      selectObject(obj, true);
+      return;
    }
-}
 
-void SceneWindow::OnTranslateMenuEvent(wxCommandEvent& evt)
-{
-   switch (evt.GetId())
+   Scene::BaseComponent* component = evt.GetComponent();
+   if (component)
    {
-      case 0:
-         mGizmo.mTranslateSnap = 0.0f;
-         break;
-
-      case 1:
-         mGizmo.mTranslateSnap = 0.1f;
-         break;
-
-      case 2:
-         mGizmo.mTranslateSnap = 0.5f;
-         break;
-
-      case 3:
-         mGizmo.mTranslateSnap = 1.0f;
-         break;
-
-      case 4:
-         mGizmo.mTranslateSnap = 5.0f;
-         break;
-   }
-}
-
-void SceneWindow::OnRotateMenuEvent(wxCommandEvent& evt)
-{
-   switch (evt.GetId())
-   {
-      case 0:
-         mGizmo.mRotateSnap = 0.0f;
-         break;
-
-      case 1:
-         mGizmo.mRotateSnap = M_PI_F / 36.0f;
-         break;
-
-      case 2:
-         mGizmo.mRotateSnap = M_PI_F / 12.0f;
-         break;
-
-      case 3:
-         mGizmo.mRotateSnap = M_PI_F / 4.0f;
-         break;
-
-      case 4:
-         mGizmo.mRotateSnap = M_PI_F / 2.0f;
-         break;
-   }
-}
-
-void SceneWindow::OnScaleMenuEvent(wxCommandEvent& evt)
-{
-   switch (evt.GetId())
-   {
-      case 0:
-         mGizmo.mScaleSnap = 0.0f;
-         break;
-
-      case 1:
-         mGizmo.mScaleSnap = 0.1f;
-         break;
-
-      case 2:
-         mGizmo.mScaleSnap = 0.5f;
-         break;
-
-      case 3:
-         mGizmo.mScaleSnap = 1.0f;
-         break;
-
-      case 4:
-         mGizmo.mScaleSnap = 5.0f;
-         break;   
+      selectComponent(component, true);
+      return;
    }
 }

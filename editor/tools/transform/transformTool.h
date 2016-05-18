@@ -20,8 +20,8 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef SCENE_WINDOW_H
-#define SCENE_WINDOW_H
+#ifndef TRANSFORM_TOOL_H
+#define TRANSFORM_TOOL_H
 
 #ifndef EDITORMANAGER_H
 #include "editorManager.h"
@@ -39,81 +39,57 @@
 #include <scene/object.h>
 #endif
 
+#ifndef _GIZMO_H_
+#include "gizmo.h"
+#endif
+
 #ifndef WXFLATNOTEBOOK_H
 #include "widgets/wxFlatNotebook/wxFlatNotebook.h"
 #endif
 
-class ObjectTreeItemData : public wxTreeItemData
+class TransformTool : public EditorTool
 {
-public:
-   SimObject* objPtr;
-   
-   ObjectTreeItemData(SimObject* _objPtr)
-      :  objPtr(_objPtr)
-   {
-   }
-};
-
-class wxTorqueInspector;
-
-class SceneWindow : public EditorWindow
-{
-   typedef EditorWindow Parent;
+   typedef EditorTool Parent;
 
    protected:
-      ScenePanel*          mScenePanel;
-      ScenePanel_Objects*  mScenePanelObjects;
-      wxTorqueInspector*   mScenePanelInspector;
-      wxImageList*         mObjectIconList;
-      wxTreeItemId         mObjectListRoot;
-      wxFlatNotebook*      mTabs;
-      
       Scene::SceneObject*     mSelectedObject;
       Scene::BaseComponent*   mSelectedComponent;
 
       Scene::SceneObject*     mMenuObject;
       Scene::BaseComponent*   mMenuComponent;
 
-      Vector<StringTableEntry> mComponentClassList;
-
-      wxPGChoices mMeshChoices;
-      wxPGChoices mMaterialChoices;
-      wxPGChoices mObjectTemplateChoices;
+      wxMenu* mTranslateMenu;
+      wxMenu* mRotateMenu;
+      wxMenu* mScaleMenu;
 
       bool mRefreshing;
+      Gizmo mGizmo;
 
       TextureObject* mLightIcon;
 
    public:
-      SceneWindow(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
-      ~SceneWindow();
-
-      void refreshClassLists();
-      void refreshObjectList();
-      void refreshChoices();
-      void selectObject(Scene::SceneObject* obj, bool updateTree = false);
-      void addComponent(Scene::SceneObject* obj, StringTableEntry componentClassName);
-      void selectComponent(Scene::BaseComponent* componenty, bool updateTree = false);
-      void openAddObjectMenu();
-      void openAddComponentMenu();
-
-      void OnMenuEvent(wxCommandEvent& evt);
-      void OnTreeEvent( wxTreeEvent& evt );
-      void OnTreeMenu( wxTreeEvent& evt );
-      void OnAddObjectMenuEvent(wxCommandEvent& evt);
-      void OnAddComponentMenuEvent(wxCommandEvent& evt);
-      void OnObjectMenuEvent(wxCommandEvent& evt);
-      void OnComponentMenuEvent(wxCommandEvent& evt);
+      TransformTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
+      ~TransformTool();
 
       void OnObjectSelected(wxTorqueObjectEvent& evt);
+      void OnToolbarEvent(wxCommandEvent& evt);
+      void OnToolbarDropdownEvent(wxCommandEvent& evt);
+      void OnTranslateMenuEvent(wxCommandEvent& evt);
+      void OnRotateMenuEvent(wxCommandEvent& evt);
+      void OnScaleMenuEvent(wxCommandEvent& evt);
 
-      virtual void initWindow();
-      virtual void openWindow();
-      virtual void closeWindow();
+      virtual void initTool();
+      virtual void activateTool();
+      virtual void deactivateTool();
+      virtual void renderTool();
+
+      virtual bool onMouseLeftDown(int x, int y);
+      virtual bool onMouseLeftUp(int x, int y);
+      virtual bool onMouseMove(int x, int y);
 
       virtual void onSceneChanged();
       virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
       virtual void onProjectClosed();
 };
 
-#endif // SCENE_WINDOW_H
+#endif // TRANSFORM_TOOL_H

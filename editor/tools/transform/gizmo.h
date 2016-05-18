@@ -55,10 +55,11 @@ class Gizmo
       Point3F  mSelectedScale;
 
    public:
-      EditorManager*         mEditorManager;
+      EditorManager*          mEditorManager;
       Scene::SceneObject*     mSelectedObject;
       Scene::BaseComponent*   mSelectedComponent;
 
+      S32 mMode;
       F32 mTranslateSnap;
       F32 mScaleSnap;
       F32 mRotateSnap;

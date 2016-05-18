@@ -39,6 +39,10 @@
 #include "editorCamera.h"
 #endif
 
+#ifndef EDITORTOOL_H
+#include "editorTool.h"
+#endif
+
 #ifndef EDITORWINDOW_H
 #include "editorWindow.h"
 #endif
@@ -74,6 +78,48 @@ class wxWizardCallback : public wxObject
       wxWizard*   wizard;
 };
 
+class wxTorqueObjectEvent;
+wxDECLARE_EVENT(wxTORQUE_SELECT_OBJECT, wxTorqueObjectEvent);
+
+class wxTorqueObjectEvent : public wxEvent
+{
+   public:
+      wxTorqueObjectEvent(int id = 0, wxEventType commandType = wxEVT_NULL)
+         : wxEvent(id, commandType) 
+      { 
+         mSimObject     = NULL;
+         mSceneObject   = NULL;
+         mComponent     = NULL;
+      }
+
+      // You *must* copy here the data to be transported
+      wxTorqueObjectEvent(const wxTorqueObjectEvent& event)
+         : wxEvent(event) 
+      {
+         this->SetSimObject(event.GetSimObject());
+         this->SetSceneObject(event.GetSceneObject());
+         this->SetComponent(event.GetComponent());
+      }
+
+      // Required for sending with wxPostEvent()
+      wxEvent* Clone() const { return new wxTorqueObjectEvent(*this); }
+
+      SimObject* GetSimObject() const { return mSimObject; }
+      void SetSimObject(SimObject* obj) { mSimObject = obj; }
+      Scene::SceneObject* GetSceneObject() const { return mSceneObject; }
+      void SetSceneObject(Scene::SceneObject* obj) { mSceneObject = obj; }
+      Scene::BaseComponent* GetComponent() const { return mComponent; }
+      void SetComponent(Scene::BaseComponent* comp) { mComponent = comp; }
+
+   private:
+      SimObject* mSimObject;
+      Scene::SceneObject* mSceneObject;
+      Scene::BaseComponent* mComponent;
+};
+
+typedef void (wxEvtHandler::*wxTorqueObjectEventFunction)(wxTorqueObjectEvent &);
+#define wxTorqueObjectEventHandler(func) wxEVENT_HANDLER_CAST(wxTorqueObjectEventFunction, func)  
+
 class EditorManager : public wxEvtHandler, public Debug::DebugMode
 {
    public:
@@ -100,8 +146,6 @@ class EditorManager : public wxEvtHandler, public Debug::DebugMode
       F32               mEditorCameraSpeed;
 
       wxImageList*         mCommonIcons;
-
-      S32                  mEditorMode;
       Vector<ModuleInfo>   mModuleList;
       wxPGChoices          mTextureAssetChoices;
 
@@ -117,6 +161,8 @@ class EditorManager : public wxEvtHandler, public Debug::DebugMode
       void runProject();
       void addObjectTemplateAsset(wxString assetID, Point3F position);
       void addMeshAsset(wxString assetID, Point3F position);
+
+      void OnObjectSelected(wxTorqueObjectEvent& evt);
 
       // New Material Wizard
       bool newMaterialWizard(wxString& returnMaterialName, const char* moduleId = NULL);

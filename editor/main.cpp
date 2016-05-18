@@ -27,6 +27,15 @@
 #include <wx/stdpaths.h>
 #include "wx/treectrl.h"
 #include "wx/aui/aui.h"
+
+#include "tools/transform//transformTool.h"
+
+#include "windows/project/projectWindow.h"
+#include "windows/console/consoleWindow.h"
+#include "windows/materials/materialsWindow.h"
+#include "windows/profiler/profilerWindow.h"
+#include "windows/scene/sceneWindow.h"
+#include "windows/scripts/scriptsWindow.h"
  
 IMPLEMENT_APP(Torque6Editor)
 
@@ -59,6 +68,12 @@ bool Torque6Editor::OnInit()
    mEditorManager.init(runPath, mManager, mFrame, mFrame->mainPanel);
 
    // Tools
+   EditorTool::smEditorTools.push_back(new TransformTool(&mEditorManager, mFrame, mManager));
+
+   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+      EditorTool::smEditorTools[i]->initTool();
+
+   // Windows
    EditorWindow::smEditorWindows.push_back(new ProjectWindow(&mEditorManager, mFrame, mManager));
    EditorWindow::smEditorWindows.push_back(new ConsoleWindow(&mEditorManager, mFrame, mManager));
    EditorWindow::smEditorWindows.push_back(new MaterialsWindow(&mEditorManager, mFrame, mManager));
@@ -95,8 +110,8 @@ Torque6Editor::~Torque6Editor()
 {
    for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
    {
-      EditorWindow* tool = EditorWindow::smEditorWindows[i];
-      tool->destroyWindow();
+      EditorWindow* window = EditorWindow::smEditorWindows[i];
+      window->destroyWindow();
       //delete tool;
    }
 

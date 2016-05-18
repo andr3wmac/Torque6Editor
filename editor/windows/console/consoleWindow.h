@@ -39,7 +39,7 @@
 #include <wx/treectrl.h>
 #endif
 
-class ConsoleWindow : public wxEvtHandler, public EditorWindow
+class ConsoleWindow : public EditorWindow
 {
    typedef EditorWindow Parent;
 

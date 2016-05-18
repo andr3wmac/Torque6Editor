@@ -79,7 +79,7 @@ public:
 class ModuleDefinition;
 class wxTorqueInspector;
 
-class ProjectWindow : public wxEvtHandler, public EditorWindow
+class ProjectWindow : public EditorWindow
 {
    typedef EditorWindow Parent;
 

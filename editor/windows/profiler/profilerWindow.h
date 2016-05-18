@@ -43,7 +43,7 @@
 #include <plugins/plugins_shared.h>
 #endif
 
-class ProfilerWindow : public wxEvtHandler, public EditorWindow
+class ProfilerWindow : public EditorWindow
 {
    typedef EditorWindow Parent;
 
