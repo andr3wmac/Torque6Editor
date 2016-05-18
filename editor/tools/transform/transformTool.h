@@ -58,9 +58,23 @@ class TransformTool : public EditorTool
       Scene::SceneObject*     mMenuObject;
       Scene::BaseComponent*   mMenuComponent;
 
-      wxMenu* mTranslateMenu;
-      wxMenu* mRotateMenu;
-      wxMenu* mScaleMenu;
+      // Translate
+      wxBitmapButton*   mTranslateBtn;
+      wxBitmap*         mTranslateIcon;
+      wxBitmap*         mTranslateHighlightIcon;
+      wxMenu*           mTranslateMenu;
+
+      // Rotate
+      wxBitmapButton*   mRotateBtn;
+      wxBitmap*         mRotateIcon;
+      wxBitmap*         mRotateHighlightIcon;
+      wxMenu*           mRotateMenu;
+
+      // Scale
+      wxBitmapButton*   mScaleBtn;
+      wxBitmap*         mScaleIcon;
+      wxBitmap*         mScaleHighlightIcon;
+      wxMenu*           mScaleMenu;
 
       bool mRefreshing;
       Gizmo mGizmo;
@@ -79,8 +93,8 @@ class TransformTool : public EditorTool
       void OnScaleMenuEvent(wxCommandEvent& evt);
 
       virtual void initTool();
-      virtual void activateTool();
-      virtual void deactivateTool();
+      virtual void onActivateTool(S32 index = -1);
+      virtual void onDeactivateTool();
       virtual void renderTool();
 
       virtual bool onMouseLeftDown(int x, int y);

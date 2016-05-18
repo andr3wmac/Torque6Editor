@@ -39,3 +39,27 @@ EditorTool::EditorTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiMa
 {
    //
 }
+
+void EditorTool::activateTool(EditorTool* tool, S32 index)
+{
+   for (S32 n = 0; n < smEditorTools.size(); ++n)
+   {
+      if (tool == smEditorTools[n])
+         tool->onActivateTool(index);
+      else if (tool->mActive)
+         tool->onDeactivateTool();
+   }
+}
+
+template <typename T>
+static T* EditorTool::findTool()
+{
+   for (S32 n = 0; n < smEditorTools.size(); ++n)
+   {
+      T* result = dynamic_cast<T*>(smEditorTools[n]);
+      if (result)
+         return result;
+   }
+
+   return NULL;
+}

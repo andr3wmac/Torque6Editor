@@ -51,8 +51,8 @@ class EditorTool : public wxEvtHandler
 
       virtual void initTool() { }
       virtual void destroyTool() { }
-      virtual void activateTool() { mActive = true; }
-      virtual void deactivateTool() { mActive = false; }
+      virtual void onActivateTool(S32 index = -1) { mActive = true; }
+      virtual void onDeactivateTool() { mActive = false; }
       virtual void renderTool() { }
 
       virtual void onSceneChanged() { }
@@ -66,18 +66,9 @@ class EditorTool : public wxEvtHandler
       virtual bool onMouseMove(int x, int y) { return false; }
       
       static wxVector<EditorTool*> smEditorTools;
-      template <typename T>
-      static T* findTool()
-      {
-         for (S32 n = 0; n < smEditorTools.size(); ++n)
-         {
-            T* result = dynamic_cast<T*>(smEditorTools[n]);
-            if (result)
-               return result;
-         }
 
-         return NULL;
-      }
+      static void activateTool(EditorTool* tool, S32 index = -1);
+      template <typename T> static T* findTool();
 };
  
 #endif // EDITORTOOL_H

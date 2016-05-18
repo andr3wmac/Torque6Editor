@@ -78,6 +78,14 @@ TransformTool::TransformTool(EditorManager* _EditorManager, MainFrame* _frame, w
 
    // Events
    Bind(wxTORQUE_SELECT_OBJECT, &TransformTool::OnObjectSelected, this);
+
+   // Icons
+   mTranslateIcon          = new wxBitmap(wxT("images/translate.png"), wxBITMAP_TYPE_ANY);
+   mTranslateHighlightIcon = new wxBitmap(wxT("images/translate_highlight.png"), wxBITMAP_TYPE_ANY);
+   mRotateIcon             = new wxBitmap(wxT("images/rotate.png"), wxBITMAP_TYPE_ANY);
+   mRotateHighlightIcon    = new wxBitmap(wxT("images/rotate_highlight.png"), wxBITMAP_TYPE_ANY);
+   mScaleIcon              = new wxBitmap(wxT("images/scale.png"), wxBITMAP_TYPE_ANY);
+   mScaleHighlightIcon     = new wxBitmap(wxT("images/scale_highlight.png"), wxBITMAP_TYPE_ANY);
 }
 
 TransformTool::~TransformTool()
@@ -93,11 +101,11 @@ void TransformTool::initTool()
    mGizmo.mEditorManager = mEditorManager;
 
    // Add Tools to toolabr
-   wxBitmapButton* translateBtn = new wxBitmapButton(mFrame->toolbar, 1, wxBitmap(wxT("images/translate.png"), wxBITMAP_TYPE_ANY), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
-   translateBtn->SetBackgroundColour(Theme::darkBackgroundColor);
-   translateBtn->SetMinSize(wxSize(36, 36));
-   translateBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarEvent, this, -1, -1, NULL);
-   mFrame->toolbarContents->Add(translateBtn, 0, 0, 5);
+   mTranslateBtn = new wxBitmapButton(mFrame->toolbar, 1, *mTranslateIcon, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   mTranslateBtn->SetBackgroundColour(Theme::darkBackgroundColor);
+   mTranslateBtn->SetMinSize(wxSize(36, 36));
+   mTranslateBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarEvent, this, -1, -1, NULL);
+   mFrame->toolbarContents->Add(mTranslateBtn, 0, 0, 5);
 
    wxBitmapButton* translateDownBtn = new wxBitmapButton(mFrame->toolbar, 2, wxBitmap(wxT("images/smallDownArrow.png"), wxBITMAP_TYPE_ANY), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
    translateDownBtn->SetBackgroundColour(Theme::darkBackgroundColor);
@@ -105,11 +113,11 @@ void TransformTool::initTool()
    translateDownBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarDropdownEvent, this, -1, -1, NULL);
    mFrame->toolbarContents->Add(translateDownBtn, 0, 0, 5);
 
-   wxBitmapButton* rotateBtn = new wxBitmapButton(mFrame->toolbar, 3, wxBitmap(wxT("images/rotate.png"), wxBITMAP_TYPE_ANY), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
-   rotateBtn->SetBackgroundColour(Theme::darkBackgroundColor);
-   rotateBtn->SetMinSize(wxSize(36, 36));
-   rotateBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarEvent, this, -1, -1, NULL);
-   mFrame->toolbarContents->Add(rotateBtn, 0, 0, 5);
+   mRotateBtn = new wxBitmapButton(mFrame->toolbar, 3, *mRotateIcon, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   mRotateBtn->SetBackgroundColour(Theme::darkBackgroundColor);
+   mRotateBtn->SetMinSize(wxSize(36, 36));
+   mRotateBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarEvent, this, -1, -1, NULL);
+   mFrame->toolbarContents->Add(mRotateBtn, 0, 0, 5);
 
    wxBitmapButton* rotateDownBtn = new wxBitmapButton(mFrame->toolbar, 4, wxBitmap(wxT("images/smallDownArrow.png"), wxBITMAP_TYPE_ANY), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
    rotateDownBtn->SetBackgroundColour(Theme::darkBackgroundColor);
@@ -117,11 +125,11 @@ void TransformTool::initTool()
    rotateDownBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarDropdownEvent, this, -1, -1, NULL);
    mFrame->toolbarContents->Add(rotateDownBtn, 0, 0, 5);
 
-   wxBitmapButton* scaleBtn = new wxBitmapButton(mFrame->toolbar, 5, wxBitmap(wxT("images/scale.png"), wxBITMAP_TYPE_ANY), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
-   scaleBtn->SetBackgroundColour(Theme::darkBackgroundColor);
-   scaleBtn->SetMinSize(wxSize(36, 36));
-   scaleBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarEvent, this, -1, -1, NULL);
-   mFrame->toolbarContents->Add(scaleBtn, 0, 0, 5);
+   mScaleBtn = new wxBitmapButton(mFrame->toolbar, 5, *mScaleIcon, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   mScaleBtn->SetBackgroundColour(Theme::darkBackgroundColor);
+   mScaleBtn->SetMinSize(wxSize(36, 36));
+   mScaleBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarEvent, this, -1, -1, NULL);
+   mFrame->toolbarContents->Add(mScaleBtn, 0, 0, 5);
 
    wxBitmapButton* scaleDownBtn = new wxBitmapButton(mFrame->toolbar, 6, wxBitmap(wxT("images/smallDownArrow.png"), wxBITMAP_TYPE_ANY), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
    scaleDownBtn->SetBackgroundColour(Theme::darkBackgroundColor);
@@ -130,14 +138,46 @@ void TransformTool::initTool()
    mFrame->toolbarContents->Add(scaleDownBtn, 0, 0, 5);
 }
 
-void TransformTool::activateTool()
+void TransformTool::onActivateTool(S32 index)
 {
+   Parent::onActivateTool(index);
 
+   // Translate
+   if (index == 0)
+   {
+      mGizmo.mMode = 0;
+      mTranslateBtn->SetBitmap(*mTranslateHighlightIcon);
+      mRotateBtn->SetBitmap(*mRotateIcon);
+      mScaleBtn->SetBitmap(*mScaleIcon);
+   }
+   
+   // Rotate
+   if (index == 1)
+   {
+      mGizmo.mMode = 1;
+      mTranslateBtn->SetBitmap(*mTranslateIcon);
+      mRotateBtn->SetBitmap(*mRotateHighlightIcon);
+      mScaleBtn->SetBitmap(*mScaleIcon);
+   }
+
+   // Scale
+   if (index == 2)
+   {
+      mGizmo.mMode = 2;
+      mTranslateBtn->SetBitmap(*mTranslateIcon);
+      mRotateBtn->SetBitmap(*mRotateIcon);
+      mScaleBtn->SetBitmap(*mScaleHighlightIcon);
+   }
 }
 
-void TransformTool::deactivateTool()
+void TransformTool::onDeactivateTool()
 {
+   Parent::onDeactivateTool();
 
+   // Reset icons.
+   mTranslateBtn->SetBitmap(*mTranslateIcon);
+   mRotateBtn->SetBitmap(*mRotateIcon);
+   mScaleBtn->SetBitmap(*mScaleIcon);
 }
 
 void TransformTool::renderTool()
@@ -309,15 +349,15 @@ void TransformTool::OnToolbarEvent(wxCommandEvent& evt)
    switch (evt.GetId())
    {
       case 1:
-         mGizmo.mMode = 0;
+         EditorTool::activateTool(this, 0);
          break;
 
       case 3:
-         mGizmo.mMode = 1;
+         EditorTool::activateTool(this, 1);
          break;
 
       case 5:
-         mGizmo.mMode = 2;
+         EditorTool::activateTool(this, 2);
          break;
 
       default:
