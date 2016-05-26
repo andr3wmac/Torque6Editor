@@ -73,6 +73,8 @@ bool Torque6Editor::OnInit()
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
       EditorTool::smEditorTools[i]->initTool();
 
+   EditorTool::activateTool(0, 0);
+
    // Windows
    EditorWindow::smEditorWindows.push_back(new ProjectWindow(&mEditorManager, mFrame, mManager));
    EditorWindow::smEditorWindows.push_back(new ConsoleWindow(&mEditorManager, mFrame, mManager));
@@ -134,11 +136,11 @@ void Torque6Editor::OnMenuEvent(wxCommandEvent& evt)
          break;
 
       case MENU_CAMERA_SLOW:
-         mEditorManager.mEditorCameraSpeed = 0.1f;
+         mEditorManager.mEditorCameraSpeed = 0.05f;
          break;
 
       case MENU_CAMERA_NORMAL:
-         mEditorManager.mEditorCameraSpeed = 0.5f;
+         mEditorManager.mEditorCameraSpeed = 0.25f;
          break;
 
       case MENU_CAMERA_FAST:

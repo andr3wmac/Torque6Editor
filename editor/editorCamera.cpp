@@ -70,8 +70,11 @@ void EditorCamera::mainLoop()
    {
       MatrixF lookMatrix;
       bx::mtxLookAt(lookMatrix, mWorldPosition, look, up);
-      mWorldPosition += (lookMatrix.getForwardVector() * mForwardVelocity.x);
-      mWorldPosition -= (lookMatrix.getRightVector() * mForwardVelocity.y);
+
+      F32 speedMod = mShiftKey ? 2.0f : 1.0f;
+      mWorldPosition += (lookMatrix.getForwardVector() * mForwardVelocity.x * speedMod);
+      mWorldPosition -= (lookMatrix.getRightVector() * mForwardVelocity.y * speedMod);
+
       mTransform.setPosition(mWorldPosition);
    }
 

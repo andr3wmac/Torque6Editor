@@ -51,9 +51,14 @@
 #include "debug/debugMode.h"
 #endif
 
+#ifndef DGL_HOOK_H
+#include "graphics/dglHook.h"
+#endif
+
 typedef int (*initFunc)(int argc, const char **argv, HWND windowHWND);
 typedef void (*shutdownFunc)();
 
+class NVGContext;
 class SelectMaterialDialog;
 class wxTorqueAssetSelectDialog;
 class wxTorqueAssetTree;
@@ -85,42 +90,32 @@ class wxTorqueObjectEvent : public wxEvent
 {
    public:
       wxTorqueObjectEvent(int id = 0, wxEventType commandType = wxEVT_NULL)
-         : wxEvent(id, commandType) 
+         : wxEvent(id, commandType)
       { 
-         mSimObject     = NULL;
-         mSceneObject   = NULL;
-         mComponent     = NULL;
       }
 
       // You *must* copy here the data to be transported
       wxTorqueObjectEvent(const wxTorqueObjectEvent& event)
-         : wxEvent(event) 
+         : wxEvent(event)
       {
-         this->SetSimObject(event.GetSimObject());
-         this->SetSceneObject(event.GetSceneObject());
-         this->SetComponent(event.GetComponent());
+         this->SetObjects(event.GetObjects());
       }
 
       // Required for sending with wxPostEvent()
       wxEvent* Clone() const { return new wxTorqueObjectEvent(*this); }
 
-      SimObject* GetSimObject() const { return mSimObject; }
-      void SetSimObject(SimObject* obj) { mSimObject = obj; }
-      Scene::SceneObject* GetSceneObject() const { return mSceneObject; }
-      void SetSceneObject(Scene::SceneObject* obj) { mSceneObject = obj; }
-      Scene::BaseComponent* GetComponent() const { return mComponent; }
-      void SetComponent(Scene::BaseComponent* comp) { mComponent = comp; }
+      void AddObject(SimObject* obj) { mObjects.push_back(obj); }
+      Vector<SimObject*> GetObjects() const { return mObjects; }
+      void SetObjects(Vector<SimObject*> objects) { mObjects = objects; }
 
    private:
-      SimObject* mSimObject;
-      Scene::SceneObject* mSceneObject;
-      Scene::BaseComponent* mComponent;
+      Vector<SimObject*> mObjects;
 };
 
 typedef void (wxEvtHandler::*wxTorqueObjectEventFunction)(wxTorqueObjectEvent &);
 #define wxTorqueObjectEventHandler(func) wxEVENT_HANDLER_CAST(wxTorqueObjectEventFunction, func)  
 
-class EditorManager : public wxEvtHandler, public Debug::DebugMode
+class EditorManager : public wxEvtHandler, public Debug::DebugMode, public Graphics::DGLHook
 {
    public:
       EditorManager();
@@ -144,25 +139,23 @@ class EditorManager : public wxEvtHandler, public Debug::DebugMode
       EditorCamera      mEditorCamera;
       Point3F           mEditorCameraForwardVelocity;
       F32               mEditorCameraSpeed;
+      wxTimer*          mTimer;
 
-      wxImageList*         mCommonIcons;
-      Vector<ModuleInfo>   mModuleList;
-      wxPGChoices          mTextureAssetChoices;
+      wxImageList*               mCommonIcons;
+      Vector<ModuleInfo>         mModuleList;
+      wxPGChoices                mTextureAssetChoices;
+      Graphics::ViewTableEntry*  mEditorOverlayView;
 
       // Dialogs
       wxTorqueAssetSelectDialog* mAssetSelectDialog;
       wxTorqueAssetSelectDialog* mMaterialSelectDialog;
-
-      Graphics::ViewTableEntry* mRenderLayer4View;
-      Graphics::ViewTableEntry* mEditorOverlayView;
 
       bool openProject(wxString projectPath);
       void closeProject();
       void runProject();
       void addObjectTemplateAsset(wxString assetID, Point3F position);
       void addMeshAsset(wxString assetID, Point3F position);
-
-      void OnObjectSelected(wxTorqueObjectEvent& evt);
+      void postEvent(const wxEvent& evt);
 
       // New Material Wizard
       bool newMaterialWizard(wxString& returnMaterialName, const char* moduleId = NULL);
@@ -181,6 +174,7 @@ class EditorManager : public wxEvtHandler, public Debug::DebugMode
       wxPGChoices* getTextureAssetChoices();
 
       virtual void render(Rendering::RenderCamera*);
+      virtual void dglRender();
 
       virtual void OnToolbarEvent(wxCommandEvent& evt);
       virtual void OnIdle(wxIdleEvent& evt);

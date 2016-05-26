@@ -35,6 +35,7 @@ class Gizmo
 {
    protected:
       bool     mHovering;
+      Point2F  mMousePosition;
 
       bool     mSelectRed;
       bool     mSelectGreen;
@@ -56,18 +57,23 @@ class Gizmo
 
    public:
       EditorManager*          mEditorManager;
+      bool                    mMultiselect;
+      Vector<SimObject*>      mSelectedObjects;
       Scene::SceneObject*     mSelectedObject;
       Scene::BaseComponent*   mSelectedComponent;
 
       S32 mMode;
+      bool mTranslateLocal;
       F32 mTranslateSnap;
       F32 mScaleSnap;
+      bool mRotateLocal;
       F32 mRotateSnap;
 
       Gizmo();
       ~Gizmo();
 
       void selectObject(Scene::SceneObject* obj);
+      void selectObjects(Vector<SimObject*> objects);
       void selectComponent(Scene::BaseComponent* component);
       void render();
 

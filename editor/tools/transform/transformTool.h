@@ -52,11 +52,26 @@ class TransformTool : public EditorTool
    typedef EditorTool Parent;
 
    protected:
+      bool     mSelectionBounds;
+      ColorI   mSelectionBoundsColor;
+      Point3F  mSelectionBoundsStart;
+      Point3F  mSelectionBoundsEnd;
+
+      bool                    mMultiselect;
+      Vector<SimObject*>      mSelectedObjects;
       Scene::SceneObject*     mSelectedObject;
       Scene::BaseComponent*   mSelectedComponent;
 
       Scene::SceneObject*     mMenuObject;
       Scene::BaseComponent*   mMenuComponent;
+
+      bool     mDebugWorldRay;
+      Point3F  mLastRayStart;
+      Point3F  mLastRayEnd;
+
+      bool     mDebugBoxSelection;
+      Point3F  mBoxNearPoint;
+      Point3F  mBoxFarPoint[4];
 
       // Translate
       wxBitmapButton*   mTranslateBtn;
@@ -76,8 +91,14 @@ class TransformTool : public EditorTool
       wxBitmap*         mScaleHighlightIcon;
       wxMenu*           mScaleMenu;
 
-      bool mRefreshing;
-      Gizmo mGizmo;
+      bool     mShiftDown;
+      bool     mMouseDown;
+      Point2I  mMouseDownPosition;
+      Point2I  mMousePosition;
+      bool     mBoxSelection;
+
+      bool     mRefreshing;
+      Gizmo    mGizmo;
 
       TextureObject* mLightIcon;
 
@@ -96,10 +117,14 @@ class TransformTool : public EditorTool
       virtual void onActivateTool(S32 index = -1);
       virtual void onDeactivateTool();
       virtual void renderTool();
+      virtual void dglRenderTool();
 
       virtual bool onMouseLeftDown(int x, int y);
       virtual bool onMouseLeftUp(int x, int y);
       virtual bool onMouseMove(int x, int y);
+
+      virtual bool onKeyDown(wxKeyEvent& evt);
+      virtual bool onKeyUp(wxKeyEvent& evt);
 
       virtual void onSceneChanged();
       virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);

@@ -47,6 +47,7 @@ class EditorCamera
       Point3F                    mWorldPosition;
       Point3F                    mForwardVelocity;
 
+      bool                       mShiftKey;
       bool                       mMouseDown;
       Point2I                    mMouseStart;
       F32                        mHorizontalAngle;
@@ -57,11 +58,13 @@ class EditorCamera
 
       void initialize(EditorManager* EditorManager);
       void mainLoop();
+      Point3F getForwardVelocity() { return mForwardVelocity; }
       void setForwardVelocity(Point3F velocity);
 
       Rendering::RenderCamera* getRenderCamera() { return mRenderCamera; }
       Point3F getWorldPosition() { return mWorldPosition; }
 
+      void setShiftKey(bool val) { mShiftKey = val; }
       bool onMouseLeftDown(int x, int y);
       bool onMouseLeftUp(int x, int y);
       bool onMouseRightDown(int x, int y);

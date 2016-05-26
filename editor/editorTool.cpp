@@ -40,14 +40,28 @@ EditorTool::EditorTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiMa
    //
 }
 
-void EditorTool::activateTool(EditorTool* tool, S32 index)
+void EditorTool::activateTool(S32 index, S32 subToolIndex)
+{
+   if (index < smEditorTools.size())
+   {
+      for (S32 n = 0; n < smEditorTools.size(); ++n)
+      {
+         if (n == index)
+            smEditorTools[n]->onActivateTool(subToolIndex);
+         else if (smEditorTools[n]->mActive)
+            smEditorTools[n]->onDeactivateTool();
+      }
+   }
+}
+
+void EditorTool::activateTool(EditorTool* tool, S32 subToolIndex)
 {
    for (S32 n = 0; n < smEditorTools.size(); ++n)
    {
       if (tool == smEditorTools[n])
-         tool->onActivateTool(index);
-      else if (tool->mActive)
-         tool->onDeactivateTool();
+         smEditorTools[n]->onActivateTool(subToolIndex);
+      else if (smEditorTools[n]->mActive)
+         smEditorTools[n]->onDeactivateTool();
    }
 }
 

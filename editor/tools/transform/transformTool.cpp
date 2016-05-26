@@ -36,6 +36,7 @@
 #include "theme.h"
 
 #include "transformTool.h"
+#include "math/mPlaneSet.h"
 #include <bx/bx.h>
 #include <bx/fpumath.h>
 #include <debugdraw/debugdraw.h>
@@ -49,22 +50,36 @@ TransformTool::TransformTool(EditorManager* _EditorManager, MainFrame* _frame, w
      mLightIcon(NULL),
      mRefreshing(false)
 {
+   mSelectionBounds     = false;
+   mMouseDown           = false;
+   mBoxSelection        = false;
+   mDebugBoxSelection   = false;
+   mDebugWorldRay       = false;
+   mLastRayStart        = Point3F::Zero;
+   mLastRayEnd          = Point3F::Zero;
+
    // Translate Menu
    mTranslateMenu = new wxMenu;
-   mTranslateMenu->Append(0, wxT("Snap: None"), wxEmptyString, wxITEM_RADIO);
-   mTranslateMenu->Append(1, wxT("Snap: 0.1"), wxEmptyString, wxITEM_RADIO);
-   mTranslateMenu->Append(2, wxT("Snap: 0.5"), wxEmptyString, wxITEM_RADIO);
-   mTranslateMenu->Append(3, wxT("Snap: 1.0"), wxEmptyString, wxITEM_RADIO);
-   mTranslateMenu->Append(4, wxT("Snap: 5.0"), wxEmptyString, wxITEM_RADIO);
+   mTranslateMenu->Append(0, wxT("Local"), wxEmptyString, wxITEM_RADIO);
+   mTranslateMenu->Append(1, wxT("Global"), wxEmptyString, wxITEM_RADIO);
+   mTranslateMenu->AppendSeparator();
+   mTranslateMenu->Append(2, wxT("Snap: None"), wxEmptyString, wxITEM_RADIO);
+   mTranslateMenu->Append(3, wxT("Snap: 0.1"), wxEmptyString, wxITEM_RADIO);
+   mTranslateMenu->Append(4, wxT("Snap: 0.5"), wxEmptyString, wxITEM_RADIO);
+   mTranslateMenu->Append(5, wxT("Snap: 1.0"), wxEmptyString, wxITEM_RADIO);
+   mTranslateMenu->Append(6, wxT("Snap: 5.0"), wxEmptyString, wxITEM_RADIO);
    mTranslateMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(TransformTool::OnTranslateMenuEvent), NULL, this);
 
    // Rotate Menu
    mRotateMenu = new wxMenu;
-   mRotateMenu->Append(0, wxT("Snap: None"), wxEmptyString, wxITEM_RADIO);
-   mRotateMenu->Append(1, wxT("Snap: 5 Degrees"), wxEmptyString, wxITEM_RADIO);
-   mRotateMenu->Append(2, wxT("Snap: 15 Degrees"), wxEmptyString, wxITEM_RADIO);
-   mRotateMenu->Append(3, wxT("Snap: 45 Degrees"), wxEmptyString, wxITEM_RADIO);
-   mRotateMenu->Append(4, wxT("Snap: 90 Degrees"), wxEmptyString, wxITEM_RADIO);
+   mRotateMenu->Append(0, wxT("Local"), wxEmptyString, wxITEM_RADIO);
+   mRotateMenu->Append(1, wxT("Global"), wxEmptyString, wxITEM_RADIO);
+   mRotateMenu->AppendSeparator();
+   mRotateMenu->Append(2, wxT("Snap: None"), wxEmptyString, wxITEM_RADIO);
+   mRotateMenu->Append(3, wxT("Snap: 5 Degrees"), wxEmptyString, wxITEM_RADIO);
+   mRotateMenu->Append(4, wxT("Snap: 15 Degrees"), wxEmptyString, wxITEM_RADIO);
+   mRotateMenu->Append(5, wxT("Snap: 45 Degrees"), wxEmptyString, wxITEM_RADIO);
+   mRotateMenu->Append(6, wxT("Snap: 90 Degrees"), wxEmptyString, wxITEM_RADIO);
    mRotateMenu->Connect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(TransformTool::OnRotateMenuEvent), NULL, this);
 
    // Scale Menu
@@ -100,7 +115,7 @@ void TransformTool::initTool()
 {
    mGizmo.mEditorManager = mEditorManager;
 
-   // Add Tools to toolabr
+   // Translate
    mTranslateBtn = new wxBitmapButton(mFrame->toolbar, 1, *mTranslateIcon, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
    mTranslateBtn->SetBackgroundColour(Theme::darkBackgroundColor);
    mTranslateBtn->SetMinSize(wxSize(36, 36));
@@ -113,6 +128,7 @@ void TransformTool::initTool()
    translateDownBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarDropdownEvent, this, -1, -1, NULL);
    mFrame->toolbarContents->Add(translateDownBtn, 0, 0, 5);
 
+   // Rotate
    mRotateBtn = new wxBitmapButton(mFrame->toolbar, 3, *mRotateIcon, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
    mRotateBtn->SetBackgroundColour(Theme::darkBackgroundColor);
    mRotateBtn->SetMinSize(wxSize(36, 36));
@@ -125,6 +141,7 @@ void TransformTool::initTool()
    rotateDownBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarDropdownEvent, this, -1, -1, NULL);
    mFrame->toolbarContents->Add(rotateDownBtn, 0, 0, 5);
 
+   // Scale
    mScaleBtn = new wxBitmapButton(mFrame->toolbar, 5, *mScaleIcon, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
    mScaleBtn->SetBackgroundColour(Theme::darkBackgroundColor);
    mScaleBtn->SetMinSize(wxSize(36, 36));
@@ -182,20 +199,26 @@ void TransformTool::onDeactivateTool()
 
 void TransformTool::renderTool()
 {
-   Point3F editorPos = mEditorManager->mEditorCamera.getWorldPosition();
-   editorPos = editorPos / 10.0f;
-   editorPos.x = mFloor(editorPos.x);
-   editorPos.y = mFloor(editorPos.y);
-   editorPos = editorPos * 10.0f;
+   if (!mActive)
+      return;
 
-   Torque::Debug.ddPush();
-   Torque::Debug.ddSetState(true, false, true);
+   // Grid
+   {
+      Point3F editorPos = mEditorManager->mEditorCamera.getWorldPosition();
+      editorPos = editorPos / 10.0f;
+      editorPos.x = mFloor(editorPos.x);
+      editorPos.y = mFloor(editorPos.y);
+      editorPos = editorPos * 10.0f;
 
-   Torque::Debug.ddSetWireframe(true);
-   Torque::Debug.ddSetColor(BGFXCOLOR_RGBA(255, 255, 255, 255));
-   F32 gridNormal[3] = { 0.0f, 0.0f, 1.0f };
-   F32 gridPos[3]    = { editorPos.x, editorPos.y, -0.01f };
-   Torque::Debug.ddDrawGrid(gridNormal, gridPos, 100, 10.0f);
+      Torque::Debug.ddPush();
+      Torque::Debug.ddSetState(true, false, true);
+
+      Torque::Debug.ddSetWireframe(true);
+      Torque::Debug.ddSetColor(BGFXCOLOR_RGBA(255, 255, 255, 255));
+      F32 gridNormal[3] = { 0.0f, 0.0f, 1.0f };
+      F32 gridPos[3] = { editorPos.x, editorPos.y, -0.01f };
+      Torque::Debug.ddDrawGrid(gridNormal, gridPos, 100, 10.0f);
+   }
 
    // Draw Light Icons
    /*if (mLightIcon != NULL)
@@ -214,30 +237,46 @@ void TransformTool::renderTool()
       }
    }*/
 
+   if (mMultiselect)
+   {
+      Box3F multiSelectBox;
+      multiSelectBox.set(Point3F(0, 0, 0));
+         
+      for (S32 n = 0; n < mSelectedObjects.size(); ++n)
+      {
+         Scene::SceneObject* obj = dynamic_cast<Scene::SceneObject*>(mSelectedObjects[n]);
+         if (obj)
+         {
+            if (n == 0)
+               multiSelectBox = obj->mBoundingBox;
+            else
+               multiSelectBox.intersect(obj->mBoundingBox);
+         }
+
+         Scene::BaseComponent* component = dynamic_cast<Scene::BaseComponent*>(mSelectedObjects[n]);
+         if (component)
+         {
+            Box3F boundingBox = component->getBoundingBox();
+            boundingBox.transform(component->mTransform.matrix);
+
+            if (n == 0)
+               multiSelectBox = boundingBox;
+            else
+               multiSelectBox.intersect(boundingBox);
+         }
+      }
+
+      mSelectionBounds        = true;
+      mSelectionBoundsStart   = multiSelectBox.minExtents;
+      mSelectionBoundsEnd     = multiSelectBox.maxExtents;
+   }
+
    // Object Selected
    if (mSelectedObject != NULL && mSelectedComponent == NULL)
    {
-      // Bounding Box
-      //Torque::Graphics.drawBox3D(mEditorManager->mRenderLayer4View->id, mSelectedObject->mBoundingBox, ColorI(255, 255, 255, 255), NULL);
-
-      Aabb debugBox;
-      debugBox.m_min[0] = mSelectedObject->mBoundingBox.minExtents.x;
-      debugBox.m_min[1] = mSelectedObject->mBoundingBox.minExtents.y;
-      debugBox.m_min[2] = mSelectedObject->mBoundingBox.minExtents.z;
-      debugBox.m_max[0] = mSelectedObject->mBoundingBox.maxExtents.x;
-      debugBox.m_max[1] = mSelectedObject->mBoundingBox.maxExtents.y;
-      debugBox.m_max[2] = mSelectedObject->mBoundingBox.maxExtents.z;
-
-      Torque::Debug.ddSetWireframe(true);
-      Torque::Debug.ddSetColor(BGFXCOLOR_RGBA(255, 255, 255, 255));
-      Torque::Debug.ddDrawAabb(debugBox);
-
-      Torque::Debug.ddPop();
-
-      // Render Gizmo
-      mGizmo.render();
-
-      return;
+      mSelectionBounds        = true;
+      mSelectionBoundsStart   = mSelectedObject->mBoundingBox.minExtents;
+      mSelectionBoundsEnd     = mSelectedObject->mBoundingBox.maxExtents;
    }
 
    // Component Selected
@@ -246,60 +285,190 @@ void TransformTool::renderTool()
       Box3F boundingBox = mSelectedComponent->getBoundingBox();
       boundingBox.transform(mSelectedObject->mTransform.matrix);
 
-      // Bounding Box
-      //Torque::Graphics.drawBox3D(mEditorManager->mRenderLayer4View->id, boundingBox, ColorI(0, 255, 0, 255), NULL);
+      mSelectionBounds        = true;
+      mSelectionBoundsStart   = boundingBox.minExtents;
+      mSelectionBoundsEnd     = boundingBox.maxExtents;
+   }
 
+   // Selection Bounding Box
+   if (mSelectionBounds)
+   {
       Aabb debugBox;
-      debugBox.m_min[0] = boundingBox.minExtents.x;
-      debugBox.m_min[1] = boundingBox.minExtents.y;
-      debugBox.m_min[2] = boundingBox.minExtents.z;
-      debugBox.m_max[0] = boundingBox.maxExtents.x;
-      debugBox.m_max[1] = boundingBox.maxExtents.y;
-      debugBox.m_max[2] = boundingBox.maxExtents.z;
+      debugBox.m_min[0] = mSelectionBoundsStart.x;
+      debugBox.m_min[1] = mSelectionBoundsStart.y;
+      debugBox.m_min[2] = mSelectionBoundsStart.z;
+      debugBox.m_max[0] = mSelectionBoundsEnd.x;
+      debugBox.m_max[1] = mSelectionBoundsEnd.y;
+      debugBox.m_max[2] = mSelectionBoundsEnd.z;
 
       Torque::Debug.ddSetWireframe(true);
-      Torque::Debug.ddSetColor(BGFXCOLOR_RGBA(255, 255, 0, 255));
+      Torque::Debug.ddSetColor(BGFXCOLOR_RGBA(mSelectionBoundsColor.red, mSelectionBoundsColor.green, mSelectionBoundsColor.blue, mSelectionBoundsColor.alpha));
       Torque::Debug.ddDrawAabb(debugBox);
 
       Torque::Debug.ddPop();
+   }
 
-      // Render Gizmo
-      mGizmo.render();
+   // Gizmo
+   mGizmo.render();
+
+   // Debug
+   if (mDebugWorldRay)
+   {
+      Torque::Debug.ddMoveTo(mLastRayStart.x, mLastRayStart.y, mLastRayStart.z);
+      Torque::Debug.ddLineTo(mLastRayEnd.x, mLastRayEnd.y, mLastRayEnd.z);
+   }
+
+   if (mDebugBoxSelection)
+   {
+      for (U32 i = 0; i < 4; ++i)
+      {
+         Torque::Debug.ddMoveTo(mBoxNearPoint.x, mBoxNearPoint.y, mBoxNearPoint.z);
+         Torque::Debug.ddLineTo(mBoxFarPoint[i].x, mBoxFarPoint[i].y, mBoxFarPoint[i].z);
+      }
+   }
+}
+
+void TransformTool::dglRenderTool()
+{
+   if (!mActive)
+      return;
+
+   if (mBoxSelection)
+   {
+      Torque::Graphics.dglDrawRectFill(mMouseDownPosition, mMousePosition, ColorI(255, 255, 255, 64));
+      Torque::Graphics.dglDrawRect(RectI(mMouseDownPosition, mMousePosition - mMouseDownPosition), ColorI(255, 255, 255, 255), 2.0f);
    }
 }
 
 bool TransformTool::onMouseLeftDown(int x, int y)
 {
-   Point3F worldRay = Torque::Rendering.screenToWorld(Point2I(x, y));
-   Point3F editorPos = mEditorManager->mEditorCamera.getWorldPosition();
+   if (!mActive)
+      return false;
 
-   if (!mGizmo.onMouseLeftDown(x, y))
-   {
-      Scene::SceneObject* hit = Torque::Scene.raycast(editorPos, editorPos + (worldRay * 1000.0f));
-      if (mSelectedObject != hit)
-      {
-         if (hit)
-         {
-            // Broadcast the hit.
-            wxTorqueObjectEvent evt(0, wxTORQUE_SELECT_OBJECT);
-            evt.SetSceneObject(hit);
-            wxPostEvent(mEditorManager, evt);
-         }
-      }
-   }
-
+   mMouseDown = true;
+   mMouseDownPosition.set(x, y);
+   mGizmo.onMouseLeftDown(x, y);
    return false;
 }
 
 bool TransformTool::onMouseLeftUp(int x, int y)
 {
-   mGizmo.onMouseLeftUp(x, y);
+   if (!mActive)
+      return false;
+
+   if (!mGizmo.onMouseLeftUp(x, y))
+   {
+      Point2I delta = mMousePosition - mMouseDownPosition;
+      F32 dist = delta.len();
+
+      if (mBoxSelection && mMousePosition.x != mMouseDownPosition.x && mMousePosition.y != mMouseDownPosition.y)
+      {
+         //mDebugBoxSelection = true;
+
+         Torque::Rendering.screenToWorld(Point2I(mMouseDownPosition.x, mMouseDownPosition.y), mBoxNearPoint, mBoxFarPoint[0]);
+         Torque::Rendering.screenToWorld(Point2I(mMousePosition.x, mMouseDownPosition.y), mBoxNearPoint, mBoxFarPoint[1]);
+         Torque::Rendering.screenToWorld(Point2I(mMouseDownPosition.x, mMousePosition.y), mBoxNearPoint, mBoxFarPoint[2]);
+         Torque::Rendering.screenToWorld(Point2I(mMousePosition.x, mMousePosition.y), mBoxNearPoint, mBoxFarPoint[3]);
+
+         PlaneF planes[4];
+         planes[0].set(mBoxNearPoint, mBoxFarPoint[2], mBoxFarPoint[0]);
+         planes[1].set(mBoxNearPoint, mBoxFarPoint[1], mBoxFarPoint[3]);
+         planes[2].set(mBoxNearPoint, mBoxFarPoint[0], mBoxFarPoint[1]);
+         planes[3].set(mBoxNearPoint, mBoxFarPoint[3], mBoxFarPoint[2]);
+         PlaneSetF planeSet(planes, 4);
+
+         Vector<Scene::SceneObject*> objects = Torque::Scene.boxSearch(planeSet);
+         if (objects.size() > 0)
+         {
+            wxTorqueObjectEvent evt(0, wxTORQUE_SELECT_OBJECT);
+
+            for (S32 n = 0; n < objects.size(); ++n)
+               evt.AddObject(objects[n]);
+
+            if (mShiftDown)
+            {
+               if (mSelectedObject != NULL)
+                  evt.AddObject(mSelectedObject);
+
+               for (S32 n = 0; n < mSelectedObjects.size(); ++n)
+                  evt.AddObject(mSelectedObjects[n]);
+
+               if (mSelectedComponent != NULL)
+                  evt.AddObject(mSelectedComponent);
+            }
+
+            // Broadcast the selections.
+            mEditorManager->postEvent(evt);
+         }
+      }
+      else 
+      {
+         Torque::Rendering.screenToWorld(Point2I(x, y), mLastRayStart, mLastRayEnd);
+         Point3F editorPos = mEditorManager->mEditorCamera.getWorldPosition();
+
+         //mDebugWorldRay = true;
+
+         Scene::SceneObject* hit = Torque::Scene.raycast(mLastRayStart, mLastRayEnd);
+         if (mSelectedObject != hit)
+         {
+            if (hit)
+            {
+               wxTorqueObjectEvent evt(0, wxTORQUE_SELECT_OBJECT);
+               evt.AddObject(hit);
+
+               if (mShiftDown)
+               {
+                  if ( mSelectedObject != NULL )
+                     evt.AddObject(mSelectedObject);
+
+                  for (S32 n = 0; n < mSelectedObjects.size(); ++n)
+                     evt.AddObject(mSelectedObjects[n]);
+
+                  if (mSelectedComponent != NULL)
+                     evt.AddObject(mSelectedComponent);
+               }
+
+               // Broadcast the hit.
+               mEditorManager->postEvent(evt);
+            }
+         }
+      }
+   }
+
+   mMouseDown     = false;
+   mBoxSelection  = false;
+
    return false;
 }
 
 bool TransformTool::onMouseMove(int x, int y)
 {
-   mGizmo.onMouseMove(x, y);
+   if (!mActive)
+      return false;
+
+   mMousePosition.set(x, y);
+   if (!mGizmo.onMouseMove(x, y))
+   {
+      if (mMouseDown)
+      {
+         Point2I delta = mMousePosition - mMouseDownPosition;
+         F32 dist = delta.len();
+         if (dist > 5.0f)
+            mBoxSelection = true;
+      }
+   }
+   return false;
+}
+
+bool TransformTool::onKeyDown(wxKeyEvent& evt)
+{
+   mShiftDown = evt.ShiftDown();
+   return false;
+}
+
+bool TransformTool::onKeyUp(wxKeyEvent& evt)
+{
+   mShiftDown = evt.ShiftDown();
    return false;
 }
 
@@ -321,18 +490,39 @@ void TransformTool::onProjectClosed()
 
 void TransformTool::OnObjectSelected(wxTorqueObjectEvent& evt)
 {
-   Scene::SceneObject* obj = evt.GetSceneObject();
+   if (!mActive)
+      return;
+
+   mMultiselect         = false;
+   mSelectedObject      = NULL;
+   mSelectedComponent   = NULL;
+   mSelectedObjects.clear();
+
+   Vector<SimObject*> objects = evt.GetObjects();
+   if (objects.size() < 1)
+      return;
+
+   if (objects.size() > 1)
+   {
+      mMultiselect      = true;
+      mSelectedObjects  = objects;
+
+      // Update the gizmo.
+      mGizmo.selectObjects(mSelectedObjects);
+      return;
+   }
+
+   Scene::SceneObject* obj = dynamic_cast<Scene::SceneObject*>(objects[0]);
    if (obj)
    {
       mSelectedObject    = obj;
-      mSelectedComponent = NULL;
 
       // Update the gizmo.
       mGizmo.selectObject(obj);
       return;
    }
 
-   Scene::BaseComponent* component = evt.GetComponent();
+   Scene::BaseComponent* component = dynamic_cast<Scene::BaseComponent*>(objects[0]);
    if (component)
    {
       mSelectedObject      = component->mOwnerObject;
@@ -391,22 +581,30 @@ void TransformTool::OnTranslateMenuEvent(wxCommandEvent& evt)
    switch (evt.GetId())
    {
       case 0:
-         mGizmo.mTranslateSnap = 0.0f;
+         mGizmo.mTranslateLocal = true;
          break;
 
       case 1:
-         mGizmo.mTranslateSnap = 0.1f;
+         mGizmo.mTranslateLocal = false;
          break;
 
       case 2:
-         mGizmo.mTranslateSnap = 0.5f;
+         mGizmo.mTranslateSnap = 0.0f;
          break;
 
       case 3:
-         mGizmo.mTranslateSnap = 1.0f;
+         mGizmo.mTranslateSnap = 0.1f;
          break;
 
       case 4:
+         mGizmo.mTranslateSnap = 0.5f;
+         break;
+
+      case 5:
+         mGizmo.mTranslateSnap = 1.0f;
+         break;
+
+      case 6:
          mGizmo.mTranslateSnap = 5.0f;
          break;
    }
@@ -417,22 +615,30 @@ void TransformTool::OnRotateMenuEvent(wxCommandEvent& evt)
    switch (evt.GetId())
    {
       case 0:
-         mGizmo.mRotateSnap = 0.0f;
+         mGizmo.mRotateLocal = true;
          break;
 
       case 1:
-         mGizmo.mRotateSnap = M_PI_F / 36.0f;
+         mGizmo.mRotateLocal = false;
          break;
 
       case 2:
-         mGizmo.mRotateSnap = M_PI_F / 12.0f;
+         mGizmo.mRotateSnap = 0.0f;
          break;
 
       case 3:
-         mGizmo.mRotateSnap = M_PI_F / 4.0f;
+         mGizmo.mRotateSnap = M_PI_F / 36.0f;
          break;
 
       case 4:
+         mGizmo.mRotateSnap = M_PI_F / 12.0f;
+         break;
+
+      case 5:
+         mGizmo.mRotateSnap = M_PI_F / 4.0f;
+         break;
+
+      case 6:
          mGizmo.mRotateSnap = M_PI_F / 2.0f;
          break;
    }

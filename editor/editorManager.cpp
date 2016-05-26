@@ -57,7 +57,9 @@ class TextDropTarget : public wxTextDropTarget
 };
 
 EditorManager::EditorManager()
-   :  mManager(NULL),
+   :  Debug::DebugMode(),
+      Graphics::DGLHook(),
+      mManager(NULL),
       mFrame(NULL),
       mWindow(NULL),
       mProjectLoaded( false ), 
@@ -66,13 +68,13 @@ EditorManager::EditorManager()
       mTorque6Library(NULL),
       mTorque6Init(NULL),
       mTorque6Shutdown(NULL),
-      mEditorOverlayView(NULL),
-      mRenderLayer4View(NULL)
+      mEditorOverlayView(NULL)
 {
    mEditorCameraForwardVelocity  = Point3F::Zero;
-   mEditorCameraSpeed            = 0.5f;
+   mEditorCameraSpeed            = 0.25f;
 
-   mCommonIcons = new wxImageList(16, 16);
+   mCommonIcons   = new wxImageList(16, 16);
+   mTimer         = new wxTimer(this);
 }
 
 EditorManager::~EditorManager()
@@ -141,9 +143,6 @@ void EditorManager::init(wxString runPath, wxAuiManager* manager, MainFrame* fra
    openMatButton->Bind(wxEVT_BUTTON, &EditorManager::OnOpenInMaterialEditorButton, this, -1, -1, NULL);
    mMaterialSelectDialog->TopBarSizer->Add(openMatButton, 0, wxALL, 5);
    mMaterialSelectDialog->TopBarSizer->Add(0, 0, 1, wxEXPAND, 5);
-
-   // Events
-   Bind(wxTORQUE_SELECT_OBJECT, &EditorManager::OnObjectSelected, this, 0, -1, NULL);
 }
 
 bool EditorManager::openProject(wxString projectPath)
@@ -187,8 +186,7 @@ bool EditorManager::openProject(wxString projectPath)
 
       // Editor Camera
       mEditorCamera.initialize(this);
-      mRenderLayer4View = Torque::Graphics.getView("DeferredFinal", 1750, mEditorCamera.getRenderCamera());
-      mEditorOverlayView = Torque::Graphics.getView("EditorOverlay", 6100, mEditorCamera.getRenderCamera());
+      mEditorOverlayView = Torque::Graphics.getView("EditorOverlay", S32_MAX - 500, NULL);
 
       onProjectLoaded(mProjectName, projectPath);
       return true;
@@ -394,7 +392,15 @@ void EditorManager::OnKeyDown(wxKeyEvent& evt)
          mEditorCameraForwardVelocity.y = -1.0 * mEditorCameraSpeed;
          break;
    }
+
+   mEditorCamera.setShiftKey(evt.ShiftDown());
    mEditorCamera.setForwardVelocity(mEditorCameraForwardVelocity);
+
+   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+      EditorTool::smEditorTools[i]->onKeyDown(evt);
+
+   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+      EditorWindow::smEditorWindows[i]->onKeyDown(evt);
 
    KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
    Torque::Engine.keyDown(torqueKey);
@@ -423,7 +429,15 @@ void EditorManager::OnKeyUp(wxKeyEvent& evt)
          mEditorCameraForwardVelocity.y = 0.0;
          break;
    }
+
+   mEditorCamera.setShiftKey(evt.ShiftDown());
    mEditorCamera.setForwardVelocity(mEditorCameraForwardVelocity);
+
+   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+      EditorTool::smEditorTools[i]->onKeyUp(evt);
+
+   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+      EditorWindow::smEditorWindows[i]->onKeyUp(evt);
 
    KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
    Torque::Engine.keyUp(torqueKey);
@@ -435,10 +449,21 @@ void EditorManager::render(Rendering::RenderCamera* camera)
    //Torque::bgfx.setViewTransform(mEditorOverlayView->id, camera->viewMatrix, camera->projectionMatrix, BGFX_VIEW_STEREO, NULL);
 
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+   {
       EditorTool::smEditorTools[i]->renderTool();
+   }
 
    for(unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
       EditorWindow::smEditorWindows[i]->renderWindow();
+}
+
+void EditorManager::dglRender()
+{
+   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+      EditorTool::smEditorTools[i]->dglRenderTool();
+
+   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+      EditorWindow::smEditorWindows[i]->dglRenderWindow();
 }
 
 void EditorManager::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
@@ -467,7 +492,6 @@ void _addObjectTemplateAsset(wxString assetID, Point3F position)
    newObject->setTemplateAsset(assetID);
    newObject->mTransform.setPosition(position);
    Torque::Scene.addObject(newObject, "NewSceneObject");
-   newObject->registerObject();
 }
 
 void _addMeshAsset(wxString assetID, Point3F position)
@@ -478,7 +502,6 @@ void _addMeshAsset(wxString assetID, Point3F position)
    newObject->addComponent(meshComponent);
    newObject->mTransform.setPosition(position);
    Torque::Scene.addObject(newObject, "NewSceneObject");
-   newObject->registerObject();
    meshComponent->registerObject();
 }
 
@@ -499,21 +522,20 @@ bool TextDropTarget::OnDropText(wxCoord x, wxCoord y, const wxString& text)
       tokenizer.GetNextToken();
       wxString assetID = tokenizer.GetNextToken();
 
+      Point3F nearPoint;
+      Point3F farPoint;
+      Torque::Rendering.screenToWorld(Point2I(x, y), nearPoint, farPoint);
+
+      Point3F direction = farPoint - nearPoint;
+      direction.normalize();
+
       // ObjectTemplateAsset gets added straight to the scene.
       if (assetType == "ObjectTemplateAsset")
-      {
-         Point3F worldRay = Torque::Rendering.screenToWorld(Point2I(x, y));
-         //Point3F editorPos = Torque::Scene.getActiveCamera()->getPosition();
-         //_addObjectTemplateAsset(assetID, editorPos + (worldRay * 10.0f));
-      }
+         _addObjectTemplateAsset(assetID, nearPoint + (direction * 10.0f));
 
       // MeshAsset
       if (assetType == "MeshAsset")
-      {
-         Point3F worldRay = Torque::Rendering.screenToWorld(Point2I(x, y));
-         //Point3F editorPos = Torque::Scene.getActiveCamera()->getPosition();
-         //_addMeshAsset(assetID, editorPos + (worldRay * 10.0f));
-      }
+         _addMeshAsset(assetID, nearPoint + (direction * 10.0f));
 
       // Inform the tools the scene has changed.
       for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
@@ -531,6 +553,18 @@ void EditorManager::addObjectTemplateAsset(wxString assetID, Point3F position)
 void EditorManager::addMeshAsset(wxString assetID, Point3F position)
 {
    _addMeshAsset(assetID, position);
+}
+
+void EditorManager::postEvent(const wxEvent& evt)
+{
+   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+      wxPostEvent(EditorTool::smEditorTools[i], evt);
+
+   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+      wxPostEvent(EditorWindow::smEditorWindows[i], evt);
+
+   // Note: this forces events to process asap.
+   mTimer->StartOnce(0);
 }
 
 void EditorManager::refreshChoices()
@@ -765,13 +799,4 @@ void EditorManager::OnNewMaterialSelectModule(wxCommandEvent& evt)
       return;
 
    _materialWizardSelectModule(wizard);
-}
-
-void EditorManager::OnObjectSelected(wxTorqueObjectEvent& evt)
-{
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      wxPostEvent(EditorTool::smEditorTools[i], evt);
-
-   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
-      wxPostEvent(EditorWindow::smEditorWindows[i], evt);
 }

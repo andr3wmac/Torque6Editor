@@ -307,10 +307,13 @@ void SceneWindow::OnTreeEvent( wxTreeEvent& evt )
       if (data)
       {
          // Did we select an object?
-         Scene::SceneObject* Object = dynamic_cast<Scene::SceneObject*>(data->objPtr);
-         if (Object)
+         Scene::SceneObject* object = dynamic_cast<Scene::SceneObject*>(data->objPtr);
+         if (object)
          {
-            selectObject(Object);
+            // Broadcast the hit.
+            wxTorqueObjectEvent evt(0, wxTORQUE_SELECT_OBJECT);
+            evt.AddObject(object);
+            mEditorManager->postEvent(evt);
             return;
          }
 
@@ -318,7 +321,10 @@ void SceneWindow::OnTreeEvent( wxTreeEvent& evt )
          Scene::BaseComponent* component = dynamic_cast<Scene::BaseComponent*>(data->objPtr);
          if (component)
          {
-            selectComponent(component);
+            // Broadcast the hit.
+            wxTorqueObjectEvent evt(0, wxTORQUE_SELECT_OBJECT);
+            evt.AddObject(component);
+            mEditorManager->postEvent(evt);
             return;
          }
       }
@@ -602,14 +608,18 @@ void SceneWindow::selectComponent(Scene::BaseComponent* component, bool updateTr
 
 void SceneWindow::OnObjectSelected(wxTorqueObjectEvent& evt)
 {
-   Scene::SceneObject* obj = evt.GetSceneObject();
+   Vector<SimObject*> objects = evt.GetObjects();
+   if (objects.size() < 1)
+      return;
+
+   Scene::SceneObject* obj = dynamic_cast<Scene::SceneObject*>(objects[0]);
    if (obj)
    {
       selectObject(obj, true);
       return;
    }
 
-   Scene::BaseComponent* component = evt.GetComponent();
+   Scene::BaseComponent* component = dynamic_cast<Scene::BaseComponent*>(objects[0]);
    if (component)
    {
       selectComponent(component, true);

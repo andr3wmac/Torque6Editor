@@ -54,6 +54,7 @@ class EditorWindow : public wxEvtHandler
       virtual void openWindow() { mOpen = true; }
       virtual void closeWindow() { mOpen = false; }
       virtual void renderWindow() { }
+      virtual void dglRenderWindow() { }
       virtual void onSceneChanged() { }
       virtual void onProjectLoaded(wxString projectName, wxString path) {}
       virtual void onProjectClosed() {}
@@ -63,6 +64,9 @@ class EditorWindow : public wxEvtHandler
       virtual bool onMouseRightDown(int x, int y) { return false; }
       virtual bool onMouseRightUp(int x, int y) { return false; }
       virtual bool onMouseMove(int x, int y) { return false; }
+
+      virtual bool onKeyDown(wxKeyEvent& evt) { return false; }
+      virtual bool onKeyUp(wxKeyEvent& evt) { return false; }
       
       static wxVector<EditorWindow*> smEditorWindows;
       template <typename T>

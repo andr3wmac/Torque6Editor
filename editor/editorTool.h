@@ -51,9 +51,10 @@ class EditorTool : public wxEvtHandler
 
       virtual void initTool() { }
       virtual void destroyTool() { }
-      virtual void onActivateTool(S32 index = -1) { mActive = true; }
+      virtual void onActivateTool(S32 subToolIndex = -1) { mActive = true; }
       virtual void onDeactivateTool() { mActive = false; }
       virtual void renderTool() { }
+      virtual void dglRenderTool() { }
 
       virtual void onSceneChanged() { }
       virtual void onProjectLoaded(wxString projectName, wxString path) {}
@@ -64,10 +65,14 @@ class EditorTool : public wxEvtHandler
       virtual bool onMouseRightDown(int x, int y) { return false; }
       virtual bool onMouseRightUp(int x, int y) { return false; }
       virtual bool onMouseMove(int x, int y) { return false; }
+
+      virtual bool onKeyDown(wxKeyEvent& evt) { return false; }
+      virtual bool onKeyUp(wxKeyEvent& evt) { return false; }
       
       static wxVector<EditorTool*> smEditorTools;
 
-      static void activateTool(EditorTool* tool, S32 index = -1);
+      static void activateTool(S32 index, S32 subToolIndex);
+      static void activateTool(EditorTool* tool, S32 subToolIndex = -1);
       template <typename T> static T* findTool();
 };
  
