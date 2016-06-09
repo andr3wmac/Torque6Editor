@@ -131,6 +131,8 @@ class EditorManager : public wxEvtHandler, public Debug::DebugMode, public Graph
       wxString          mRunPath;
 
       bool              mProjectLoaded;
+      bool              mScenePlaying;
+
       wxString          mProjectName;
       wxString          mProjectPath;
       wxAuiManager*     mManager;
@@ -153,6 +155,8 @@ class EditorManager : public wxEvtHandler, public Debug::DebugMode, public Graph
       bool openProject(wxString projectPath);
       void closeProject();
       void runProject();
+      void play();
+      void stop();
       void addObjectTemplateAsset(wxString assetID, Point3F position);
       void addMeshAsset(wxString assetID, Point3F position);
       void postEvent(const wxEvent& evt);

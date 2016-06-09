@@ -20,15 +20,8 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _MAIN_H_
-#define _MAIN_H_
-
-// For compilers that don't support precompilation, include "wx/wx.h"
-#include "wx/wxprec.h"
- 
-#ifndef WX_PRECOMP
-#	include "wx/wx.h"
-#endif
+#ifndef ENGINE_TOOL_H
+#define ENGINE_TOOL_H
 
 #ifndef EDITORMANAGER_H
 #include "editorManager.h"
@@ -38,30 +31,38 @@
 #include "Torque6EditorUI.h"
 #endif
 
-class Torque6Editor : public wxApp
+#ifndef _WX_TREECTRL_H_BASE_
+#include <wx/treectrl.h>
+#endif
+
+#ifndef _SCENE_OBJECT_H_
+#include <scene/object.h>
+#endif
+
+#ifndef WXFLATNOTEBOOK_H
+#include "widgets/wxFlatNotebook/wxFlatNotebook.h"
+#endif
+
+class EngineTool : public EditorTool
 {
-public:
-   ~Torque6Editor();
+   typedef EditorTool Parent;
 
-   // Window Management
-   MainFrame*        mFrame;
-   wxAuiManager*     mManager;
+   protected:
+      // Play
+      wxBitmapButton*   mPlayBtn;
+      wxBitmap*         mPlayIcon;
+      wxBitmap*         mPlayHighlightIcon;
+      wxMenu*           mPlayMenu;
 
-   // Editor Manager
-   EditorManager     mEditorManager;
+   public:
+      EngineTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager);
+      ~EngineTool();
 
-   // Dialogs
-   AboutDialog*      mAboutDialog;
+      void OnPlay(wxCommandEvent& evt);
 
-   // Toolbar
-   wxBitmap*         mSeparatorIcon;
-
-   // Events
-	virtual bool OnInit();
-   virtual int OnExit();
-   virtual void OnMenuEvent( wxCommandEvent& evt );
+      virtual void initTool();
+      virtual void onProjectLoaded(const wxString& projectName, const wxString& projectPath);
+      virtual void onProjectClosed();
 };
- 
-DECLARE_APP(Torque6Editor)
- 
-#endif // _MAIN_H_
+
+#endif // ENGINE_TOOL_H

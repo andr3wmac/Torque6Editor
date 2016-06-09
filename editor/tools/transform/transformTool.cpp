@@ -116,42 +116,42 @@ void TransformTool::initTool()
    mGizmo.mEditorManager = mEditorManager;
 
    // Translate
-   mTranslateBtn = new wxBitmapButton(mFrame->toolbar, 1, *mTranslateIcon, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   mTranslateBtn = new wxBitmapButton(mFrame->toolbar, wxID_ANY, *mTranslateIcon, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
    mTranslateBtn->SetBackgroundColour(Theme::darkBackgroundColor);
    mTranslateBtn->SetMinSize(wxSize(36, 36));
-   mTranslateBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarEvent, this, -1, -1, NULL);
+   mTranslateBtn->Bind(wxEVT_BUTTON, &TransformTool::OnTranslateTool, this, -1, -1, NULL);
    mFrame->toolbarContents->Add(mTranslateBtn, 0, 0, 5);
 
-   wxBitmapButton* translateDownBtn = new wxBitmapButton(mFrame->toolbar, 2, wxBitmap(wxT("images/smallDownArrow.png"), wxBITMAP_TYPE_ANY), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   wxBitmapButton* translateDownBtn = new wxBitmapButton(mFrame->toolbar, wxID_ANY, wxBitmap(wxT("images/smallDownArrow.png"), wxBITMAP_TYPE_ANY), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
    translateDownBtn->SetBackgroundColour(Theme::darkBackgroundColor);
    translateDownBtn->SetMinSize(wxSize(16, 36));
-   translateDownBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarDropdownEvent, this, -1, -1, NULL);
+   translateDownBtn->Bind(wxEVT_BUTTON, &TransformTool::OnTranslateMenu, this, -1, -1, NULL);
    mFrame->toolbarContents->Add(translateDownBtn, 0, 0, 5);
 
    // Rotate
-   mRotateBtn = new wxBitmapButton(mFrame->toolbar, 3, *mRotateIcon, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   mRotateBtn = new wxBitmapButton(mFrame->toolbar, wxID_ANY, *mRotateIcon, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
    mRotateBtn->SetBackgroundColour(Theme::darkBackgroundColor);
    mRotateBtn->SetMinSize(wxSize(36, 36));
-   mRotateBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarEvent, this, -1, -1, NULL);
+   mRotateBtn->Bind(wxEVT_BUTTON, &TransformTool::OnRotateTool, this, -1, -1, NULL);
    mFrame->toolbarContents->Add(mRotateBtn, 0, 0, 5);
 
-   wxBitmapButton* rotateDownBtn = new wxBitmapButton(mFrame->toolbar, 4, wxBitmap(wxT("images/smallDownArrow.png"), wxBITMAP_TYPE_ANY), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   wxBitmapButton* rotateDownBtn = new wxBitmapButton(mFrame->toolbar, wxID_ANY, wxBitmap(wxT("images/smallDownArrow.png"), wxBITMAP_TYPE_ANY), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
    rotateDownBtn->SetBackgroundColour(Theme::darkBackgroundColor);
    rotateDownBtn->SetMinSize(wxSize(16, 36));
-   rotateDownBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarDropdownEvent, this, -1, -1, NULL);
+   rotateDownBtn->Bind(wxEVT_BUTTON, &TransformTool::OnRotateMenu, this, -1, -1, NULL);
    mFrame->toolbarContents->Add(rotateDownBtn, 0, 0, 5);
 
    // Scale
-   mScaleBtn = new wxBitmapButton(mFrame->toolbar, 5, *mScaleIcon, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   mScaleBtn = new wxBitmapButton(mFrame->toolbar, wxID_ANY, *mScaleIcon, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
    mScaleBtn->SetBackgroundColour(Theme::darkBackgroundColor);
    mScaleBtn->SetMinSize(wxSize(36, 36));
-   mScaleBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarEvent, this, -1, -1, NULL);
+   mScaleBtn->Bind(wxEVT_BUTTON, &TransformTool::OnScaleTool, this, -1, -1, NULL);
    mFrame->toolbarContents->Add(mScaleBtn, 0, 0, 5);
 
-   wxBitmapButton* scaleDownBtn = new wxBitmapButton(mFrame->toolbar, 6, wxBitmap(wxT("images/smallDownArrow.png"), wxBITMAP_TYPE_ANY), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   wxBitmapButton* scaleDownBtn = new wxBitmapButton(mFrame->toolbar, wxID_ANY, wxBitmap(wxT("images/smallDownArrow.png"), wxBITMAP_TYPE_ANY), wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
    scaleDownBtn->SetBackgroundColour(Theme::darkBackgroundColor);
    scaleDownBtn->SetMinSize(wxSize(16, 36));
-   scaleDownBtn->Bind(wxEVT_BUTTON, &TransformTool::OnToolbarDropdownEvent, this, -1, -1, NULL);
+   scaleDownBtn->Bind(wxEVT_BUTTON, &TransformTool::OnScaleMenu, this, -1, -1, NULL);
    mFrame->toolbarContents->Add(scaleDownBtn, 0, 0, 5);
 }
 
@@ -534,46 +534,14 @@ void TransformTool::OnObjectSelected(wxTorqueObjectEvent& evt)
    }
 }
 
-void TransformTool::OnToolbarEvent(wxCommandEvent& evt)
+void TransformTool::OnTranslateTool(wxCommandEvent& evt)
 {
-   switch (evt.GetId())
-   {
-      case 1:
-         EditorTool::activateTool(this, 0);
-         break;
-
-      case 3:
-         EditorTool::activateTool(this, 1);
-         break;
-
-      case 5:
-         EditorTool::activateTool(this, 2);
-         break;
-
-      default:
-         break;
-   }
+   EditorTool::activateTool(this, 0);
 }
 
-void TransformTool::OnToolbarDropdownEvent(wxCommandEvent& evt)
+void TransformTool::OnTranslateMenu(wxCommandEvent& evt)
 {
-   switch (evt.GetId())
-   {
-      case 2:
-         mFrame->PopupMenu(mTranslateMenu, wxDefaultPosition);
-         break;
-
-      case 4:
-         mFrame->PopupMenu(mRotateMenu, wxDefaultPosition);
-         break;
-
-      case 6:
-         mFrame->PopupMenu(mScaleMenu, wxDefaultPosition);
-         break;
-
-      default:
-         break;
-   }
+   mFrame->PopupMenu(mTranslateMenu, wxDefaultPosition);
 }
 
 void TransformTool::OnTranslateMenuEvent(wxCommandEvent& evt)
@@ -610,6 +578,16 @@ void TransformTool::OnTranslateMenuEvent(wxCommandEvent& evt)
    }
 }
 
+void TransformTool::OnRotateTool(wxCommandEvent& evt)
+{
+   EditorTool::activateTool(this, 1);
+}
+
+void TransformTool::OnRotateMenu(wxCommandEvent& evt)
+{
+   mFrame->PopupMenu(mRotateMenu, wxDefaultPosition);
+}
+
 void TransformTool::OnRotateMenuEvent(wxCommandEvent& evt)
 {
    switch (evt.GetId())
@@ -642,6 +620,16 @@ void TransformTool::OnRotateMenuEvent(wxCommandEvent& evt)
          mGizmo.mRotateSnap = M_PI_F / 2.0f;
          break;
    }
+}
+
+void TransformTool::OnScaleTool(wxCommandEvent& evt)
+{
+   EditorTool::activateTool(this, 2);
+}
+
+void TransformTool::OnScaleMenu(wxCommandEvent& evt)
+{
+   mFrame->PopupMenu(mScaleMenu, wxDefaultPosition);
 }
 
 void TransformTool::OnScaleMenuEvent(wxCommandEvent& evt)

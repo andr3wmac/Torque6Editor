@@ -21,6 +21,7 @@
 //-----------------------------------------------------------------------------
 
 #include "main.h"
+#include "theme.h"
 
 #include <wx/dir.h>
 #include <wx/utils.h> 
@@ -28,8 +29,11 @@
 #include "wx/treectrl.h"
 #include "wx/aui/aui.h"
 
-#include "tools/transform//transformTool.h"
+// Tools
+#include "tools/engine/engineTool.h"
+#include "tools/transform/transformTool.h"
 
+// Windows
 #include "windows/project/projectWindow.h"
 #include "windows/console/consoleWindow.h"
 #include "windows/materials/materialsWindow.h"
@@ -49,7 +53,7 @@ bool Torque6Editor::OnInit()
 	SetTopWindow(mFrame);
 
    // Preload Dialogs
-   mAboutDialog = new AboutDialog(mFrame);
+   //mAboutDialog = new AboutDialog(mFrame);
 
    // Setup Advanced UI Manager
    mManager = &mFrame->m_mgr;
@@ -67,13 +71,29 @@ bool Torque6Editor::OnInit()
    // Editor Manager
    mEditorManager.init(runPath, mManager, mFrame, mFrame->mainPanel);
 
+   // Toolbar Separator
+   mSeparatorIcon = new wxBitmap(wxT("images/separator.png"), wxBITMAP_TYPE_ANY);
+
    // Tools
+   EditorTool::smEditorTools.push_back(new EngineTool(&mEditorManager, mFrame, mManager));
    EditorTool::smEditorTools.push_back(new TransformTool(&mEditorManager, mFrame, mManager));
 
    for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->initTool();
+   {
+      // Every second tool gets a separator placed.
+      if (i % 2 != 0)
+      {
+         wxBitmapButton* sep = new wxBitmapButton(mFrame->toolbar, -1, *mSeparatorIcon, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+         sep->SetBackgroundColour(Theme::darkBackgroundColor);
+         sep->SetMinSize(wxSize(16, 36));
+         mFrame->toolbarContents->Add(sep, 0, 0, 5);
+      }
 
-   EditorTool::activateTool(0, 0);
+      EditorTool::smEditorTools[i]->initTool();
+   }
+
+   // Auto activate transform tool for default.
+   EditorTool::activateTool(1, 0);
 
    // Windows
    EditorWindow::smEditorWindows.push_back(new ProjectWindow(&mEditorManager, mFrame, mManager));
@@ -106,6 +126,11 @@ bool Torque6Editor::OnInit()
    }
 
 	return true;
+}
+
+int Torque6Editor::OnExit()
+{
+   return 0;
 }
 
 Torque6Editor::~Torque6Editor()

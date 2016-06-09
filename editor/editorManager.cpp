@@ -62,7 +62,8 @@ EditorManager::EditorManager()
       mManager(NULL),
       mFrame(NULL),
       mWindow(NULL),
-      mProjectLoaded( false ), 
+      mProjectLoaded(false), 
+      mScenePlaying(false),
       mProjectName(""),
       mProjectPath(""),
       mTorque6Library(NULL),
@@ -219,6 +220,31 @@ void EditorManager::runProject()
    wxExecute(command);
 }
 
+void EditorManager::play()
+{
+   mScenePlaying = true;
+   Torque::Scene.save("editortemp.taml");
+   Torque::Scene.play();
+   mWindow->SetFocus();
+}
+
+void EditorManager::stop()
+{
+   mScenePlaying = false;
+   Torque::Scene.stop();
+   Torque::Scene.clear();
+   Torque::Engine.mainLoop();
+
+   Torque::Scene.load("editortemp.taml", false);
+   Torque::Scene.play();
+   Torque::Engine.mainLoop();
+
+   wxRemoveFile("editortemp.taml");
+
+   Torque::Scene.pause();
+   mEditorCamera.initialize(this);
+}
+
 void EditorManager::OnToolbarEvent(wxCommandEvent& evt)
 {
    switch (evt.GetId())
@@ -236,7 +262,9 @@ void EditorManager::OnIdle(wxIdleEvent& evt)
 {
    if (mProjectLoaded)
    {
-      mEditorCamera.mainLoop();
+      if (!mScenePlaying)
+         mEditorCamera.mainLoop();
+
       Torque::Engine.mainLoop();
       evt.RequestMore();
    }
@@ -255,15 +283,21 @@ void EditorManager::OnMouseMove(wxMouseEvent& evt)
    if (!mProjectLoaded)
       return;
 
-   mEditorCamera.onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
+   if (!mScenePlaying)
+   {
+      mEditorCamera.onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
+      for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+         EditorTool::smEditorTools[i]->onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
-      EditorWindow::smEditorWindows[i]->onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
+      for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+         EditorWindow::smEditorWindows[i]->onMouseMove(evt.GetPosition().x, evt.GetPosition().y);
 
-   Torque::Engine.mouseMove(evt.GetPosition().x, evt.GetPosition().y);
+   }
+   else 
+   {
+      Torque::Engine.mouseMove(evt.GetPosition().x, evt.GetPosition().y);
+   }
 }
 
 void EditorManager::OnMouseLeftDown(wxMouseEvent& evt)
@@ -273,15 +307,19 @@ void EditorManager::OnMouseLeftDown(wxMouseEvent& evt)
    if (!mProjectLoaded)
       return;
 
-   mEditorCamera.onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
+   if (!mScenePlaying)
+   {
+      mEditorCamera.onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
+      for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+         EditorTool::smEditorTools[i]->onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
-      EditorWindow::smEditorWindows[i]->onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
-
-   Torque::Engine.mouseButton(true, true);
+      for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+         EditorWindow::smEditorWindows[i]->onMouseLeftDown(evt.GetPosition().x, evt.GetPosition().y);
+   }
+   else {
+      Torque::Engine.mouseButton(true, true);
+   }
 }
 
 void EditorManager::OnMouseLeftUp(wxMouseEvent& evt)
@@ -289,15 +327,20 @@ void EditorManager::OnMouseLeftUp(wxMouseEvent& evt)
    if (!mProjectLoaded)
       return;
 
-   mEditorCamera.onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
+   if (!mScenePlaying)
+   {
+      mEditorCamera.onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
+      for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+         EditorTool::smEditorTools[i]->onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
-      EditorWindow::smEditorWindows[i]->onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
-
-   Torque::Engine.mouseButton(false, true);
+      for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+         EditorWindow::smEditorWindows[i]->onMouseLeftUp(evt.GetPosition().x, evt.GetPosition().y);
+   }
+   else
+   {
+      Torque::Engine.mouseButton(false, true);
+   }  
 }
 
 void EditorManager::OnMouseRightDown(wxMouseEvent& evt)
@@ -307,15 +350,20 @@ void EditorManager::OnMouseRightDown(wxMouseEvent& evt)
    if (!mProjectLoaded)
       return;
 
-   mEditorCamera.onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
+   if (!mScenePlaying)
+   {
+      mEditorCamera.onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
+      for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+         EditorTool::smEditorTools[i]->onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
-      EditorWindow::smEditorWindows[i]->onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
-
-   Torque::Engine.mouseButton(true, false);
+      for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+         EditorWindow::smEditorWindows[i]->onMouseRightDown(evt.GetPosition().x, evt.GetPosition().y);
+   }
+   else
+   {
+      Torque::Engine.mouseButton(true, false);
+   }
 }
 
 void EditorManager::OnMouseRightUp(wxMouseEvent& evt)
@@ -323,15 +371,20 @@ void EditorManager::OnMouseRightUp(wxMouseEvent& evt)
    if (!mProjectLoaded)
       return;
 
-   mEditorCamera.onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
+   if (!mScenePlaying)
+   {
+      mEditorCamera.onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
+      for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+         EditorTool::smEditorTools[i]->onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
 
-   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
-      EditorWindow::smEditorWindows[i]->onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
-
-   Torque::Engine.mouseButton(false, false);
+      for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+         EditorWindow::smEditorWindows[i]->onMouseRightUp(evt.GetPosition().x, evt.GetPosition().y);
+   }
+   else
+   {
+      Torque::Engine.mouseButton(false, false);
+   }
 }
 
 KeyCodes getTorqueKeyCode(int key)
@@ -374,36 +427,41 @@ void EditorManager::OnKeyDown(wxKeyEvent& evt)
    if (!mProjectLoaded)
       return;
 
-   switch (evt.GetKeyCode())
+   if (!mScenePlaying)
    {
-      case 87: // W
-         mEditorCameraForwardVelocity.x = 1.0 * mEditorCameraSpeed;
-         break;
+      switch (evt.GetKeyCode())
+      {
+         case 87: // W
+            mEditorCameraForwardVelocity.x = 1.0 * mEditorCameraSpeed;
+            break;
 
-      case 65: // A
-         mEditorCameraForwardVelocity.y = 1.0 * mEditorCameraSpeed;
-         break;
+         case 65: // A
+            mEditorCameraForwardVelocity.y = 1.0 * mEditorCameraSpeed;
+            break;
 
-      case 83: // S
-         mEditorCameraForwardVelocity.x = -1.0 * mEditorCameraSpeed;
-         break;
+         case 83: // S
+            mEditorCameraForwardVelocity.x = -1.0 * mEditorCameraSpeed;
+            break;
 
-      case 68: // D
-         mEditorCameraForwardVelocity.y = -1.0 * mEditorCameraSpeed;
-         break;
+         case 68: // D
+            mEditorCameraForwardVelocity.y = -1.0 * mEditorCameraSpeed;
+            break;
+      }
+
+      mEditorCamera.setShiftKey(evt.ShiftDown());
+      mEditorCamera.setForwardVelocity(mEditorCameraForwardVelocity);
+
+      for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+         EditorTool::smEditorTools[i]->onKeyDown(evt);
+
+      for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+         EditorWindow::smEditorWindows[i]->onKeyDown(evt);
    }
-
-   mEditorCamera.setShiftKey(evt.ShiftDown());
-   mEditorCamera.setForwardVelocity(mEditorCameraForwardVelocity);
-
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->onKeyDown(evt);
-
-   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
-      EditorWindow::smEditorWindows[i]->onKeyDown(evt);
-
-   KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
-   Torque::Engine.keyDown(torqueKey);
+   else
+   {
+      KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
+      Torque::Engine.keyDown(torqueKey);
+   }
 }
 
 void EditorManager::OnKeyUp(wxKeyEvent& evt)
@@ -411,36 +469,48 @@ void EditorManager::OnKeyUp(wxKeyEvent& evt)
    if (!mProjectLoaded)
       return;
 
-   switch (evt.GetKeyCode())
+   if (!mScenePlaying)
    {
-      case 87: // W
-         mEditorCameraForwardVelocity.x = 0.0;
-         break;
+      switch (evt.GetKeyCode())
+      {
+         case 87: // W
+            mEditorCameraForwardVelocity.x = 0.0;
+            break;
 
-      case 65: // A
-         mEditorCameraForwardVelocity.y = 0.0;
-         break;
+         case 65: // A
+            mEditorCameraForwardVelocity.y = 0.0;
+            break;
 
-      case 83: // S
-         mEditorCameraForwardVelocity.x = 0.0;
-         break;
+         case 83: // S
+            mEditorCameraForwardVelocity.x = 0.0;
+            break;
 
-      case 68: // D
-         mEditorCameraForwardVelocity.y = 0.0;
-         break;
+         case 68: // D
+            mEditorCameraForwardVelocity.y = 0.0;
+            break;
+      }
+
+      mEditorCamera.setShiftKey(evt.ShiftDown());
+      mEditorCamera.setForwardVelocity(mEditorCameraForwardVelocity);
+
+      for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+         EditorTool::smEditorTools[i]->onKeyUp(evt);
+
+      for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+         EditorWindow::smEditorWindows[i]->onKeyUp(evt);
    }
+   else
+   {
+      switch (evt.GetKeyCode())
+      {
+         case WXK_ESCAPE: // Escape
+            stop();
+            return;
+      }
 
-   mEditorCamera.setShiftKey(evt.ShiftDown());
-   mEditorCamera.setForwardVelocity(mEditorCameraForwardVelocity);
-
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->onKeyUp(evt);
-
-   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
-      EditorWindow::smEditorWindows[i]->onKeyUp(evt);
-
-   KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
-   Torque::Engine.keyUp(torqueKey);
+      KeyCodes torqueKey = getTorqueKeyCode(evt.GetKeyCode());
+      Torque::Engine.keyUp(torqueKey);
+   }
 }
 
 void EditorManager::render(Rendering::RenderCamera* camera)
@@ -448,22 +518,26 @@ void EditorManager::render(Rendering::RenderCamera* camera)
    //Torque::bgfx.setViewRect(mEditorOverlayView->id, 0, 0, *Torque::Rendering.windowWidth, *Torque::Rendering.windowHeight);
    //Torque::bgfx.setViewTransform(mEditorOverlayView->id, camera->viewMatrix, camera->projectionMatrix, BGFX_VIEW_STEREO, NULL);
 
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+   if (!mScenePlaying)
    {
-      EditorTool::smEditorTools[i]->renderTool();
-   }
+      for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+         EditorTool::smEditorTools[i]->renderTool();
 
-   for(unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
-      EditorWindow::smEditorWindows[i]->renderWindow();
+      for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+         EditorWindow::smEditorWindows[i]->renderWindow();
+   }
 }
 
 void EditorManager::dglRender()
 {
-   for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
-      EditorTool::smEditorTools[i]->dglRenderTool();
+   if (!mScenePlaying)
+   {
+      for (unsigned int i = 0; i < EditorTool::smEditorTools.size(); ++i)
+         EditorTool::smEditorTools[i]->dglRenderTool();
 
-   for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
-      EditorWindow::smEditorWindows[i]->dglRenderWindow();
+      for (unsigned int i = 0; i < EditorWindow::smEditorWindows.size(); ++i)
+         EditorWindow::smEditorWindows[i]->dglRenderWindow();
+   }
 }
 
 void EditorManager::onProjectLoaded(const wxString& projectName, const wxString& projectPath)

@@ -20,9 +20,6 @@
 // IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef _MAIN_H_
-#define _MAIN_H_
-
 // For compilers that don't support precompilation, include "wx/wx.h"
 #include "wx/wxprec.h"
  
@@ -30,38 +27,50 @@
 #	include "wx/wx.h"
 #endif
 
-#ifndef EDITORMANAGER_H
-#include "editorManager.h"
-#endif
+#include <wx/propgrid/propgrid.h>
+#include <wx/dir.h>
+#include <wx/treectrl.h>
 
-#ifndef __TORQUE6EDITORUI_H__
+// UI generated from wxFormBuilder
 #include "Torque6EditorUI.h"
-#endif
+#include "theme.h"
 
-class Torque6Editor : public wxApp
+#include "engineTool.h"
+
+EngineTool::EngineTool(EditorManager* _EditorManager, MainFrame* _frame, wxAuiManager* _manager)
+   : Parent(_EditorManager, _frame, _manager)
 {
-public:
-   ~Torque6Editor();
+   // Icons
+   mPlayIcon          = new wxBitmap(wxT("images/run.png"), wxBITMAP_TYPE_ANY);
+   mPlayHighlightIcon = new wxBitmap(wxT("images/run.png"), wxBITMAP_TYPE_ANY);
+}
 
-   // Window Management
-   MainFrame*        mFrame;
-   wxAuiManager*     mManager;
+EngineTool::~EngineTool()
+{
 
-   // Editor Manager
-   EditorManager     mEditorManager;
+}
 
-   // Dialogs
-   AboutDialog*      mAboutDialog;
+void EngineTool::initTool()
+{
+   // Play
+   mPlayBtn = new wxBitmapButton(mFrame->toolbar, -1, *mPlayIcon, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+   mPlayBtn->SetBackgroundColour(Theme::darkBackgroundColor);
+   mPlayBtn->SetMinSize(wxSize(36, 36));
+   mPlayBtn->Bind(wxEVT_BUTTON, &EngineTool::OnPlay, this, -1, -1, NULL);
+   mFrame->toolbarContents->Add(mPlayBtn, 0, 0, 5);
+}
 
-   // Toolbar
-   wxBitmap*         mSeparatorIcon;
+void EngineTool::onProjectLoaded(const wxString& projectName, const wxString& projectPath)
+{
 
-   // Events
-	virtual bool OnInit();
-   virtual int OnExit();
-   virtual void OnMenuEvent( wxCommandEvent& evt );
-};
- 
-DECLARE_APP(Torque6Editor)
- 
-#endif // _MAIN_H_
+}
+
+void EngineTool::onProjectClosed()
+{
+
+}
+
+void EngineTool::OnPlay(wxCommandEvent& evt)
+{
+   mEditorManager->play();
+}

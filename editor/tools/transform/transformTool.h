@@ -107,10 +107,15 @@ class TransformTool : public EditorTool
       ~TransformTool();
 
       void OnObjectSelected(wxTorqueObjectEvent& evt);
-      void OnToolbarEvent(wxCommandEvent& evt);
-      void OnToolbarDropdownEvent(wxCommandEvent& evt);
+
+      void OnTranslateTool(wxCommandEvent& evt);
+      void OnTranslateMenu(wxCommandEvent& evt);
       void OnTranslateMenuEvent(wxCommandEvent& evt);
+      void OnRotateTool(wxCommandEvent& evt);
+      void OnRotateMenu(wxCommandEvent& evt);
       void OnRotateMenuEvent(wxCommandEvent& evt);
+      void OnScaleTool(wxCommandEvent& evt);
+      void OnScaleMenu(wxCommandEvent& evt);
       void OnScaleMenuEvent(wxCommandEvent& evt);
 
       virtual void initTool();
